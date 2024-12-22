@@ -41,6 +41,8 @@ class BaseAPIApp:
 # Create the base API interface
 if __name__ == "__main__":
     from Graphics import App
+    from temp import trial_scene
     tk_root = App()
+    tk_root.set_scene(trial_scene(tk_root))
     app = BaseAPIApp(tk_root)
     tk_root.run()
