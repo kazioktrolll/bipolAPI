@@ -4,6 +4,7 @@ import customtkinter as ctk
 
 class DropdownButton(ctk.CTkButton):
     item_height = 30
+    item_ypad = 0
     def __init__(self, master, top_level, **kwargs):
         super().__init__(master, **kwargs)
         self.top_level = top_level
@@ -18,6 +19,7 @@ class DropdownButton(ctk.CTkButton):
         button_height = self.winfo_height()
 
         self.dropdown.place(x=button_x, y=button_y + button_height)
+        self.dropdown.lift()
         
     def _hide_dropdown(self):
         self.dropdown.place_forget()
@@ -28,15 +30,25 @@ class DropdownButton(ctk.CTkButton):
         else:
             self._show_dropdown()
     
-    def set_dropdown_items(self, items: dict[str, Callable[[], None]]):
-        self.dropdown.configure(height=len(items) * self.item_height)
+    def set_items(self, items: dict[str, Callable[[], None]]):
+        height = len(items) * self.item_height + (len(items) + 1) * self.item_ypad
+        self.dropdown.configure(height=height)
         for i, (text, command) in enumerate(items.items()):
-            button = ctk.CTkButton(self.dropdown, text=text, command=command)
-            button.grid(row=i, column=0, sticky="ew")
+            button = ctk.CTkButton(self.dropdown, text=text, command=command, height=self.item_height, corner_radius=0)
+            button.grid(row=i, column=0, sticky="ew", pady=self.item_ypad)
 
         mw = 0
         for button in self.dropdown.winfo_children():
             if button.winfo_width() > mw:
                 mw = button.winfo_width()
         self.dropdown.configure(width=mw)
-            
+
+    def insert_item(self, text: str, command: Callable[[], None], index:int|None=None):
+        new_button = ctk.CTkButton(self.dropdown, text=text, command=command, height=self.item_height, corner_radius=0)
+        if index is None:
+            new_button.grid(row=len(self.dropdown.winfo_children()), column=0, sticky="ew", pady=self.item_ypad)
+            return
+        buttons = self.dropdown.winfo_children()
+        buttons.insert(index, new_button)
+        for i, button in enumerate(buttons):
+            button.grid(row=i, column=0, sticky="ew", pady=self.item_ypad)

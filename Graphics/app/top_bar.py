@@ -7,7 +7,7 @@ class TopBar(ctk.CTkFrame):
         super().__init__(master, fg_color="grey50")
         self.top_level = top_level
         file_menu = DropdownButton(self, top_level, text="File")
-        file_menu.set_dropdown_items({
+        file_menu.set_items({
             "New": lambda: print("New"),
             "Open": lambda: print("Open"),
             "Save": lambda: print("Save"),
