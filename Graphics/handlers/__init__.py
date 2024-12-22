@@ -1,2 +1,2 @@
-from .avl_handler import Avl_handler, avl
+from .avl import *
 from .xfoil_handler import Xfoil_handler, xfoil
