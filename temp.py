@@ -1,7 +1,7 @@
 import customtkinter as ctk
 from Graphics import App, HoverButton, ScrolledText, Stage
+from Graphics import avl, xfoil
 import threading
-from handlers import avl, xfoil
 
 
 class TrialScene(Stage):
@@ -19,8 +19,12 @@ class TrialScene(Stage):
         # Set up the buttons at the bottom
         lower_layout = ctk.CTkFrame(self, height=100)
         lower_layout.grid(row=1, column=0, sticky="nsew")
+        lower_layout.columnconfigure(0, weight=1)
+        lower_layout.columnconfigure(1, weight=0)
+        lower_layout.columnconfigure(2, weight=1)
         self.command_input_field = ctk.CTkEntry(lower_layout, width=40)
-        self.command_input_field.grid(row=0, column=0)
+        self.command_input_field.grid(row=0, column=0, sticky="e")
+
         HoverButton(
             lower_layout,
             text="Send",
@@ -32,7 +36,8 @@ class TrialScene(Stage):
             text="Quit",
             hover_text="Quit current console app.",
             command=lambda: self.send_command("QUIT\n")
-        ).grid(row=0, column=2)
+        ).grid(row=0, column=2, sticky="w")
+        print(lower_layout.winfo_width())
 
         # Start the process
         self.process = avl()
