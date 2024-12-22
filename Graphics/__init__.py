@@ -1,3 +1,3 @@
 from .app import App
-from .Widgets import HoverButton
-from .Widgets import ScrolledText
+from .Widgets import HoverButton, ScrolledText
+from .stage import Stage

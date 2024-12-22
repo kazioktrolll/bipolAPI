@@ -1,10 +1,10 @@
 import customtkinter as ctk
-from Graphics import App, HoverButton, ScrolledText
+from Graphics import App, HoverButton, ScrolledText, Stage
 import threading
 from handlers import avl, xfoil
 
 
-class TrialScene(ctk.CTkFrame):
+class TrialScene(Stage):
     def __init__(self, master: App):
         super().__init__(master)
         # Set up grid
@@ -39,26 +39,26 @@ class TrialScene(ctk.CTkFrame):
         self.output_thread = threading.Thread(target=self.read_output, daemon=True)
         self.output_thread.start()
 
-        self.master.protocol("WM_DELETE_WINDOW", self.on_close)
+        self.app.protocol("WM_DELETE_WINDOW", self.on_close)
 
     def send_command(self, command):
         """Send a command to the base process."""
         if self.process.poll() is None:  # Check if the process is still running
             self.process.stdin.write(command)
             self.process.stdin.flush()
-            self.master.scene.output_area.insert(command)
+            self.output_area.insert(command)
         else:
-            self.master.scene.output_area.insert("Base process has terminated.\n")
-        self.master.scene.command_input_field.delete(0, len(self.master.scene.command_input_field.get()))
+            self.output_area.insert("Base process has terminated.\n")
+        self.command_input_field.delete(0, len(self.command_input_field.get()))
 
     def read_output(self):
         """Continuously read output from the base process."""
         while True:
             char = self.process.stdout.read(1)
-            self.master.scene.output_area.insert(char)
-            self.master.scene.output_area.scroll_down()
+            self.output_area.insert(char)
+            self.output_area.scroll_down()
 
     def on_close(self):
         """Handle the close event by terminating the base process."""
         self.process.terminate()
-        self.master.destroy()
+        self.app.destroy()
