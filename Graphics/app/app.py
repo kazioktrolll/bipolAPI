@@ -8,7 +8,6 @@ class App(ctk.CTk):
 
     def __init__(self):
         super().__init__()
-        self.main = None
         self.scene = None
 
         self.geometry(f"{self.width}x{self.height}")
