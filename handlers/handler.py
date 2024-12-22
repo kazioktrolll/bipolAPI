@@ -2,6 +2,17 @@ import subprocess
 import customtkinter as ctk
 
 
+def open_process(path: str) -> subprocess.Popen:
+    return subprocess.Popen(
+            path,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            bufsize=1
+        )
+
+
 class Handler:
     def __init__(self, path: str):
         self.process = subprocess.Popen(

@@ -1,2 +1,3 @@
 from .app import App
-from .hover_button import HoverButton
+from .Widgets import HoverButton
+from .Widgets import ScrolledText
