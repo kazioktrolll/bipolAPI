@@ -1,4 +1,4 @@
-from .handler import Handler, open_process
+from ..handler import Handler, open_process
 
 
 avl_path = r"C:\Users\kazio\OneDrive\Pulpit\BIPOL\avl.exe"
