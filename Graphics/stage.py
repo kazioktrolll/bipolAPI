@@ -14,3 +14,10 @@ class Stage(ctk.CTkFrame):
     @property
     def app(self) -> App:
         return self.master  # noqa
+
+    def lift(self):
+        super().lift()
+        for widget in self.app.winfo_children():
+            if widget == self:
+                continue
+            widget.lift()
