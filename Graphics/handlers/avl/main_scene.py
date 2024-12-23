@@ -1,8 +1,8 @@
-from ...stage import Stage
+from ...scene import Scene
 from ...Widgets import HoverButton
 
 
-class AvlMainStage(Stage):
+class AvlMainScene(Scene):
     def __init__(self, master):
         super().__init__(master)
         buttons = {

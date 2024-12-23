@@ -1,10 +1,10 @@
 import customtkinter as ctk
-from Graphics import App, HoverButton, ScrolledText, Stage
+from Graphics import App, HoverButton, ScrolledText, Scene
 from Graphics import avl, xfoil
 import threading
 
 
-class TrialScene(Stage):
+class TrialScene(Scene):
     def __init__(self, master: App):
         super().__init__(master)
         # Set up grid

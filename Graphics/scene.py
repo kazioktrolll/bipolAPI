@@ -2,9 +2,9 @@ import customtkinter as ctk
 from .app import App
 
 
-class Stage(ctk.CTkFrame):
+class Scene(ctk.CTkFrame):
     """
-    A pattern for creating a stage in the application.
+    A pattern for creating a scene in the application.
     Stage is the actual interactive part of the window, below the menu bar.
     """
     def __init__(self, app: App):
