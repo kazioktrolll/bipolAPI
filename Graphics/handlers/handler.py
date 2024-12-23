@@ -1,6 +1,6 @@
 import subprocess
 import customtkinter as ctk
-from ..scene import Scene
+from ..app import App
 
 
 def open_process(path: str) -> subprocess.Popen:
@@ -15,7 +15,10 @@ def open_process(path: str) -> subprocess.Popen:
 
 
 class Handler:
-    def __init__(self, path: str):
+    def __init__(self, master:App, path: str):
+        from ..scene import Scene
+
+        self.master = master
         self.process = subprocess.Popen(
             path,
             stdin=subprocess.PIPE,
@@ -24,8 +27,12 @@ class Handler:
             text=True,
             bufsize=1
         )
-        self.main_scene: Scene
-        self.current_scene: Scene
+        self.main_scene: Scene = None   # noqa
+        self.current_scene: Scene = None    # noqa
+
+    @property
+    def app(self) -> App:
+        return self.master
 
     def input_command(self, command: str) -> None:
         self.process.stdin.write(command + "\n")
@@ -35,5 +42,5 @@ class Handler:
         self.process.terminate()
 
     def set_scene(self, scene):
-        self.scene = scene
-        self.scene.grid(row=1, column=0, sticky="nsew")
+        self.current_scene = scene
+        self.app.update_scene()

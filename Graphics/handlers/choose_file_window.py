@@ -1,5 +1,4 @@
 import customtkinter as ctk
-from tkinter import filedialog
 
 def open_file_path_dialog(filetypes: list[tuple[str, str]]|None=None) -> str|None:
     """
@@ -11,6 +10,9 @@ def open_file_path_dialog(filetypes: list[tuple[str, str]]|None=None) -> str|Non
     :return: The selected file path as a string in the format "C:/dir1/dir2/file.ext",
              or 'None' if no file is selected.
     """
+
+    from tkinter import filedialog
+
     filetypes = filetypes or [("All Files", "*.*")]
     modal_window = ctk.CTkToplevel(None)
     modal_window.withdraw()

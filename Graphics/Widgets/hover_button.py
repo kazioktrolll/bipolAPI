@@ -1,5 +1,4 @@
 import customtkinter as ctk
-import threading
 
 class HoverButton(ctk.CTkFrame):
     def __init__(self, master, text, hover_text, command, **kwargs):
@@ -27,7 +26,8 @@ class HoverButton(ctk.CTkFrame):
         if self.hover_label.cget("text") == "":
             return
         # Start a timer to show the hover text after 1 second
-        self.hover_timer = threading.Timer(1.0, self.show_hover_text, [event])
+        from threading import Timer
+        self.hover_timer = Timer(1.0, self.show_hover_text, [event])
         self.hover_timer.start()
 
     def cancel_hover(self, event):
@@ -67,4 +67,3 @@ if __name__ == "__main__":
     app.mainloop()
 
 # TODO: make it so the label is always visible and doesn't render outside of the window.
-# TODO: make the button prettier.

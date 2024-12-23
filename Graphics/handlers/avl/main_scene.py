@@ -1,9 +1,10 @@
 from ...scene import Scene
-from ...Widgets import HoverButton
 
 
 class AvlMainScene(Scene):
     def __init__(self, master):
+        from ...Widgets import HoverButton
+
         super().__init__(master)
         buttons = {
         "oper": print("oper"),

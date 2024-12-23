@@ -1,9 +1,10 @@
 import customtkinter as ctk
-from ..Widgets import DropdownButton
 
 
 class TopBar(ctk.CTkFrame):
     def __init__(self, master, top_level):
+        from ..Widgets import DropdownButton
+
         super().__init__(master, fg_color="grey50", corner_radius=0)
         self.top_level = top_level
         file_menu = DropdownButton(self, top_level, text="File", fg_color="grey50", hover_color="grey30", corner_radius=0)
@@ -23,5 +24,5 @@ def row_stack(widgets: list):
 
 if __name__ == "__main__":
     root = ctk.CTk()
-    top_bar = TopBar(root)
+    top_bar = TopBar(root, root)
     root.mainloop()
