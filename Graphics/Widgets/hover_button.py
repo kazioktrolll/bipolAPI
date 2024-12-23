@@ -2,14 +2,16 @@ import customtkinter as ctk
 import threading
 
 class HoverButton(ctk.CTkFrame):
-    def __init__(self, master, text, hover_text, command=None, **kwargs):
+    def __init__(self, master, text, hover_text, command, **kwargs):
         super().__init__(master, **kwargs)
+        colour = ctk.CTkButton(None).cget("fg_color")
+        self.configure(fg_color=colour)
 
         self.command = command
         self.hover_timer = None
 
         # Button label
-        self.button_label = ctk.CTkLabel(self, text=text)
+        self.button_label = ctk.CTkLabel(self, text=text, fg_color=colour)
         self.button_label.pack(fill="both", expand=True, padx=5, pady=5)
 
         # Hover label
@@ -22,11 +24,15 @@ class HoverButton(ctk.CTkFrame):
         self.button_label.bind("<Button-1>", self.on_click)
 
     def start_hover_timer(self, event):
+        if self.hover_label.cget("text") == "":
+            return
         # Start a timer to show the hover text after 1 second
         self.hover_timer = threading.Timer(1.0, self.show_hover_text, [event])
         self.hover_timer.start()
 
     def cancel_hover(self, event):
+        if self.hover_label.cget("text") == "":
+            return
         # Cancel the hover timer and hide the hover label
         if self.hover_timer:
             self.hover_timer.cancel()
