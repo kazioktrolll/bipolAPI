@@ -33,9 +33,8 @@ class DropdownButton(ctk.CTkButton):
     def set_items(self, items: dict[str, Callable[[], None]]):
         height = len(items) * self.item_height + (len(items) + 1) * self.item_ypad
         self.dropdown.configure(height=height)
-        for i, (text, command) in enumerate(items.items()):
-            button = ctk.CTkButton(self.dropdown, text=text, command=command, height=self.item_height, corner_radius=0)
-            button.grid(row=i, column=0, sticky="ew", pady=self.item_ypad)
+        for text, command in items.items():
+            self.insert_item(text, command)
 
         mw = 0
         for button in self.dropdown.winfo_children():
@@ -44,10 +43,25 @@ class DropdownButton(ctk.CTkButton):
         self.dropdown.configure(width=mw)
 
     def insert_item(self, text: str, command: Callable[[], None], index:int|None=None):
-        new_button = ctk.CTkButton(self.dropdown, text=text, command=command, height=self.item_height, corner_radius=0)
+        new_button = ctk.CTkButton(
+            self.dropdown,
+            text=text,
+            command=command,
+            height=self.item_height,
+            corner_radius=0,
+            fg_color=self.cget("fg_color"),
+            hover_color=self.cget("hover_color")
+        )
+
         if index is None:
-            new_button.grid(row=len(self.dropdown.winfo_children()), column=0, sticky="ew", pady=self.item_ypad)
+            new_button.grid(
+                row=len(self.dropdown.winfo_children()),
+                column=0,
+                sticky="ew",
+                pady=self.item_ypad
+            )
             return
+
         buttons = self.dropdown.winfo_children()
         buttons.insert(index, new_button)
         for i, button in enumerate(buttons):

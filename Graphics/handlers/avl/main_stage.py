@@ -22,4 +22,4 @@ class AvlMainStage(Stage):
         }
         for i, (k, v) in enumerate(buttons.items()):
             self.grid_rowconfigure(i, weight=0)
-            HoverButton(self, text=k, hover_text="", command=v).grid(row=i, column=0)
+            HoverButton(self, text=k, hover_text="No Description", command=v).grid(row=i, column=0)

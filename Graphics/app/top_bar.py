@@ -4,9 +4,9 @@ from ..Widgets import DropdownButton
 
 class TopBar(ctk.CTkFrame):
     def __init__(self, master, top_level):
-        super().__init__(master, fg_color="grey50")
+        super().__init__(master, fg_color="grey50", corner_radius=0)
         self.top_level = top_level
-        file_menu = DropdownButton(self, top_level, text="File")
+        file_menu = DropdownButton(self, top_level, text="File", fg_color="grey50", hover_color="grey30", corner_radius=0)
         file_menu.set_items({
             "New": lambda: print("New"),
             "Open": lambda: print("Open"),
