@@ -1,4 +1,5 @@
 import customtkinter as ctk
+from typing import Type
 from ..Scenes import Scene
 
 
@@ -32,3 +33,6 @@ class App(ctk.CTk):
     def set_scene(self, scene: Scene):
         self.active_scene = scene
         scene.grid(row=1, column=0, sticky="nsew")
+
+    def change_to_scene(self, scene_type: Type[Scene]):
+        self.set_scene(scene_type(self))
