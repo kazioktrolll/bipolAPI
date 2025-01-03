@@ -1,5 +1,4 @@
 import subprocess
-import customtkinter as ctk
 from ..app import App
 
 
@@ -15,10 +14,21 @@ def open_process(path: str) -> subprocess.Popen:
 
 
 class Handler:
-    def __init__(self, master:App, path: str):
-        from ..scene import Scene
+    """
+    Encapsulates the handling of a subprocess in conjunction with an application.
 
-        self.master = master
+    Provides methods to interact with a subprocess via standard input and
+    manage its lifecycle, including initialization and termination. This class
+    is designed to interface subprocesses with the provided application for
+    streamlined execution and communication.
+
+    :ivar master: Instance of the main application interacting with the subprocess.
+    :type master: App
+    :ivar process: Subprocess object managing the external process.
+    :type process: subprocess.Popen
+    """
+    def __init__(self, path: str):
+
         self.process = subprocess.Popen(
             path,
             stdin=subprocess.PIPE,
@@ -27,12 +37,7 @@ class Handler:
             text=True,
             bufsize=1
         )
-        self.main_scene: Scene = None   # noqa
-        self.current_scene: Scene = None    # noqa
 
-    @property
-    def app(self) -> App:
-        return self.master
 
     def input_command(self, command: str) -> None:
         self.process.stdin.write(command + "\n")
@@ -40,7 +45,3 @@ class Handler:
 
     def on_close(self) -> None:
         self.process.terminate()
-
-    def set_scene(self, scene):
-        self.current_scene = scene
-        self.app.update_scene()

@@ -1,9 +1,9 @@
-from Graphics import App, Avl_handler
+from Graphics import App, Avl_handler, SceneAvlInitial, SceneGeneralInitial
 from temp import TrialScene
 
 
 app = App()
-avl = Avl_handler(app)
+avl = Avl_handler()
 app.active_handler = avl
-avl.current_scene.lift()
+app.set_scene(SceneGeneralInitial(app))
 app.run()

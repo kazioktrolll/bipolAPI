@@ -1,5 +1,8 @@
+from __future__ import annotations
 import customtkinter as ctk
-from .app import App
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from ..app import App
 
 
 class Scene(ctk.CTkFrame):

@@ -1,6 +1,6 @@
 import customtkinter as ctk
 from Graphics import App, HoverButton, ScrolledText, Scene
-from Graphics import avl, xfoil
+from Graphics import Avl_handler, xfoil
 import threading
 
 
@@ -40,7 +40,7 @@ class TrialScene(Scene):
         print(lower_layout.winfo_width())
 
         # Start the process
-        self.process = avl()
+        self.process = Avl_handler()
         self.output_thread = threading.Thread(target=self.read_output, daemon=True)
         self.output_thread.start()
 

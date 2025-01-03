@@ -1,4 +1,5 @@
 import customtkinter as ctk
+from ..Scenes import Scene
 
 
 class App(ctk.CTk):
@@ -11,7 +12,7 @@ class App(ctk.CTk):
         from ..handlers import Handler
 
         self.handlers: dict[str, Handler] = {}
-        self.active_handler: Handler = None # noqa
+        self.active_scene: Scene = None # noqa
 
         self.geometry(f"{self.width}x{self.height}")
         self.resizable(False, False)
@@ -28,6 +29,6 @@ class App(ctk.CTk):
     def run(self) -> None:
         self.mainloop()
 
-    def update_scene(self):
-        scene = self.active_handler.current_scene
+    def set_scene(self, scene: Scene):
+        self.active_scene = scene
         scene.grid(row=1, column=0, sticky="nsew")

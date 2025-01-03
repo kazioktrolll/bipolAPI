@@ -1,4 +1,3 @@
-from .avl import *
+from .avl_handler import Avl_handler
 from .xfoil_handler import Xfoil_handler, xfoil
-from .choose_file_window import open_file_path_dialog
 from .handler import Handler
