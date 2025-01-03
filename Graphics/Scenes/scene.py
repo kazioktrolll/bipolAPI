@@ -7,11 +7,19 @@ if TYPE_CHECKING:
 
 class Scene(ctk.CTkFrame):
     """
-    A pattern for creating a scene in the application.
-    Stage is the actual interactive part of the window, below the menu bar.
+    Represents a Scene widget that inherits from `ctk.CTkFrame`.
+
+    This class serves as the base for constructing a specialized `CTkFrame` widget
+    which can be used as a scene in a larger application. It integrates functionality
+    to manage its child widgets' stacking order, especially providing an efficient
+    way to lift the scene and its children in the hierarchy. This is particularly
+    beneficial for applications requiring scene management or view layering.
+
+    :ivar app: Reference to the parent application instance.
+    :type app: App
     """
-    def __init__(self, app: App):
-        super().__init__(master=app)
+    def __init__(self, master: App):
+        super().__init__(master=master)
 
 
     @property
@@ -19,8 +27,16 @@ class Scene(ctk.CTkFrame):
         return self.master  # noqa
 
     def lift(self):
+        """
+        Lifts the current widget to the top of the stacking order and ensures that
+        all children of the widget are adjusted in the stacking order accordingly.
+        This behavior ensures that all child widgets maintain their relative
+        ordering while the current widget is elevated.
+
+        :return: None
+        """
         super().lift()
-        for widget in self.app.winfo_children():
+        for widget in self.winfo_children():
             if widget == self:
                 continue
             widget.lift()

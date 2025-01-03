@@ -25,7 +25,7 @@ class SceneGeneralInitial(Scene):
 
     def goto_avl(self):
         from .scene_avl_initial import SceneAvlInitial
-        self.master.set_scene(SceneAvlInitial(self.master))
+        self.app.set_scene(SceneAvlInitial(self.app))
 
     def goto_xfoil(self):
         raise NotImplementedError

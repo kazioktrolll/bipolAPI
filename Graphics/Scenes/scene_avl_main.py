@@ -7,20 +7,22 @@ class SceneAvlMain(Scene):
 
         super().__init__(master)
         buttons = {
-        "oper": print("oper"),
-        "mode" : print("mode"),
-        "time": print("time"),
+        "oper": lambda: print("oper"),
+        "mode" : lambda: print("mode"),
+        "time": lambda: print("time"),
         
-        "load f": print("load f"),
-        "mass f": print("mass f"),
-        "case f": print("case f"),
+        "load f": lambda: print("load f"),
+        "mass f": lambda: print("mass f"),
+        "case f": lambda: print("case f"),
         
-        "cini": print("cini"),
-        "mset": print("mset"),
+        "cini": lambda: print("cini"),
+        "mset": lambda: print("mset"),
         
-        "plop": print("plop"),
-        "name": print("name")
+        "plop": lambda: print("plop"),
+        "name": lambda: print("name")
         }
         for i, (k, v) in enumerate(buttons.items()):
             self.grid_rowconfigure(i, weight=0)
-            HoverButton(self, text=k, hover_text="No Description", command=v).grid(row=i, column=0)
+            HoverButton(
+                self, text=k, hover_text="No Description", command=v
+            ).grid(row=i, column=0)
