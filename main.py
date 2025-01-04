@@ -1,4 +1,4 @@
-from Graphics import App, Avl_handler, SceneAvlInitial, SceneGeneralInitial
+from Graphics import App, SceneGeneralInitial
 from temp import TrialScene
 
 

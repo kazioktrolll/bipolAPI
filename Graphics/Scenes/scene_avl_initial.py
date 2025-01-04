@@ -25,3 +25,6 @@ class SceneAvlInitial(Scene):
         filename = path.split("/")[-1]
         CTkLabel(self, text=filename).grid(row=1, column=0, sticky="n")
         self.app.avl.input_command("LOAD " + path)
+        self.app.avl.current_file = path
+        from .scene_avl_oper import SceneAvlOper
+        self.app.change_to_scene(SceneAvlOper)
