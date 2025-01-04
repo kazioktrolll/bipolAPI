@@ -43,5 +43,14 @@ class Handler:
         self.process.stdin.write(command + "\n")
         self.process.stdin.flush()
 
+    def read_to_prompt(self) -> str:
+        _r = ""
+        while True:
+            c = self.process.stdout.read(1)
+            _r += c
+            if c == ">":
+                break
+        return _r
+
     def on_close(self) -> None:
         self.process.terminate()
