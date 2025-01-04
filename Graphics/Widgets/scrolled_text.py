@@ -2,13 +2,14 @@ import customtkinter as ctk
 
 
 class ScrolledText(ctk.CTkScrollableFrame):
-    def __init__(self, master, **kwargs):
+    def __init__(self, master, text="", **kwargs):
         super().__init__(master, **kwargs)
 
         # add widgets onto the frame...
         self.label = ctk.CTkLabel(self, text="")
         self.label.grid(row=0, column=0, padx=20)
         self.label.configure(anchor='w', justify='left')
+        self.set_text(text)
 
     def set_text(self, text) -> None:
         self.label.configure(text=text)
