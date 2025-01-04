@@ -10,9 +10,10 @@ class App(ctk.CTk):
     def __init__(self):
         super().__init__()
         from .top_bar import TopBar
-        from ..handlers import Handler
+        from ..handlers import Avl_handler, Xfoil_handler
 
-        self.handlers: dict[str, Handler] = {}
+        self.avl = Avl_handler()
+        self.xfoil = Xfoil_handler()
         self.active_scene: Scene = None # noqa
 
         self.geometry(f"{self.width}x{self.height}")

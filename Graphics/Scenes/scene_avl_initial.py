@@ -24,3 +24,4 @@ class SceneAvlInitial(Scene):
         from customtkinter import CTkLabel
         filename = path.split("/")[-1]
         CTkLabel(self, text=filename).grid(row=1, column=0, sticky="n")
+        self.app.avl.input_command("LOAD " + path)
