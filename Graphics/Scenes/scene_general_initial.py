@@ -6,6 +6,7 @@ class SceneGeneralInitial(Scene):
         from customtkinter import CTkButton
 
         super().__init__(master)
+        self.app.hide_top_bar()
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=1)

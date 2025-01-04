@@ -24,7 +24,7 @@ class App(ctk.CTk):
         self.grid_columnconfigure(0, weight=1)
 
         self.top_bar = TopBar(master=self, top_level=self)
-        self.top_bar.grid(row=0, column=0, sticky="nsew")
+        self.show_top_bar()
 
 
     def run(self) -> None:
@@ -36,3 +36,9 @@ class App(ctk.CTk):
 
     def change_to_scene(self, scene_type: Type[Scene]):
         self.set_scene(scene_type(self))
+
+    def hide_top_bar(self):
+        self.top_bar.grid_remove()
+
+    def show_top_bar(self):
+        self.top_bar.grid(row=0, column=0, sticky="nsew")
