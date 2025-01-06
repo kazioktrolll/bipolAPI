@@ -12,7 +12,7 @@ class SceneAvlOper(Scene):
         self.app.show_top_bar()
         self.avl.read_all()
         self.avl.input_command("OPER")
-        console_text = self.avl.read_to_prompt()
+        console_text = self.avl.read_all()
 
         self.columnconfigure(0, weight=0)
         self.columnconfigure(1, weight=1)

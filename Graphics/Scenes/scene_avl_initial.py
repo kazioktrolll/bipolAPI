@@ -12,7 +12,7 @@ class SceneAvlInitial(Scene):
         self.columnconfigure(0, weight=1)
 
         load_file_button = CTkButton(
-            self, text="Load File", command=lambda: self.get_file()
+            self, text="open .avl file", command=lambda: self.get_file()
         )
         load_file_button.grid(row=0, column=0, sticky="s")
 

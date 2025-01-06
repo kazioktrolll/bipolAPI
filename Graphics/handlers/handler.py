@@ -3,6 +3,7 @@ from ..app import App
 import threading
 import queue
 import time
+from abc import ABC, abstractmethod
 
 
 def open_process(path: str) -> subprocess.Popen:
@@ -16,7 +17,7 @@ def open_process(path: str) -> subprocess.Popen:
         )
 
 
-class Handler:
+class Handler(ABC):
     """
     Encapsulates the handling of a subprocess in conjunction with an application.
 
@@ -25,12 +26,14 @@ class Handler:
     is designed to interface subprocesses with the provided application for
     streamlined execution and communication.
 
-    :ivar master: Instance of the main application interacting with the subprocess.
-    :type master: App
     :ivar process: Subprocess object managing the external process.
     :type process: subprocess.Popen
+    :ivar scene: Scene object associated with the subprocess.
+    :type scene: Scene
     """
+    @abstractmethod
     def __init__(self, path: str):
+        from .. import Scene
 
         self.process = subprocess.Popen(
             path,
@@ -40,6 +43,7 @@ class Handler:
             text=True,
             bufsize=1
         )
+        self.scene = Scene(None)
 
 
     def input_command(self, command: str) -> None:

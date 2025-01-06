@@ -9,5 +9,8 @@ def xfoil():
 
 
 class Xfoil_handler(Handler):
-    def __init__(self):
+    def __init__(self, app):
+        from ..Scenes import Scene
         super().__init__(xfoil_path)
+        self.scene = Scene(app)
+        self.scene.configure(fg_color="green")

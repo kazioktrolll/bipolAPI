@@ -18,13 +18,18 @@ class Scene(ctk.CTkFrame):
     :ivar app: Reference to the parent application instance.
     :type app: App
     """
-    def __init__(self, master: App):
+    def __init__(self, app: App|None):
+        master = app.main_frame if app else None
         super().__init__(master=master)
+        self._app = app
+        self.configure(corner_radius=0)
 
 
     @property
-    def app(self) -> App:
-        return self.master  # noqa
+    def app(self):
+        from ..app import App
+        if isinstance(self._app, App):
+            return self._app
 
     def lift(self):
         """
