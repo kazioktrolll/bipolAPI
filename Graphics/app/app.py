@@ -43,9 +43,10 @@ class App(CTk):
         self.mainloop()
 
     def set_scene(self, scene: Scene):
-        self.scene.grid_forget()
+        self.scene.deactivate()
         self.scene = scene
         scene.grid(row=0, column=1, sticky="nsew")
+        self.scene.activate()
 
     def change_to_scene(self, scene_type: Type[Scene]):
         self.set_scene(scene_type(self))

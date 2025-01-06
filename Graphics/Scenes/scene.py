@@ -45,3 +45,9 @@ class Scene(ctk.CTkFrame):
             if widget == self:
                 continue
             widget.lift()
+
+    def activate(self):
+        pass
+
+    def deactivate(self):
+        self.grid_forget()

@@ -6,7 +6,6 @@ class SceneAvlInitial(Scene):
         from customtkinter import CTkButton
 
         super().__init__(master)
-        self.app.hide_top_bar()
         self.rowconfigure(0, weight=1)
         self.rowconfigure(1, weight=1)
         self.columnconfigure(0, weight=1)
@@ -28,3 +27,7 @@ class SceneAvlInitial(Scene):
         self.app.avl.current_file = path
         from .scene_avl_oper import SceneAvlOper
         self.app.change_to_scene(SceneAvlOper)
+
+    def activate(self):
+        super().activate()
+        self.app.hide_top_bar()
