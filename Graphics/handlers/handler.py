@@ -32,7 +32,7 @@ class Handler(ABC):
     :type scene: Scene
     """
     @abstractmethod
-    def __init__(self, path: str):
+    def __init__(self, app:App, path: str):
         from .. import Scene
 
         self.process = subprocess.Popen(
@@ -43,21 +43,13 @@ class Handler(ABC):
             text=True,
             bufsize=1
         )
+        self.app = app
         self.scene = Scene(None)
 
 
     def input_command(self, command: str) -> None:
-        self.process.stdin.write(command + "\n")
+        self.process.stdin.write(command + "\r\n")
         self.process.stdin.flush()
-
-    def read_to_prompt(self) -> str:
-        _r = ""
-        while True:
-            c = self.process.stdout.read(1)
-            _r += c
-            if _r[-2:] == "c>":
-                break
-        return _r
 
     def threaded_reader(self, data_queue: queue.Queue):
         """
@@ -98,3 +90,14 @@ class Handler(ABC):
 
     def on_close(self) -> None:
         self.process.terminate()
+
+    def set_scene(self, scene):
+        self.scene = scene
+        self.app.set_scene(scene)
+
+    def change_to_scene(self, scene_type):
+        from typing import Type
+        from ..Scenes import Scene
+        if not issubclass(scene_type, Scene):
+            raise TypeError("Invalid scene type.")
+        self.set_scene(scene_type(self.app))

@@ -33,9 +33,9 @@ class App(CTk):
         self.side_bar = SideBar(master=self.main_frame)
         self.side_bar.grid(row=0, column=0, sticky="nsew")
 
+        self.scene = Scene(None)
         self.avl = Avl_handler(self)
         self.xfoil = Xfoil_handler(self)
-        self.scene = Scene(None)
         self.side_bar.switch_to_avl()
 
 
