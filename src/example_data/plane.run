@@ -1,0 +1,12 @@
+Run case  1: AutoCase
+alpha -> alpha = 0.0
+beta -> beta = 0.0
+pb/2V -> pb/2V = 0.0
+qc/2V -> qc/2V = 0.0
+rb/2V -> rb/2V = 0.0
+flap -> flap = 0
+
+grav.acc. = 9.80665 m/s^2
+density = 1.2250122659906943 kg/m^3
+velocity = 85.0 km/s
+Mach = 0.24978526778554874 
