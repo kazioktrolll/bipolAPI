@@ -22,4 +22,5 @@ class InitialScene(Scene):
             filetypes=(("AVL Files", "*.avl"),)
         )
         self.app.geo_path = Path(path)
-        print(self.app.geo_path)
+        from .oper import OperScene
+        self.app.set_scene(OperScene(self.app, ['a', 'b', 'c']))
