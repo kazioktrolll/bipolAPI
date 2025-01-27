@@ -28,17 +28,5 @@ class OperScene(Scene):
         self.fake_output.grid(column=1, row=0, sticky='nsew')
 
         CTkButton(left_frame, text="Run",
-                  command=self.run_avl
+                  command=lambda: 1/0
                   ).grid(column=0, row=6, sticky='nsew')
-
-    def get_values(self) -> list[float]:
-        return [field.value for field in self.inputs.values()]
-
-    def run_avl(self):
-        input_values = self.get_values()
-        keys = ['alfa', 'beta', 'roll', 'pitch', 'yaw', 'flap']
-        val_dict = {key: value for key, value in zip(keys, input_values)}
-        text = get_avl_data(r"C:\Users\kazio\OneDrive\Pulpit\BIPOL\plane.avl", **val_dict)
-        output_dict = format_avl_response(text)
-        dict_to_string = '\n'.join([f'{key} = {value}' for key, value in output_dict.items()])
-        self.fake_output.configure(text=dict_to_string)

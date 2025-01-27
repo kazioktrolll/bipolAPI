@@ -1,2 +1,2 @@
 from . import physics
-from .main import *
+from .oper import *

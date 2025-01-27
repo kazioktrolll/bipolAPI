@@ -1,7 +1,4 @@
-from src.app import App
-from src.scenes import InitialScene
+from src.backend import AVL
 
 
-app = App()
-app.set_scene(InitialScene(app))
-app.run()
+print(AVL().communicate('Q'))
