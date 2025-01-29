@@ -1,3 +1,6 @@
+from copy import copy
+
+
 class Geometry:
     def __init__(self,
                  name: str,
@@ -15,6 +18,9 @@ class Geometry:
         self.span_length = span_length
         self.ref_pos = ref_pos
         self.surfaces: dict[str, Surface] = {}
+
+    def add_surface(self, surface: 'Surface') -> None:
+        self.surfaces[surface.name] = surface
 
 
 class Surface:
@@ -59,6 +65,13 @@ class Surface:
         sec = Section((xle, y, zle), chord, prev_sec.airfoil)
         self.add_section(sec)
 
+    def get_symmetric(self) -> 'Surface':
+        surf = copy(self)
+        surf.name = self.name + '_symm'
+        reflected_sections = [sec.mirror() for sec in self.sections]
+        surf.sections = reflected_sections
+        return surf
+
 
 class Wing(Surface):
     @classmethod
@@ -96,6 +109,11 @@ class Section:
         self.chord = chord
         self.airfoil = airfoil
         self.flap_chord_ratio = flap_chord_ratio
+
+    def mirror(self) -> 'Section':
+        lep = self.leading_edge_position[0], self.leading_edge_position[1] * -1, self.leading_edge_position[2]
+        sec = Section(lep, self.chord, self.airfoil, self.flap_chord_ratio)
+        return sec
 
     @property
     def has_flap(self) -> bool:

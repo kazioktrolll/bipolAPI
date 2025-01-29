@@ -29,4 +29,4 @@ class Scene(CTkFrame):
         Constructs and arranges the widgets to be displayed in the Scene.
         This method should be overridden in subclasses to define the layout and components for each specific Scene.
         """
-        pass
+        if type(self) is not Scene: raise NotImplementedError
