@@ -22,6 +22,7 @@ class Scene(CTkFrame):
     def __init__(self, app:App):
         super().__init__(app.root)
         self.app = app
+        self.to_update = []
         self.build()
 
     def build(self) -> None:
@@ -30,3 +31,6 @@ class Scene(CTkFrame):
         This method should be overridden in subclasses to define the layout and components for each specific Scene.
         """
         if type(self) is not Scene: raise NotImplementedError
+
+    def update(self) -> None:
+        for tu in self.to_update: tu.update()

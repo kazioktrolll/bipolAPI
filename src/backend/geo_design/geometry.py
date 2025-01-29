@@ -1,4 +1,5 @@
 from copy import copy
+from typing import Optional
 
 
 class Geometry:
@@ -22,6 +23,13 @@ class Geometry:
     def add_surface(self, surface: 'Surface') -> None:
         self.surfaces[surface.name] = surface
 
+    @property
+    def wing(self) -> Optional['Surface']:
+        try:
+            return self.surfaces["Wing"]
+        except KeyError:
+            return None
+
 
 class Surface:
     def __init__(self,
@@ -38,8 +46,12 @@ class Surface:
         self.inclination = inclination
         self.airfoil = airfoil
         self.sections: list[Section] = []
+        self.geometry.add_surface(self)
 
     def add_section(self, section: 'Section'):
+        if not self.sections[0].y < section.y < self.sections[-1].y: return
+        for sec in self.sections:
+            if sec.y == section.y: return
         self.sections.append(section)
         self.sections.sort(key=lambda sec: sec.y)
 
@@ -49,7 +61,7 @@ class Surface:
                 self.add_section_gentle(yi)
             return
 
-        assert isinstance(y, float) or isinstance(y, int)
+        assert isinstance(y, (int, float))
 
         for i, sec in enumerate(self.sections):
             if sec.y >= y:
@@ -126,3 +138,4 @@ class Section:
     @property
     def y(self):
         return self.leading_edge_position[1]
+

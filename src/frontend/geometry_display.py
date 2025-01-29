@@ -1,23 +1,34 @@
 from customtkinter import CTkCanvas, CTkFrame
-from ..backend.geo_design import Section, Surface
+from ..backend.geo_design import Section, Surface, Geometry
 
 
 class GeometryDisplay(CTkFrame):
-    def __init__(self, parent, origin: tuple[int, int]):
+    def __init__(self, parent, geometry: Geometry):
         super().__init__(parent)
+        self.geometry = geometry
         self.canvas = CTkCanvas(self)
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
         self.canvas.grid(row=0, column=0, sticky='nsew')
         self.scale = 100
-        self.origin = origin
-        self.after(0, self.build)
+        self.origin = (0, 0)
 
-    def build(self):
-        self.display_CG(*self.origin)
+    def draw(self):
+        for surface in self.geometry.surfaces.values():
+            self.display_wing(surface)
+        self.display_CG(*self.geometry.ref_pos[:2])
+
+    def update(self):
+        self.clear()
+        self.origin = (self.winfo_width() / 2, self.winfo_height() / 2)
+        self.draw()
 
     def display_CG(self, x, y):
-        self.canvas.create_oval(x-5, y-5, x+5, y+5, fill='yellow')
+        x *= self.scale
+        y *= self.scale
+        x += self.origin[1]
+        y += self.origin[0]
+        self.canvas.create_oval(y-5, x-5, y+5, x+5, fill='yellow')
 
     def display_section(self, section: Section | list[Section]):
         if isinstance(section, list):
