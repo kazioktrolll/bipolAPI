@@ -3,34 +3,53 @@ from ..backend.geo_design import Section, Surface, Geometry
 
 
 class GeometryDisplay(CTkFrame):
+    """
+    A widget for displaying current aircraft's geometry while specifying parameters.
+
+    Attributes:
+        geometry (Geometry): Top-level geometry object that is being displayed.
+        canvas (CTkCanvas): Canvas widget used for creating the graphic.
+        origin (tuple[int, int]): Center point of the display.
+        scale (int): A scale used while transforming meters to pixels.
+    """
     def __init__(self, parent, geometry: Geometry):
+        """
+        Parameters:
+            parent (CTkFrame): Parent widget to nest the GeometryDisplay instance in.
+            geometry (Geometry): Top-level geometry object that is being displayed.
+        """
         super().__init__(parent)
         self.geometry = geometry
+        self.scale = 100
+        self.origin = (0, 0)
         self.canvas = CTkCanvas(self)
+
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
         self.canvas.grid(row=0, column=0, sticky='nsew')
-        self.scale = 100
-        self.origin = (0, 0)
 
-    def draw(self):
+    def draw(self) -> None:
+        """Draws geometry's surfaces and center of mass."""
         for surface in self.geometry.surfaces.values():
             self.display_wing(surface)
         self.display_CG(*self.geometry.ref_pos[:2])
 
-    def update(self):
-        self.clear()
+    def update(self) -> None:
+        """Sets the origin to center of the widget, redraws everything."""
         self.origin = (self.winfo_width() / 2, self.winfo_height() / 2)
+        self.clear()
         self.draw()
 
-    def display_CG(self, x, y):
+    def display_CG(self, x: float, y: float) -> None:
+        """Displays a center-of-mass marker at given coordinates."""
         x *= self.scale
         y *= self.scale
         x += self.origin[1]
         y += self.origin[0]
         self.canvas.create_oval(y-5, x-5, y+5, x+5, fill='yellow')
 
-    def display_section(self, section: Section | list[Section]):
+    def display_section(self, section: Section | list[Section]) -> None:
+        """Displays a ``Section`` as a single blue line. If given a list of Sections, displays all."""
         if isinstance(section, list):
             for s in section:
                 self.display_section(s)
@@ -45,7 +64,8 @@ class GeometryDisplay(CTkFrame):
                                 self.origin[0] + yle * self.scale, self.origin[1] + xte * self.scale,
                                 fill='blue', width=3, capstyle='round')
 
-    def display_wing(self, wing: Surface | list[Surface]):
+    def display_wing(self, wing: Surface | list[Surface]) -> None:
+        """Displays a ``Surface``. If given a list of Surfaces, displays all."""
         if isinstance(wing, list):
             for w in wing: self.display_wing(w)
             return
@@ -65,21 +85,25 @@ class GeometryDisplay(CTkFrame):
             curr_sec = wing.sections[i]
             prev_sec = wing.sections[i-1]
             self.display_section(curr_sec)
+            # Draw leading edge
             self.canvas.create_line(self.origin[0] + prev_sec.leading_edge_position[1] * self.scale,
                                     self.origin[1] + prev_sec.leading_edge_position[0] * self.scale,
                                     self.origin[0] + curr_sec.leading_edge_position[1] * self.scale,
                                     self.origin[1] + curr_sec.leading_edge_position[0] * self.scale,
                                     width=3, fill='gray70', capstyle='round')
+            # Draw trailing edge
             self.canvas.create_line(self.origin[0] + prev_sec.trailing_edge_position[1] * self.scale,
                                     self.origin[1] + prev_sec.trailing_edge_position[0] * self.scale,
                                     self.origin[0] + curr_sec.trailing_edge_position[1] * self.scale,
                                     self.origin[1] + curr_sec.trailing_edge_position[0] * self.scale,
                                     width=3, fill='gray70', capstyle='round')
+            # Draw 25% MAC line
             self.canvas.create_line(self.origin[0] + prev_sec.leading_edge_position[1] * self.scale,
                                     self.origin[1] + (prev_sec.leading_edge_position[0] + prev_sec.chord * .25) * self.scale,
                                     self.origin[0] + curr_sec.leading_edge_position[1] * self.scale,
                                     self.origin[1] + (curr_sec.leading_edge_position[0] + curr_sec.chord * .25) * self.scale,
                                     width=2, fill='red', capstyle='round', dash=20)
 
-    def clear(self):
+    def clear(self) -> None:
+        """Clears the current display."""
         self.canvas.delete('all')

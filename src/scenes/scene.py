@@ -14,10 +14,6 @@ class Scene(CTkFrame):
 
     Attributes:
         app (App): The application instance.
-
-    Methods:
-        build(): Constructs and arranges the widgets to be displayed in the Scene.
-        This method should be overridden in subclasses to define the layout and components for each specific Scene.
     """
     def __init__(self, app:App):
         super().__init__(app.root)
