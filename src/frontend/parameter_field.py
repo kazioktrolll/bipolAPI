@@ -19,7 +19,7 @@ class ParameterField(CTkFrame):
     """
     def __init__(self, master:CTkFrame,
                  name: str,
-                 on_set: Callable[[float], None]=lambda: None
+                 on_set: Callable[[float], None]=lambda _: None
                  ) -> None:
         """
         Parameters:
@@ -29,6 +29,8 @@ class ParameterField(CTkFrame):
         """
 
         super().__init__(master)
+        self.configure(fg_color=master.cget('fg_color'))
+
         self.name = name
         self.on_set = on_set
         self.value = 0
@@ -38,18 +40,29 @@ class ParameterField(CTkFrame):
         self.columnconfigure(2, weight=0)
 
         # Set the display
-        CTkLabel(self, text=name).grid(column=0, row=0, sticky="w")
+        self.name_label = CTkLabel(self, text=name)
+        self.name_label.grid(column=0, row=0, sticky="w")
         self.value_label = CTkLabel(self, text=str(self.value))
         self.value_label.grid(column=1, row=0, sticky="w", padx=10)
         self.entry = CTkEntry(self)
         self.entry.grid(column=2, row=0, sticky="ew")
-        CTkButton(self, text="Set", width=30, command=self.set).grid(column=3, row=0, sticky="e")
+        self.set_button = CTkButton(self, text="Set", width=30, command=self.set)
+        self.set_button.grid(column=3, row=0, sticky="e")
 
-    def set(self) -> None:
+    def set(self, value:float=None) -> None:
         """Sets the value in the entry as the new value of the parameter."""
-        value = self.entry.get()
-        if not value: return    # When the entry is empty
+        if value is None: value = self.entry.get()
+        if value == '': return    # When the entry is empty
         self.value = float(value)
         self.entry.delete(0, "end")
         self.value_label.configure(text=value)
+        self.focus()
         self.on_set(self.value)
+
+    def disable(self) -> None:
+        """Disables the change of the parameter."""
+        self.set_button.configure(state="disabled", fg_color="gray40", text_color="white")
+        self.entry.configure(state="disabled")
+
+    def grid_def(self, row: int, column: int) -> None:
+        self.grid(row=row, column=column, sticky="nsew", padx=10, pady=5)

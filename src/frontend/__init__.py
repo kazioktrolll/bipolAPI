@@ -1,2 +1,3 @@
 from .parameter_field import ParameterField
 from .geometry_display import GeometryDisplay
+from .geodesign_left_menu import GeoDesignLeftMenu
