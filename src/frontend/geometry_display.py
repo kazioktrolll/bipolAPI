@@ -1,4 +1,4 @@
-from customtkinter import CTkCanvas, CTkFrame
+from customtkinter import CTkCanvas, CTkFrame, CTkButton
 from ..backend.geo_design import Section, Surface, Geometry
 
 
@@ -28,6 +28,9 @@ class GeometryDisplay(CTkFrame):
         self.columnconfigure(0, weight=1)
         self.canvas.grid(row=0, column=0, sticky='nsew')
 
+        self.zoom_button = CTkButton(self, text='+', command=self.zoom, width=30, height=30, corner_radius=0)
+        self.unzoom_button = CTkButton(self, text='-', command=self.unzoom, width=30, height=30, corner_radius=0)
+
     def draw(self) -> None:
         """Draws geometry's surfaces and center of mass."""
         for surface in self.geometry.surfaces.values():
@@ -35,8 +38,10 @@ class GeometryDisplay(CTkFrame):
         self.display_CG(*self.geometry.ref_pos[:2])
 
     def update(self) -> None:
-        """Sets the origin to center of the widget, redraws everything."""
-        self.origin = (self.winfo_width() / 2, self.winfo_height() / 2)
+        """Adjust the display to the window size, redraws everything."""
+        self.origin = (self.winfo_width() / 2, self.winfo_height() / 4)
+        self.unzoom_button.place(x=self.winfo_width()-40, y=self.winfo_height()-40)
+        self.zoom_button.place(x=self.winfo_width()-40, y=self.winfo_height()-80)
         self.clear()
         self.draw()
 
@@ -107,3 +112,13 @@ class GeometryDisplay(CTkFrame):
     def clear(self) -> None:
         """Clears the current display."""
         self.canvas.delete('all')
+
+    def zoom(self) -> None:
+        """Zooms the current display."""
+        self.scale *= 1.2
+        self.update()
+
+    def unzoom(self) -> None:
+        """Unzooms the current display."""
+        self.scale /= 1.2
+        self.update()

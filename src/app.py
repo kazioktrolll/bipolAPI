@@ -40,7 +40,7 @@ class App:
 
     def run(self) -> None:
         """Runs the app."""
-        self.root.after(0, self.root.state, 'zoomed')
+        self.after(0, self.root.state, 'zoomed')
         self.root.mainloop()
 
     def set_scene(self, scene) -> None:
