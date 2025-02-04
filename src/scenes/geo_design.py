@@ -32,22 +32,29 @@ class GeoDesignLeftMenu(CTkFrame):
         wing = SimpleSurface(name='Wing', span=8, chord_length=1)
         geometry.add_surface(wing)
 
+        messages = [
+            "The wingspan of the aircraft.",
+            "",
+            "",
+            ""
+        ]
+
         self.pfs = {
-            'wingspan': ParameterField(self, 'wingspan', on_set=self.update_wing),
-            'mean_chord': ParameterField(self, 'MAC', on_set=self.update_wing),
-            'taper': ParameterField(self, 'taper ratio', on_set=self.update_wing),
-            'sweep': ParameterField(self, 'sweep angle', on_set=self.update_wing)
+            'wingspan': ParameterField(self, 'wingspan', help_message=messages[0], on_set=self.update_wing),
+            'mean_chord': ParameterField(self, 'MAC', help_message=messages[1], on_set=self.update_wing),
+            'taper': ParameterField(self, 'taper ratio', help_message=messages[2], on_set=self.update_wing),
+            'sweep': ParameterField(self, 'sweep angle', help_message=messages[3], on_set=self.update_wing)
         }
 
-        for pf in self.pfs.values(): pf.name_label.configure(width=70)
+        for pf in self.pfs.values(): pf.name_label.configure(width=80)
 
-        self.pfs['wingspan'].grid_def(row=0, column=0)
+        self.pfs['wingspan'].grid(row=0, column=0, padx=10, pady=10, sticky='e')
         self.pfs['wingspan'].set(self.geometry.span_length)
-        self.pfs['mean_chord'].grid_def(row=1, column=0)
+        self.pfs['mean_chord'].grid(row=1, column=0, padx=10, pady=10, sticky='e')
         self.pfs['mean_chord'].set(self.geometry.chord_length)
-        self.pfs['taper'].grid_def(row=3, column=0)
+        self.pfs['taper'].grid(row=3, column=0, padx=10, pady=10, sticky='e')
         self.pfs['taper'].set(1)
-        self.pfs['sweep'].grid_def(row=4, column=0)
+        self.pfs['sweep'].grid(row=4, column=0, padx=10, pady=10, sticky='e')
         self.pfs['sweep'].set(0)
         self.initialized = True
 
