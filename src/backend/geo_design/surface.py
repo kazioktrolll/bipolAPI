@@ -14,6 +14,7 @@ class Surface:
         inclination_angle (float): The inclination of the surface.
         sections (list[Section]): The sections of the surface. Is always sorted left wingtip-to-right wingtip.
     """
+
     def __init__(self,
                  name: str,
                  chord_length: float,
@@ -76,7 +77,8 @@ class Surface:
                 prev_sec = self.sections[i - 1]
                 next_sec = sec
                 break
-        else: raise Exception('Incorrect y!')
+        else:
+            raise Exception('Incorrect y!')
 
         # Calculate leading edge position as prev.x + dy * dx
         dy = (y - prev_sec.y) / (next_sec.y - prev_sec.y)
@@ -90,7 +92,7 @@ class Surface:
         """Returns a copy of the surface mirrored about Y-axis."""
         from copy import copy
         surf = copy(self)
-        surf.name = self.name + '_symm' # noqa
+        surf.name = self.name + '_symm'  # noqa
         reflected_sections = [sec.mirror() for sec in self.sections]
         surf.sections = reflected_sections
         return surf
@@ -98,13 +100,14 @@ class Surface:
 
 class SimpleSurface(Surface):
     """ A subclass of the ``Surface`` representing a simple, trapezoidal lifting surface. """
+
     def __init__(self,
                  name: str,
                  span: float,
                  chord_length: float,
                  taper_ratio: float = 1,
                  sweep_angle: float = 0,
-                 origin_position: tuple[float, float, float] = (0,0,0),
+                 origin_position: tuple[float, float, float] = (0, 0, 0),
                  inclination_angle: float = 0,
                  airfoil=None,
                  ) -> None:

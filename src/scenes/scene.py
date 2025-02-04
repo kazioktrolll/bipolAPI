@@ -15,7 +15,8 @@ class Scene(CTkFrame):
     Attributes:
         app (App): The application instance.
     """
-    def __init__(self, app:App):
+
+    def __init__(self, app: App):
         super().__init__(app.root)
         self.app = app
         self.to_update = []

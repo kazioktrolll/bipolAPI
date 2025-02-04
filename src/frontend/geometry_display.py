@@ -12,6 +12,7 @@ class GeometryDisplay(CTkFrame):
         origin (tuple[int, int]): Center point of the display.
         scale (int): A scale used while transforming meters to pixels.
     """
+
     def __init__(self, parent, geometry: Geometry):
         """
         Parameters:
@@ -40,8 +41,8 @@ class GeometryDisplay(CTkFrame):
     def update(self) -> None:
         """Adjust the display to the window size, redraws everything."""
         self.origin = (self.winfo_width() / 2, self.winfo_height() / 4)
-        self.unzoom_button.place(x=self.winfo_width()-40, y=self.winfo_height()-40)
-        self.zoom_button.place(x=self.winfo_width()-40, y=self.winfo_height()-80)
+        self.unzoom_button.place(x=self.winfo_width() - 40, y=self.winfo_height() - 40)
+        self.zoom_button.place(x=self.winfo_width() - 40, y=self.winfo_height() - 80)
         self.clear()
         self.draw()
 
@@ -51,7 +52,7 @@ class GeometryDisplay(CTkFrame):
         y *= self.scale
         x += self.origin[1]
         y += self.origin[0]
-        self.canvas.create_oval(y-5, x-5, y+5, x+5, fill='yellow')
+        self.canvas.create_oval(y - 5, x - 5, y + 5, x + 5, fill='yellow')
 
     def display_section(self, section: Section | list[Section]) -> None:
         """Displays a ``Section`` as a single blue line. If given a list of Sections, displays all."""
@@ -64,7 +65,7 @@ class GeometryDisplay(CTkFrame):
 
         xle = section.leading_edge_position[0]
         yle = section.leading_edge_position[1]
-        xte  = section.trailing_edge_position[0]
+        xte = section.trailing_edge_position[0]
         self.canvas.create_line(self.origin[0] + yle * self.scale, self.origin[1] + xle * self.scale,
                                 self.origin[0] + yle * self.scale, self.origin[1] + xte * self.scale,
                                 fill='blue', width=3, capstyle='round')
@@ -88,7 +89,7 @@ class GeometryDisplay(CTkFrame):
         self.display_section(wing.sections[0])
         for i in range(1, len(wing.sections)):
             curr_sec = wing.sections[i]
-            prev_sec = wing.sections[i-1]
+            prev_sec = wing.sections[i - 1]
             self.display_section(curr_sec)
             # Draw leading edge
             self.canvas.create_line(self.origin[0] + prev_sec.leading_edge_position[1] * self.scale,

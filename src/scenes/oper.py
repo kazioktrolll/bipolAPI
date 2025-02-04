@@ -5,7 +5,7 @@ from ..demo import *
 
 
 class OperScene(Scene):
-    def __init__(self, app:App, param_names:list[str]):
+    def __init__(self, app: App, param_names: list[str]):
         self.param_names = param_names
         self.inputs: dict[str, ParameterField] = {}
         super().__init__(app)
@@ -28,5 +28,5 @@ class OperScene(Scene):
         self.fake_output.grid(column=1, row=0, sticky='nsew')
 
         CTkButton(left_frame, text="Run",
-                  command=lambda: 1/0
+                  command=lambda: 1 / 0
                   ).grid(column=0, row=6, sticky='nsew')

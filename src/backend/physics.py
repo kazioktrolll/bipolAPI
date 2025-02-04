@@ -1,10 +1,9 @@
 from math import exp
 
-
 G = 9.80665
 """int: Earth's gravita"""
-T0 = 288.15 # K
-P0 = 101325 # Pa
+T0 = 288.15  # K
+P0 = 101325  # Pa
 R = 287.05  # J/kg*K
 
 
@@ -33,11 +32,11 @@ def get_pressure(altitude: float) -> float:
     """
     if not 20e3 > altitude >= 0: raise ValueError("Altitude must be between 0 and 20km!")
     if altitude == 0: return P0
-    if altitude <= 11e3: return P0 * (get_temperature(altitude) / T0)**(-G / R / altitude)
+    if altitude <= 11e3: return P0 * (get_temperature(altitude) / T0) ** (-G / R / altitude)
     return get_pressure(11e3) * exp((-G * (altitude - 11e3)) / (R * get_temperature(altitude)))
 
 
-def get_density(altitude:float) -> float:
+def get_density(altitude: float) -> float:
     """
     Calculate density at a given altitude.
     Parameters:
@@ -48,7 +47,7 @@ def get_density(altitude:float) -> float:
     return get_pressure(altitude) / get_temperature(altitude) / R
 
 
-def get_mach(velocity:float, altitude:float=0.0) -> float:
+def get_mach(velocity: float, altitude: float = 0.0) -> float:
     """
     Calculate Mach number at a given altitude.
     Parameters:
@@ -57,7 +56,7 @@ def get_mach(velocity:float, altitude:float=0.0) -> float:
     Returns:
         Mach number.
     """
-    SHR_air = 1.4   # Specific heat ratio γ for air
+    SHR_air = 1.4  # Specific heat ratio γ for air
     T = get_temperature(altitude)
-    a = (SHR_air * R * T)**0.5
+    a = (SHR_air * R * T) ** 0.5
     return velocity / a

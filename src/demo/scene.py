@@ -95,15 +95,15 @@ class ParameterField(CTkFrame):
 class FakeOutput(CTkLabel):
     def __init__(self, master):
         super().__init__(master)
-        self.configure(text=self.get_text(0,0,0,0,0,0))
+        self.configure(text=self.get_text(0, 0, 0, 0, 0, 0))
 
     def get_text(self, alfa, beta, roll, pitch, yaw, flaps):
         text = ("Operation of run case 1/1:   -unnamed-\n"
-                 "==========================================================\n"
-                 "\n"
-                 "variable          constraint\n"
-                 "------------      ------------------------\n"
-                 f"A lpha        ->  alpha       =   {alfa}\n"
+                "==========================================================\n"
+                "\n"
+                "variable          constraint\n"
+                "------------      ------------------------\n"
+                f"A lpha        ->  alpha       =   {alfa}\n"
                 f"B eta         ->  beta        =   {beta}\n"
                 f"R oll  rate   ->  pb/2V       =   {roll}\n"
                 f"P itch rate   ->  qc/2V       =   {pitch}\n"
@@ -114,6 +114,7 @@ class FakeOutput(CTkLabel):
 
     def set_text(self, alfa, beta, roll, pitch, yaw, flaps):
         self.configure(text=self.get_text(alfa, beta, roll, pitch, yaw, flaps))
+
 
 def get_avl_data(file_path, **values) -> str:
     from subprocess import Popen, PIPE
@@ -132,6 +133,7 @@ def get_avl_data(file_path, **values) -> str:
     avl.kill()
     return text
 
+
 def format_avl_response(response) -> dict[str, float]:
     text = response.split("c>")[-2]
     text = text.split("-unnamed-")[1]
@@ -143,9 +145,9 @@ def format_avl_response(response) -> dict[str, float]:
     text_split = [fragment.replace('=', '') for fragment in text_split]
     text_split = [fragment for fragment in text_split if fragment]
     return_dict = {}
-    for i in range(len(text_split)//2):
-        key = text_split[i*2]
-        value = float(text_split[i*2+1])
+    for i in range(len(text_split) // 2):
+        key = text_split[i * 2]
+        value = float(text_split[i * 2 + 1])
         return_dict[key] = value
 
     return return_dict

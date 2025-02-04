@@ -16,6 +16,7 @@ class Geometry:
         surfaces (Dict[str, Surface]): The ``Surface`` objects associated with the aircraft.
         wing (Surface|None): The wing of the aircraft. Returns 'None' if the aircraft has no defined wing.
     """
+
     def __init__(self,
                  name: str,
                  chord_length: float,

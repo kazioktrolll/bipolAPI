@@ -17,9 +17,10 @@ class ParameterField(CTkFrame):
         value (float): Current value of the parameter.
         on_set (Optional[Callable[[float], None]]): Function to be called when the parameter is changed.
     """
-    def __init__(self, master:CTkFrame,
+
+    def __init__(self, master: CTkFrame,
                  name: str,
-                 on_set: Callable[[float], None]=lambda _: None
+                 on_set: Callable[[float], None] = lambda _: None
                  ) -> None:
         """
         Parameters:
@@ -49,10 +50,10 @@ class ParameterField(CTkFrame):
         self.set_button = CTkButton(self, text="Set", width=30, command=self.set)
         self.set_button.grid(column=3, row=0, sticky="e")
 
-    def set(self, value:float=None) -> None:
+    def set(self, value: float = None) -> None:
         """Sets the value in the entry as the new value of the parameter."""
         if value is None: value = self.entry.get()
-        if value == '': return    # When the entry is empty
+        if value == '': return  # When the entry is empty
         self.value = float(value)
         self.entry.delete(0, "end")
         self.value_label.configure(text=value)

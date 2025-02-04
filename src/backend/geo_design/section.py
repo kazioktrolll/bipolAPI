@@ -8,6 +8,7 @@ class Section:
         airfoil (list[tuple[float, float]]): The airfoil of the section.
         flap_chord_ratio (float): Chord-wise length of flaps as a percentage of the chord length.
     """
+
     def __init__(self,
                  leading_edge_position: tuple[float, float, float],
                  chord: float,

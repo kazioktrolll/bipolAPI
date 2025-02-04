@@ -17,13 +17,14 @@ class App:
     geo_path: Path
     mass_path: Path
     run_path: Path
+
     def __init__(self):
         from customtkinter import CTk
         from .scenes import Scene
         from .backend.geo_design import Geometry
         self.root = CTk()
-        self.scene = Scene(self)    # Placeholder
-        self.geometry: Geometry = Geometry(name='Plane', chord_length=1, span_length=8)    # Placeholder
+        self.scene = Scene(self)  # Placeholder
+        self.geometry: Geometry = Geometry(name='Plane', chord_length=1, span_length=8)  # Placeholder
         self.root.bind('<Configure>', self.update)
         self.build()
 
@@ -54,4 +55,3 @@ class App:
     def after(self, ms: int, func: Callable, *args) -> None:
         """Calls the given function with the given arguments after the delay given in milliseconds."""
         self.root.after(ms, func, *args)
-
