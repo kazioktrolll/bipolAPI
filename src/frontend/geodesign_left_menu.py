@@ -10,7 +10,7 @@ class GeoDesignLeftMenu(CTkFrame):
         self.geometry = geometry
         self.initialized = False
         self.do_on_update = do_on_update
-        wing = Wing(geometry=geometry, origin_position=(0,0,0), airfoil=[])
+        wing = Wing(wingspan=8, chord_length=1)
         geometry.add_surface(wing)
 
         self.pfs = {
@@ -37,7 +37,7 @@ class GeoDesignLeftMenu(CTkFrame):
         self.geometry.span_length = self.pfs['wingspan'].value
         self.geometry.chord_length = self.pfs['mean_chord'].value
 
-        wing = Wing(geometry=self.geometry, origin_position=(.0, .0, .0), airfoil=[],
+        wing = Wing(wingspan=self.pfs['wingspan'].value, chord_length=self.pfs['mean_chord'].value,
                     taper_ratio=self.pfs['taper'].value, sweep_angle=self.pfs['sweep'].value)
         self.geometry.replace_surface(wing)
         self.do_on_update()
