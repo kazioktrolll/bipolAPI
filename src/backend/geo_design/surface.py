@@ -86,23 +86,6 @@ class Surface:
         sec = Section((xle, y, zle), chord, prev_sec.airfoil)
         self.add_section(sec)
 
-    def configure_copy(self, **kwargs) -> 'Surface':
-        """Returns a copy of the surface with given parameters replaced."""
-        base_dict = {
-            "name": self.name,
-            "chord_length": self.chord_length,
-            "root_section": self.sections[0],
-            "tip_section": self.sections[-1],
-            "y_duplicate": self.y_duplicate,
-            "origin_position": self.origin_position,
-            "airfoil": self.airfoil,
-            "inclination_angle": self.inclination_angle
-        }
-        for k in kwargs.keys():
-            if k not in base_dict: raise Exception('Invalid keyword argument: {}'.format(k))
-        kwargs = base_dict | kwargs # Copy non-specified parameters from the original
-        return Surface(**kwargs)
-
     def get_symmetric(self) -> 'Surface':
         """Returns a copy of the surface mirrored about Y-axis."""
         from copy import copy
@@ -113,10 +96,11 @@ class Surface:
         return surf
 
 
-class Wing(Surface):
-    """ A subclass of the ``Surface`` representing a horizontal wing. """
+class SimpleSurface(Surface):
+    """ A subclass of the ``Surface`` representing a simple, trapezoidal lifting surface. """
     def __init__(self,
-                 wingspan: float,
+                 name: str,
+                 span: float,
                  chord_length: float,
                  taper_ratio: float = 1,
                  sweep_angle: float = 0,
@@ -125,16 +109,14 @@ class Wing(Surface):
                  airfoil=None,
                  ) -> None:
         """
-        Creates a simple trapezoidal, swept, tapered wing.
-
         Parameters:
-            wingspan (float): The span of the wing.
-            chord_length (float): The mean aerodynamic chord length of the wing.
+            span (float): The span of the surface.
+            chord_length (float): The mean aerodynamic chord length of the surface.
             origin_position (tuple[float, float, float]): Position of the leading edge of the root chord.
             inclination_angle (float): The inclination of the surface, in degrees. Zero means horizontal, positive means leading edge up.
             airfoil (list[tuple[float, float]]): The airfoil of the surface.
-            taper_ratio (float): The taper ratio of the wing.
-            sweep_angle (float): The sweep angle of the wing in degrees.
+            taper_ratio (float): The taper ratio of the surface.
+            sweep_angle (float): The sweep angle of the surface in degrees.
         """
         if airfoil is None: airfoil = []
 
@@ -143,29 +125,13 @@ class Wing(Surface):
 
         # Calculate position and chord for both root and tip sections.
         root_chord = 2 * chord_length / (1 + taper_ratio)
-        chord = lambda y: root_chord * (1 - (1 - taper_ratio) * 2 * y / wingspan)
+        chord = lambda y: root_chord * (1 - (1 - taper_ratio) * 2 * y / span)
         from math import radians, tan
         mac025 = lambda y: root_chord * .25 + y * tan(radians(sweep_angle))
         leading_edge_y = lambda y: mac025(y) - chord(y) * .25
 
-        root = Section((0.0, 0.0, 0.0), chord(0), airfoil)
-        tip = Section((leading_edge_y(wingspan/2), wingspan/2, 0.0), chord(wingspan/2), airfoil)
+        root = Section(origin_position, chord(0), airfoil)
+        tip = Section((leading_edge_y(span / 2), span / 2, 0.0), chord(span / 2), airfoil)
 
-        super().__init__(name='Wing', chord_length=chord_length, root_section=root, tip_section=tip, y_duplicate=True,
+        super().__init__(name=name, chord_length=chord_length, root_section=root, tip_section=tip, y_duplicate=True,
                          origin_position=origin_position, airfoil=airfoil, inclination_angle=inclination_angle)
-
-    def configure_copy(self, **kwargs) -> 'Wing':
-        """Returns a copy of the surface with given parameters replaced."""
-        base_dict = {
-            "wingspan": self.span,
-            "chord_length": self.chord_length,
-            "origin_position": self.origin_position,
-            "inclination_angle": self.inclination_angle,
-            "airfoil": self.airfoil,
-            "taper_ratio": self.taper_ratio,
-            "sweep_angle": self.sweep_angle
-        }
-        for k in kwargs.keys():
-            if k not in base_dict: raise Exception('Invalid keyword argument: {}'.format(k))
-        kwargs = base_dict | kwargs  # Copy non-specified parameters from the original
-        return Wing(**kwargs)
