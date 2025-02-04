@@ -16,13 +16,8 @@ class GeoDesignScene(Scene):
         geometry_display.grid(row=0, column=1, sticky='nsew')
         geometry_display.draw()
 
-        GeoDesignLeftMenu(self).grid(row=0, column=0, sticky='nsew')
-
+        GeoDesignLeftMenu(self, self.app.geometry, self.geometry_display.update).grid(row=0, column=0, sticky='nsew')
 
     @property
     def geometry_display(self):
         return self.children['!geometrydisplay']
-
-    def do_with_update(self, func: Callable, *args):
-        func(*args)
-        self.geometry_display.update()

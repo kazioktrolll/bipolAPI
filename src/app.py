@@ -23,7 +23,7 @@ class App:
         from .backend.geo_design import Geometry
         self.root = CTk()
         self.scene = Scene(self)    # Placeholder
-        self.geometry: Geometry = Geometry(name='Plane', chord_length=1, span_length=8, ref_pos=(.5, 0, 0))    # Placeholder
+        self.geometry: Geometry = Geometry(name='Plane', chord_length=1, span_length=8)    # Placeholder
         self.root.bind('<Configure>', self.update)
         self.build()
 

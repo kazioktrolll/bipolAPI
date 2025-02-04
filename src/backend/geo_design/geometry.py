@@ -40,7 +40,13 @@ class Geometry:
         self.surfaces: dict[str, Surface] = {}
 
     def add_surface(self, surface: 'Surface') -> None:
-        """Add the given surface to the aircraft's geometry. Is called automatically on Surface creation, no need for manual use."""
+        """Add a new surface. The name must be unique."""
+        if surface.name in self.surfaces.keys(): raise AttributeError("A surface with name {} already exists.".format(surface.name))
+        self.surfaces[surface.name] = surface
+
+    def replace_surface(self, surface: 'Surface') -> None:
+        """Replace an existing surface with the new surface."""
+        if surface.name not in self.surfaces.keys(): raise AttributeError("No surface named {}.".format(surface.name))
         self.surfaces[surface.name] = surface
 
     @property
@@ -111,7 +117,6 @@ class Surface:
         self.inclination_angle = inclination_angle
         self.sections: list[Section] = [root_section, tip_section]
         self.sections.sort(key=lambda section: section.y)
-        self.geometry.add_surface(self)
 
     def add_section(self, section: 'Section'):
         """Add a new section to the surface and ensures the sections are well-ordered."""
@@ -147,6 +152,21 @@ class Surface:
         sec = Section((xle, y, zle), chord, prev_sec.airfoil)
         self.add_section(sec)
 
+    def configure_copy(self, **kwargs) -> 'Surface':
+        """Returns a copy of the surface with given parameters replaced."""
+        base_dict = {
+            "geometry": self.geometry,
+            "name": self.name,
+            "root_section": self.sections[0],
+            "tip_section": self.sections[-1],
+            "y_duplicate": self.y_duplicate,
+            "origin_position": self.origin_position,
+            "airfoil": self.airfoil,
+            "inclination_angle": self.inclination_angle
+        }
+        kwargs = base_dict | kwargs # Copy non-specified parameters from the original
+        return Surface(**kwargs)
+
     def get_symmetric(self) -> 'Surface':
         """Returns a copy of the surface mirrored about Y-axis."""
         from copy import copy
@@ -159,15 +179,14 @@ class Surface:
 
 class Wing(Surface):
     """ A subclass of the ``Surface`` representing a horizontal wing. """
-    @classmethod
-    def simple_tapered(cls,
-                       geometry: Geometry,
-                       origin_position: tuple[float, float, float] = (0,0,0),
-                       inclination_angle: float = 0,
-                       airfoil=None,
-                       taper_ratio: float = 1,
-                       sweep_angle: float = 0,
-                       ) -> 'Wing':
+    def __init__(self,
+                 geometry: Geometry,
+                 origin_position: tuple[float, float, float] = (0,0,0),
+                 inclination_angle: float = 0,
+                 airfoil=None,
+                 taper_ratio: float = 1,
+                 sweep_angle: float = 0,
+                 ) -> None:
         """
         Creates a simple trapezoidal, swept, tapered wing.
 
@@ -180,10 +199,14 @@ class Wing(Surface):
             sweep_angle (float): The sweep angle of the wing in degrees.
         """
         if airfoil is None: airfoil = []
+
+        self.taper_ratio = taper_ratio
+        self.sweep_angle = sweep_angle
+
         wingspan = geometry.span_length
 
         # Calculate position and chord for both root and tip sections.
-        root_chord = 2 * geometry.surface_area / wingspan / (1 + taper_ratio)
+        root_chord = 2 * geometry.chord_length / (1 + taper_ratio)
         chord = lambda y: root_chord * (1 - (1 - taper_ratio) * 2 * y / wingspan)
         from math import radians, tan
         mac025 = lambda y: root_chord * .25 + y * tan(radians(sweep_angle))
@@ -192,10 +215,21 @@ class Wing(Surface):
         root = Section((0.0, 0.0, 0.0), chord(0), airfoil)
         tip = Section((leading_edge_y(wingspan/2), wingspan/2, 0.0), chord(wingspan/2), airfoil)
 
+        super().__init__(geometry=geometry, name='Wing', root_section=root, tip_section=tip, y_duplicate=True,
+                         origin_position=origin_position, airfoil=airfoil, inclination_angle=inclination_angle)
 
-        wing = Wing(geometry, name='Wing', root_section=root, tip_section=tip, y_duplicate=True,
-                    origin_position=origin_position, airfoil=airfoil, inclination_angle=inclination_angle)
-        return wing
+    def configure_copy(self, **kwargs) -> 'Wing':
+        """Returns a copy of the surface with given parameters replaced."""
+        base_dict = {
+            "geometry": self.geometry,
+            "origin_position": self.origin_position,
+            "inclination_angle": self.inclination_angle,
+            "airfoil": self.airfoil,
+            "taper_ratio": self.taper_ratio,
+            "sweep_angle": self.sweep_angle
+        }
+        kwargs = base_dict | kwargs  # Copy non-specified parameters from the original
+        return Wing(**kwargs)
 
 
 class Section:
