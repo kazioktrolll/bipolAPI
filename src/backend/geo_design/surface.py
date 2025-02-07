@@ -230,3 +230,10 @@ class SimpleSurface(Surface):
                     section.control = Flap(x_hinge=x_hinge)
                 # Add ``Section`` without ``Control`` at the end.
                 if not self.has_section_at(end): self.add_section_gentle(end)
+
+    def get_symmetric(self) -> 'SimpleSurface':
+        surf = super().get_symmetric()
+        assert isinstance(surf, SimpleSurface)
+        surf.ailerons = [(-s, -e, xc) for s, e, xc in surf.ailerons]
+        surf.flaps = [(-s, -e, xc) for s, e, xc in surf.flaps]
+        return surf

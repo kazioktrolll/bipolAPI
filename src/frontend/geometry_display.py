@@ -1,5 +1,5 @@
 from customtkinter import CTkCanvas, CTkFrame, CTkButton
-from ..backend.geo_design import Section, Surface, Geometry
+from ..backend.geo_design import Section, Surface, Geometry, Flap
 
 
 class GeometryDisplay(CTkFrame):
@@ -68,7 +68,7 @@ class GeometryDisplay(CTkFrame):
         xte = section.trailing_edge_position[0]
         self.canvas.create_line(self.origin[0] + yle * self.scale, self.origin[1] + xle * self.scale,
                                 self.origin[0] + yle * self.scale, self.origin[1] + xte * self.scale,
-                                fill='blue', width=3, capstyle='round')
+                                fill='blue', width=3, capstyle='round', tags='section')
 
     def display_wing(self, wing: Surface | list[Surface]) -> None:
         """Displays a ``Surface``. If given a list of Surfaces, displays all."""
@@ -84,31 +84,46 @@ class GeometryDisplay(CTkFrame):
             ydup.y_duplicate = False
             self.display_wing(ydup)
 
+        sections = list(wing.sections)
         if len(wing.sections) < 2: raise Exception("Can't display a wing with less that 2 sections!")
 
-        self.display_section(wing.sections[0])
-        for i in range(1, len(wing.sections)):
-            curr_sec = wing.sections[i]
-            prev_sec = wing.sections[i - 1]
+        self.display_section(sections[0])
+        for i in range(1, len(sections)):
+            curr_sec = sections[i]
+            prev_sec = sections[i - 1]
             self.display_section(curr_sec)
             # Draw leading edge
             self.canvas.create_line(self.origin[0] + prev_sec.leading_edge_position[1] * self.scale,
                                     self.origin[1] + prev_sec.leading_edge_position[0] * self.scale,
                                     self.origin[0] + curr_sec.leading_edge_position[1] * self.scale,
                                     self.origin[1] + curr_sec.leading_edge_position[0] * self.scale,
-                                    width=3, fill='gray70', capstyle='round')
+                                    width=3, fill='gray70', capstyle='round', tags='edge')
             # Draw trailing edge
             self.canvas.create_line(self.origin[0] + prev_sec.trailing_edge_position[1] * self.scale,
                                     self.origin[1] + prev_sec.trailing_edge_position[0] * self.scale,
                                     self.origin[0] + curr_sec.trailing_edge_position[1] * self.scale,
                                     self.origin[1] + curr_sec.trailing_edge_position[0] * self.scale,
-                                    width=3, fill='gray70', capstyle='round')
+                                    width=3, fill='gray70', capstyle='round', tags='edge')
             # Draw 25% MAC line
             self.canvas.create_line(self.origin[0] + prev_sec.leading_edge_position[1] * self.scale,
                                     self.origin[1] + (prev_sec.leading_edge_position[0] + prev_sec.chord * .25) * self.scale,
                                     self.origin[0] + curr_sec.leading_edge_position[1] * self.scale,
                                     self.origin[1] + (curr_sec.leading_edge_position[0] + curr_sec.chord * .25) * self.scale,
-                                    width=2, fill='red', capstyle='round', dash=20)
+                                    width=2, fill='red', capstyle='round', dash=20, tags='edge')
+            # Draw control surface, if exists
+            if prev_sec.control is None: continue
+            color = 'yellow' if type(prev_sec.control) is Flap else 'green'
+            x_hinge = prev_sec.control.x_hinge
+            self.canvas.create_rectangle(self.origin[0] + prev_sec.leading_edge_position[1] * self.scale,
+                                         self.origin[1] + (prev_sec.leading_edge_position[0] + prev_sec.chord * x_hinge) * self.scale,
+                                         self.origin[0] + curr_sec.leading_edge_position[1] * self.scale,
+                                         self.origin[1] + (curr_sec.leading_edge_position[0] + curr_sec.chord) * self.scale,
+                                         fill=color, tags='control')
+
+        # Order layers
+        self.canvas.tag_raise('control')
+        self.canvas.tag_raise('section')
+        self.canvas.tag_raise('edge')
 
     def clear(self) -> None:
         """Clears the current display."""

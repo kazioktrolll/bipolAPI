@@ -31,6 +31,7 @@ class Section:
         """Returns a copy of self, mirrored about Y-axis."""
         lep = self.leading_edge_position[0], self.leading_edge_position[1] * -1, self.leading_edge_position[2]
         sec = Section(lep, self.chord, self.airfoil)
+        sec.control = self.control.copy() if self.control is not None else None
         return sec
 
     @property
@@ -70,6 +71,10 @@ class Control:
         self.gain = gain
         self.xyz_h_vec = xyz_h_vec
 
+    def copy(self) -> 'Control':
+        """Returns a copy of this control surface."""
+        return Control(self.name, self.x_hinge, self.SgnDup, self.gain, self.xyz_h_vec)
+
 
 class Flap(Control):
     def __init__(self, x_hinge: float):
@@ -80,6 +85,10 @@ class Flap(Control):
         assert 0 < x_hinge < 1
         super().__init__(name='flap', x_hinge=x_hinge, SgnDup=True)
 
+    def copy(self) -> 'Flap':
+        """Returns a copy of this flap."""
+        return Flap(self.x_hinge)
+
 
 class Aileron(Control):
     def __init__(self, x_hinge: float):
@@ -89,3 +98,7 @@ class Aileron(Control):
         """
         assert 0 < x_hinge < 1
         super().__init__(name='aileron', x_hinge=x_hinge, SgnDup=False)
+
+    def copy(self) -> 'Aileron':
+        """Returns a copy of this aileron."""
+        return Aileron(self.x_hinge)
