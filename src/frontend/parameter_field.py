@@ -31,8 +31,7 @@ class ParameterField(CTkFrame):
             on_set (Callable[[float], None], optional): Function to be called when the parameter is changed.
         """
 
-        super().__init__(master)
-        self.configure(fg_color=master.cget('fg_color'))
+        super().__init__(master, fg_color=master.cget('fg_color'))
 
         self.name = name
         self.help_message = help_message

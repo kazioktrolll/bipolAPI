@@ -1,4 +1,4 @@
-from .section import Section
+from .section import Section, Flap, Aileron
 
 
 class Surface:
@@ -97,6 +97,33 @@ class Surface:
         surf.sections = reflected_sections
         return surf
 
+    def has_section_at(self, y: float) -> bool:
+        """Returns ``True`` if the surface has a section at ``y``."""
+        ys = [section.y for section in self.sections]
+        return y in ys
+
+    def get_section_at(self, y: float) -> Section | None:
+        """Returns the section at ``y``, if exists, else returns ``None``."""
+        if not self.has_section_at(y): return None
+        for sec in self.sections:
+            if sec.y == y:
+                return sec
+
+    def get_sections_between(self, y_start: float, y_end: float,
+                             include_start: bool = True, include_end: bool = False
+                             ) -> list[Section]:
+        """Returns a list of sections between ``y_start`` and ``y_end``."""
+        secs = []
+        if include_start and self.has_section_at(y_start):
+            secs.append(self.get_section_at(y_start))
+
+        secs += [section for section in self.sections if y_start < section.y < y_end]
+
+        if include_end and self.has_section_at(y_end):
+            secs.append(self.get_section_at(y_end))
+
+        return secs
+
 
 class SimpleSurface(Surface):
     """ A subclass of the ``Surface`` representing a simple, trapezoidal lifting surface. """
@@ -126,6 +153,34 @@ class SimpleSurface(Surface):
         self.taper_ratio = taper_ratio
         self.sweep_angle = sweep_angle
 
+        root, tip = SimpleSurface.create_geometry(chord_length, span, taper_ratio, sweep_angle, airfoil, origin_position)
+        super().__init__(name=name, chord_length=chord_length, root_section=root, tip_section=tip, y_duplicate=True,
+                         origin_position=origin_position, airfoil=airfoil, inclination_angle=inclination_angle)
+
+        self.flaps = []
+        self.ailerons = []
+
+    @classmethod
+    def create_geometry(cls, chord_length: float, span: float,
+                        taper_ratio: float, sweep_angle: float,
+                        airfoil: list[tuple[float, float]],
+                        origin_position: tuple[float, float, float] = (0, 0, 0)
+                        ) -> tuple[Section, Section]:
+        """
+        Returns the root and tip Sections generated based on input parameters.
+
+        Parameters:
+            chord_length (float): The mean aerodynamic chord of the surface.
+            span (float): The span of the surface.
+            taper_ratio (float): The taper ratio of the surface.
+            sweep_angle (float): The sweep angle of the surface in degrees.
+            airfoil (list[tuple[float, float]]): The airfoil of the surface.
+            origin_position (tuple[float, float, float]): Position of the leading edge of the root chord.
+
+        Returns:
+            Root and tip Sections, in that order.
+        """
+
         # Calculate position and chord for both root and tip sections.
         root_chord = 2 * chord_length / (1 + taper_ratio)
         chord = lambda y: root_chord * (1 - (1 - taper_ratio) * 2 * y / span)
@@ -136,5 +191,42 @@ class SimpleSurface(Surface):
         root = Section(origin_position, chord(0), airfoil)
         tip = Section((leading_edge_y(span / 2), span / 2, 0.0), chord(span / 2), airfoil)
 
-        super().__init__(name=name, chord_length=chord_length, root_section=root, tip_section=tip, y_duplicate=True,
-                         origin_position=origin_position, airfoil=airfoil, inclination_angle=inclination_angle)
+        return root, tip
+
+    def set_mechanization(self,
+                          ailerons: list[tuple[float, float, float]] = None,
+                          flaps: list[tuple[float, float, float]] = None
+                          ) -> None:
+        if self.ailerons or self.flaps: raise Exception("The surface {} already has mechanization!".format(self.name))
+        # This is not necessary for method's working, but if the function is called with both arguments empty then it's
+        # probably due to user's mistake, so it should be raised to attention.
+        # Can be bypassed by setting either of the arguments as ``[]``.
+        if ailerons is None and flaps is None: raise ValueError("Both ailerons and flaps are be None")
+
+        if ailerons:
+            self.ailerons = ailerons
+            # To add a control surface in AVL, you add a control surface to a section, and it is valid up to the next section.
+            for start, end, hinge_x in self.ailerons:
+                # Ensure there is a ``Section`` at 'y' == 'start'.
+                if not self.has_section_at(start): self.add_section_gentle(start)
+                # Add ``Control`` to every Section between 'start' and 'end', including 'start', excluding 'end'.
+                sections = self.get_sections_between(start, end)
+                for section in sections:
+                    if section.has_control: raise Exception("A section already has a control surface!")
+                    section.control = Aileron(x_hinge=hinge_x)
+                # Add ``Section`` without ``Control`` at the end.
+                if not self.has_section_at(end): self.add_section_gentle(end)
+
+        if flaps:
+            self.flaps = flaps
+            # To add a control surface in AVL, you add a control surface to a section, and it is valid up to the next section.
+            for start, end, x_hinge in self.flaps:
+                # Ensure there is a ``Section`` at 'y' == 'start'.
+                if not self.has_section_at(start): self.add_section_gentle(start)
+                # Add ``Control`` to every Section between 'start' and 'end', including 'start', excluding 'end'.
+                sections = self.get_sections_between(start, end)
+                for section in sections:
+                    if section.has_control: raise Exception("A section already has a control surface!")
+                    section.control = Flap(x_hinge=x_hinge)
+                # Add ``Section`` without ``Control`` at the end.
+                if not self.has_section_at(end): self.add_section_gentle(end)

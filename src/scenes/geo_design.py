@@ -1,6 +1,6 @@
 from typing import Callable
-from .scene import Scene
 from customtkinter import CTkFrame
+from .scene import Scene
 from ..frontend import GeometryDisplay, ParameterField
 from ..backend.geo_design import Geometry, SimpleSurface
 
