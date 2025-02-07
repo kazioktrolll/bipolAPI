@@ -1,7 +1,7 @@
 from typing import Callable
 from customtkinter import CTkFrame
 from .scene import Scene
-from ..frontend import GeometryDisplay, ParameterField
+from ..frontend import GeometryDisplay, ParameterField, ListPreset
 from ..backend.geo_design import Geometry, SimpleSurface
 
 
@@ -27,11 +27,17 @@ class GeoDesignLeftMenu(CTkFrame):
     def __init__(self, parent, geometry: Geometry, do_on_update: Callable[[], None]):
         super().__init__(parent)
         self.geometry = geometry
+        self.pfs: dict[str, ParameterField] = {}
         self.initialized = False
         self.do_on_update = do_on_update
-        wing = SimpleSurface(name='Wing', span=8, chord_length=1)
-        geometry.add_surface(wing)
 
+        wing = SimpleSurface(name='Wing', span=8, chord_length=1)   # Placeholder, to be adjusted by User.
+        geometry.add_surface(wing)
+        self.init_pfs()
+        ListPreset(self, 'Ailerons').grid(row=5, column=0, padx=10, pady=10, sticky='nsew')
+        ListPreset(self, 'Flaps').grid(row=6, column=0, padx=10, pady=10, sticky='nsew')
+
+    def init_pfs(self):
         messages = [
             "The wingspan of the aircraft.",
             "",
