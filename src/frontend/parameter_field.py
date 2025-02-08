@@ -81,20 +81,17 @@ class HelpTopLevel:
     def __init__(self, master, message, padding=10, max_width=30):
         self.top = CTkToplevel(master)
         self.top.title("Message")
+        self.top.attributes("-toolwindow", True)
 
         # Wrap text into lines to make it roughly square
-        wrapped_text = textwrap.fill(message, width=max_width)
+        for i, paragraph in enumerate(message.splitlines()):
+            wrapped_text = textwrap.fill(paragraph, width=max_width)
 
-        # Create label to display text
-        label = CTkLabel(self.top, text=wrapped_text, padx=padding, pady=padding)
-        label.pack()
+            # Create label to display text
+            label = CTkLabel(self.top, text=wrapped_text, padx=padding, pady=padding, anchor="w")
+            label.grid(column=0, row=i)
 
-        # Calculate required window size
-        self.top.update_idletasks()  # Ensure size calculations are correct
-        width = label.winfo_reqwidth() + padding
-        height = label.winfo_reqheight() + padding
-
-        self.top.geometry(f"{width}x{height}")  # Set window size
+        self.top.wm_geometry("")
         self.top.resizable(False, False)  # Disable resizing
         self.top.transient(master)
         self.top.grab_set()

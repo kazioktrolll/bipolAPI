@@ -114,11 +114,14 @@ class GeometryDisplay(CTkFrame):
             if prev_sec.control is None: continue
             color = 'yellow' if type(prev_sec.control) is Flap else 'green'
             x_hinge = prev_sec.control.x_hinge
-            self.canvas.create_rectangle(self.origin[0] + prev_sec.leading_edge_position[1] * self.scale,
-                                         self.origin[1] + (prev_sec.leading_edge_position[0] + prev_sec.chord * x_hinge) * self.scale,
-                                         self.origin[0] + curr_sec.leading_edge_position[1] * self.scale,
-                                         self.origin[1] + (curr_sec.leading_edge_position[0] + curr_sec.chord) * self.scale,
-                                         fill=color, tags='control')
+            y_prev = self.origin[0] + prev_sec.leading_edge_position[1] * self.scale
+            x_prev_te = self.origin[1] + prev_sec.trailing_edge_position[0] * self.scale
+            x_prev_le = x_prev_te - (1-x_hinge) * prev_sec.chord * self.scale
+            y_curr = self.origin[0] + curr_sec.leading_edge_position[1] * self.scale
+            x_curr_te = self.origin[1] + curr_sec.trailing_edge_position[0] * self.scale
+            x_curr_le = x_curr_te - (1-x_hinge) * curr_sec.chord * self.scale
+            self.canvas.create_polygon(((y_prev, x_prev_le), (y_prev, x_prev_te), (y_curr, x_curr_te), (y_curr, x_curr_le)),
+                                       fill=color, outline='black')
 
         # Order layers
         self.canvas.tag_raise('control')
