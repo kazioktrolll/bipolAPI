@@ -2,6 +2,7 @@ from typing import Callable
 from customtkinter import CTkFrame, CTkLabel, DoubleVar, StringVar, CTkToplevel, CTkEntry, CTkButton
 from abc import ABC, abstractmethod
 from .parameter_field import HelpTopLevel
+from .popup import Popup
 
 
 class FlapDisplay(CTkFrame):
@@ -60,9 +61,7 @@ class FlapItem(Item):
         self.xc = DoubleVar(value=0)
 
     def edit(self, do_on_update: Callable[[], None]):
-        window = CTkToplevel()
-        window.title("Edit")
-        window.attributes("-toolwindow", True)
+        window = Popup(master=None, title="Edit")
 
         startvar = StringVar(value=str(self.start.get()))
         endvar = StringVar(value=str(self.end.get()))
@@ -86,7 +85,7 @@ class FlapItem(Item):
                  ).grid(column=2, row=2)
 
         CTkButton(window, text='?', width=25, height=25,
-                  command=lambda: HelpTopLevel(window, message="Input new parameters of the device.\n"
+                  command=lambda: HelpTopLevel(None, message="Input new parameters of the device.\n"
                                                                "start, stop: y-coordinate of the "
                                                                "start and the end of the device. "
                                                                "Start must be closer to the main axis of the aircraft, "
@@ -102,9 +101,7 @@ class FlapItem(Item):
                                    do_on_update())
                   ).grid(column=2, row=3, sticky='nsew')
 
-        window.wm_geometry("")
-        window.resizable(False, False)  # Disable resizing
-        window.grab_set()
+        window.run()
 
     def set_values(self, start: float, end: float, xc: float) -> None:
         if not abs(start) <= abs(end): return

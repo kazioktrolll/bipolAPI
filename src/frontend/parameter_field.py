@@ -1,4 +1,5 @@
-from customtkinter import CTkFrame, CTkLabel, CTkEntry, CTkButton, CTkToplevel
+from customtkinter import CTkFrame, CTkLabel, CTkEntry, CTkButton
+from .help_top_level import HelpTopLevel
 from typing import Callable
 
 
@@ -72,26 +73,3 @@ class ParameterField(CTkFrame):
 
     def grid_def(self, row: int, column: int) -> None:
         self.grid(row=row, column=column, sticky="nsew", padx=10, pady=5)
-
-
-import textwrap
-
-
-class HelpTopLevel:
-    def __init__(self, master, message, padding=10, max_width=30):
-        self.top = CTkToplevel(master)
-        self.top.title("Message")
-        self.top.attributes("-toolwindow", True)
-
-        # Wrap text into lines to make it roughly square
-        for i, paragraph in enumerate(message.splitlines()):
-            wrapped_text = textwrap.fill(paragraph, width=max_width)
-
-            # Create label to display text
-            label = CTkLabel(self.top, text=wrapped_text, padx=padding, pady=padding, anchor="w")
-            label.grid(column=0, row=i)
-
-        self.top.wm_geometry("")
-        self.top.resizable(False, False)  # Disable resizing
-        self.top.transient(master)
-        self.top.grab_set()

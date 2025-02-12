@@ -1,7 +1,7 @@
 from typing import Callable
 from customtkinter import CTkFrame
 from .scene import Scene
-from ..frontend import GeometryDisplay, ParameterField, ListPreset, FlapItem
+from ..frontend import GeometryDisplay, ParameterField, ListPreset, FlapItem, ParamFromFile
 from ..backend.geo_design import Geometry, SimpleSurface
 
 
@@ -39,6 +39,8 @@ class GeoDesignLeftMenu(CTkFrame):
         self.ailerons.grid(row=5, column=0, padx=10, pady=10, sticky='nsew')
         self.flaps = ListPreset(self, 'Flaps', FlapItem, lambda: self.update_wing())
         self.flaps.grid(row=6, column=0, padx=10, pady=10, sticky='nsew')
+
+        ParamFromFile(self).grid(row=7, column=0, padx=10, pady=10, sticky='nsew')
 
     def init_pfs(self):
         messages = [
