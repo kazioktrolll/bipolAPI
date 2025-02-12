@@ -1,4 +1,5 @@
 from .section import Section, Flap, Aileron
+from .airfoil import Airfoil
 
 
 class Surface:
@@ -10,7 +11,7 @@ class Surface:
         chord_length (float): The nominal mean aerodynamic chord length of the lifting surface.
         y_duplicate (bool): Whether the lifting surface should be mirrored about Y-axis.
         origin_position (tuple[float, float, float]): Position of the leading edge of the root chord.
-        airfoil (list[tuple[float, float]]): The airfoil of the surface.
+        airfoil (Airfoil): The airfoil of the surface.
         inclination_angle (float): The inclination of the surface.
         sections (list[Section]): The sections of the surface. Is always sorted left wingtip-to-right wingtip.
     """
@@ -22,7 +23,7 @@ class Surface:
                  tip_section: Section,
                  y_duplicate: bool,
                  origin_position: tuple[float, float, float],
-                 airfoil: list[tuple[float, float]],
+                 airfoil: Airfoil,
                  inclination_angle: float):
         """
         Parameters:
@@ -35,7 +36,7 @@ class Surface:
             y_duplicate (bool): Whether the lifting surface should be mirrored about Y-axis.
                 Set ``True`` when defining only one half of a symmetric surface.
             origin_position (tuple[float, float, float]): Position of the leading edge of the root chord.
-            airfoil (list[tuple[float, float]]): The airfoil of the surface.
+            airfoil (Airfoil): The airfoil of the surface.
             inclination_angle (float): The inclination of the surface, in degrees. Zero means horizontal, positive means leading edge up.
         """
         self.name = name
@@ -85,7 +86,7 @@ class Surface:
         xle = prev_sec.leading_edge_position[0] + dy * (next_sec.leading_edge_position[0] - prev_sec.leading_edge_position[0])
         zle = prev_sec.leading_edge_position[2] + dy * (next_sec.leading_edge_position[2] - prev_sec.leading_edge_position[2])
         chord = prev_sec.chord + dy * (next_sec.chord - prev_sec.chord)
-        sec = Section((xle, y, zle), chord, prev_sec.airfoil)
+        sec = Section((xle, y, zle), chord, self.airfoil)
         self.add_section(sec)
 
     def get_symmetric(self) -> 'Surface':
@@ -144,11 +145,11 @@ class SimpleSurface(Surface):
             chord_length (float): The mean aerodynamic chord length of the surface.
             origin_position (tuple[float, float, float]): Position of the leading edge of the root chord.
             inclination_angle (float): The inclination of the surface, in degrees. Zero means horizontal, positive means leading edge up.
-            airfoil (list[tuple[float, float]]): The airfoil of the surface.
+            airfoil (Airfoil): The airfoil of the surface.
             taper_ratio (float): The taper ratio of the surface.
             sweep_angle (float): The sweep angle of the surface in degrees.
         """
-        if airfoil is None: airfoil = []
+        if airfoil is None: airfoil = Airfoil.empty()
 
         self.taper_ratio = taper_ratio
         self.sweep_angle = sweep_angle
@@ -163,7 +164,7 @@ class SimpleSurface(Surface):
     @classmethod
     def create_geometry(cls, chord_length: float, span: float,
                         taper_ratio: float, sweep_angle: float,
-                        airfoil: list[tuple[float, float]],
+                        airfoil: Airfoil,
                         origin_position: tuple[float, float, float] = (0, 0, 0)
                         ) -> tuple[Section, Section]:
         """
@@ -174,7 +175,7 @@ class SimpleSurface(Surface):
             span (float): The span of the surface.
             taper_ratio (float): The taper ratio of the surface.
             sweep_angle (float): The sweep angle of the surface in degrees.
-            airfoil (list[tuple[float, float]]): The airfoil of the surface.
+            airfoil (Airfoil): The airfoil of the surface.
             origin_position (tuple[float, float, float]): Position of the leading edge of the root chord.
 
         Returns:

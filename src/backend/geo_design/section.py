@@ -1,4 +1,5 @@
 from typing import Optional
+from .airfoil import Airfoil
 
 
 class Section:
@@ -15,12 +16,12 @@ class Section:
     def __init__(self,
                  leading_edge_position: tuple[float, float, float],
                  chord: float,
-                 airfoil: list[tuple[float, float]]):
+                 airfoil: Airfoil):
         """
         Parameters:
             leading_edge_position (tuple[float, float, float]): Position of the leading edge of the section.
             chord (float): The chord of the section.
-            airfoil (list[tuple[float, float]]): The airfoil of the section.
+            airfoil (Airfoil): The airfoil of the section.
         """
         self.leading_edge_position = leading_edge_position
         self.chord = chord
