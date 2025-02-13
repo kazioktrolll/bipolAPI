@@ -50,6 +50,16 @@ class Section:
         """Returns the y position of the section."""
         return self.leading_edge_position[1]
 
+    def string(self) -> str:
+        """Returns the current geometry as a .avl type string."""
+        _r = (f"SECTION\n"
+              f"{self.leading_edge_position[0]} {self.leading_edge_position[1]} {self.leading_edge_position[2]} "
+              f"{self.chord} 0\n")
+        _r += self.airfoil.string()
+        if self.has_control:
+            _r += self.control.string()
+        return _r
+
 
 class Control:
     """Class representing a control surface attached to a section."""
@@ -75,6 +85,13 @@ class Control:
     def copy(self) -> 'Control':
         """Returns a copy of this control surface."""
         return Control(self.name, self.x_hinge, self.SgnDup, self.gain, self.xyz_h_vec)
+
+    def string(self) -> str:
+        """Returns the current geometry as a .avl type string."""
+        return ("CONTROL\n"
+                f"{self.name} {self.gain} {self.x_hinge}"
+                f"{self.xyz_h_vec[0]} {self.xyz_h_vec[1]} {self.xyz_h_vec[2]}"
+                f"{self.SgnDup}\n")
 
 
 class Flap(Control):

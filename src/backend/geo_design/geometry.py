@@ -1,5 +1,6 @@
-from typing import Optional
+from typing import Optional, TextIO
 from .surface import Surface
+from pathlib import Path
 
 
 class Geometry:
@@ -74,3 +75,24 @@ class Geometry:
             return self.surfaces["V_tail"]
         except KeyError:
             return None
+
+    def string(self) -> str:
+        """Returns the current geometry as a .avl type string."""
+        _r = (f"0.0 | Mach\n"
+              f"0 0 0 | iYsym iZsym Zsym\n"
+              f"{self.surface_area} {self.chord_length} {self.span_length} | Sref Cref Bref\n"
+              f"{self.ref_pos[0]} {self.ref_pos[1]} {self.ref_pos[2]} | Xref Yref Zref\n"
+              f"0.0 | CDp\n")
+
+        for surf in self.surfaces.values():
+            _r += "#----------------\n"
+            _r += surf.string()
+
+        return _r
+
+    def save_to_avl(self, case_name: str, path: Path) -> TextIO:
+        """Saves the current geometry to a file using .avl format."""
+        file = open(path, 'w')
+        contents = case_name + " | Case Name\n" + self.string()
+        file.write(contents)
+        return file

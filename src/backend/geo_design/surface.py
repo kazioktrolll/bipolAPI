@@ -125,6 +125,23 @@ class Surface:
 
         return secs
 
+    def string(self) -> str:
+        """Returns the current geometry as a .avl type string."""
+        _r = (f"SURFACE\n"
+              f"{self.name}\n"
+              f"{int(self.chord_length*16)} 1.0 {int(self.span*8)} 1.0\n"
+              f"YDUPLICATE\n"
+              f"0.0\n"
+              f"SCALE\n"
+              f"1.0 1.0 1.0\n"
+              f"TRANSLATE\n"
+              f"{self.origin_position[0]} {self.origin_position[1]} {self.origin_position[2]}\n"
+              f"ANGLE\n"
+              f"{self.inclination_angle}\n")
+        for sec in self.sections:
+            _r += sec.string()
+        return _r
+
 
 class SimpleSurface(Surface):
     """ A subclass of the ``Surface`` representing a simple, trapezoidal lifting surface. """
