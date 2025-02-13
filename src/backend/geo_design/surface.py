@@ -129,7 +129,7 @@ class Surface:
         """Returns the current geometry as a .avl type string."""
         _r = (f"SURFACE\n"
               f"{self.name}\n"
-              f"{int(self.chord_length*16)} 1.0 {int(self.span*8)} 1.0\n"
+              f"{int(self.chord_length*8)} 1.0 {int(self.span*4)} 1.0\n"
               f"YDUPLICATE\n"
               f"0.0\n"
               f"SCALE\n"

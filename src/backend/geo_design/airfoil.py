@@ -83,6 +83,8 @@ class Airfoil:
         negative.sort(key=lambda p: p[0])
         sorted_data = positive + negative
 
+        if len(sorted_data) < 3: raise ValueError("Incorrect input file!")
+
         af = Airfoil(name, points=sorted_data, naca=None, active_range=active_range)
         return af
 

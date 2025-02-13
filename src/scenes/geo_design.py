@@ -1,7 +1,7 @@
 from typing import Callable
 from customtkinter import CTkFrame
 from .scene import Scene
-from ..frontend import GeometryDisplay, ParameterField, ListPreset, FlapItem, ParamFromFile
+from ..frontend import GeometryDisplay, ParameterField, ListPreset, FlapItem, AirfoilChooser
 from ..backend.geo_design import Geometry, SimpleSurface
 
 
@@ -40,7 +40,8 @@ class GeoDesignLeftMenu(CTkFrame):
         self.flaps = ListPreset(self, 'Flaps', FlapItem, lambda: self.update_wing())
         self.flaps.grid(row=6, column=0, padx=10, pady=10, sticky='nsew')
 
-        ParamFromFile(self).grid(row=7, column=0, padx=10, pady=10, sticky='nsew')
+        self.airfoil_chooser = AirfoilChooser(self)
+        self.airfoil_chooser.grid(row=7, column=0, padx=10, pady=10, sticky='nsew')
 
     def init_pfs(self):
         messages = [
@@ -74,7 +75,8 @@ class GeoDesignLeftMenu(CTkFrame):
 
         wing = SimpleSurface(name='Wing',
                              span=self.pfs['wingspan'].value, chord_length=self.pfs['mean_chord'].value,
-                             taper_ratio=self.pfs['taper'].value, sweep_angle=self.pfs['sweep'].value)
+                             taper_ratio=self.pfs['taper'].value, sweep_angle=self.pfs['sweep'].value,
+                             airfoil=self.airfoil_chooser.airfoil)
         wing.set_mechanization(ailerons=self.ailerons.get_values(), flaps=self.flaps.get_values()) # noqa The types match.
         self.geometry.replace_surface(wing)
         self.do_on_update()

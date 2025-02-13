@@ -3,4 +3,4 @@ from .geometry_display import GeometryDisplay
 from .list_preset import ListPreset
 from .items import Item, FlapItem
 from .help_top_level import HelpTopLevel
-from .param_from_file import ParamFromFile
+from .airfoil_chooser import AirfoilChooser
