@@ -3,6 +3,7 @@ import re
 
 
 def is_number(s: str):
+    """Checks if a string is a valid number."""
     try:
         float(s)
         return True
@@ -10,26 +11,50 @@ def is_number(s: str):
         return False
 
 def are_numbers(ls: list[str]):
+    """Checks if a list of strings are all valid numbers."""
     for s in ls:
         if not is_number(s):
             return False
     return True
 
 def valid_naca(naca: str):
-    if not len(naca) == 4: return False
-    for char in naca:
-        if char not in '0123456789': return False
-    return True
+    """Checks if a string is a valid 4-digit symmetric NACA code."""
+    return re.fullmatch(r"00\d\d", naca)
 
 
 class Airfoil:
+    """
+    A class representing an airfoil geometry.
+
+    Attributes:
+            name (str): The name of the airfoil.
+            points (Optional list[tuple[float, float]]): A list of points defining the airfoil geometry.
+                ``None`` if the airfoil is not point-defined.
+            naca (str): The NACA code of the airfoil. ``None`` if the airfoil is not defined using NACA code.
+            active_range (tuple[float, float]): The active range of the airfoil.
+    """
     points: list[tuple[float, float]] | None
     naca: str | None
     name: str
     active_range: tuple[float, float]
 
+    def __init__(self, name: str, points:list[tuple[float, float]]|None, naca:str|None, active_range:tuple[float, float]):
+        """
+        Parameters:
+            name (str): The name of the airfoil.
+            points (Optional list[tuple[float, float]]): A list of points defining the airfoil geometry.
+                ``None`` if the airfoil is not point-defined.
+            naca (str): The NACA code of the airfoil. ``None`` if the airfoil is not defined using NACA code.
+            active_range (tuple[float, float]): The active range of the airfoil.
+        """
+        self.name = name
+        self.points = points
+        self.naca = naca
+        self.active_range = active_range
+
     @classmethod
     def from_file(cls, path: Path, name: str, active_range=(0.0, 1.0)) -> 'Airfoil':
+        """Creates an Airfoil object using geometry from a file."""
         with open(path) as f: raw_lines = f.readlines()
 
         lines = []
@@ -58,32 +83,24 @@ class Airfoil:
         negative.sort(key=lambda p: p[0])
         sorted_data = positive + negative
 
-        af = Airfoil()
-        af.name = name
-        af.points = sorted_data
-        af.naca = None
-        af.active_range = active_range
+        af = Airfoil(name, points=sorted_data, naca=None, active_range=active_range)
         return af
 
     @classmethod
     def from_naca(cls, naca: str, active_range=(0.0, 1.0)) -> 'Airfoil':
+        """Creates an Airfoil object from NACA code."""
         if not valid_naca(naca): raise ValueError("Wrong NACA code")
-        af = Airfoil()
-        af.naca = naca
-        af.name = naca
-        af.points = None
-        af.active_range = active_range
+        af = Airfoil(name=naca, points=None, naca=naca, active_range=active_range)
         return af
 
     @classmethod
     def empty(cls) -> 'Airfoil':
-        af = Airfoil()
-        af.naca = None
-        af.points = None
-        af.name = "Empty"
+        """Creates a flat-plate Airfoil."""
+        af = Airfoil(name="Empty", points=None, naca=None, active_range=(0.0, 1.0))
         return af
 
     def string(self) -> str:
+        """Returns the current geometry as a .avl type string."""
         if self.points is None and self.naca is None:
             print("Empty Airfoil is converted to a string!")
             return ""
