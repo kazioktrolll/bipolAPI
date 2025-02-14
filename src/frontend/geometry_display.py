@@ -34,9 +34,36 @@ class GeometryDisplay(CTkFrame):
 
     def draw(self) -> None:
         """Draws geometry's surfaces and center of mass."""
+        self.draw_grid()
         for surface in self.geometry.surfaces.values():
             self.display_wing(surface)
         self.display_CG(*self.geometry.ref_pos[:2])
+
+    def draw_grid(self) -> None:
+        """Draws a grid to give a sense of scale."""
+
+        def draw_line(x=None, y=None, thickness=1, color=""):
+            width = self.canvas.winfo_width()
+            height = self.canvas.winfo_height()
+            if x is not None: self.canvas.create_line(x, 0, x, height, fill=color, width=thickness)
+            if y is not None: self.canvas.create_line(0, y, width, y, fill=color, width=thickness)
+
+        def draw_grid_simple(gap_size, thickness, color="gray90"):
+            xi = self.origin[0] % gap_size
+            while xi < self.canvas.winfo_width():
+                draw_line(x=xi, thickness=thickness, color=color)
+                xi += gap_size
+            yi = self.origin[1] % gap_size
+            while yi < self.canvas.winfo_height():
+                draw_line(y=yi, thickness=thickness, color=color)
+                yi += gap_size
+
+        meter = self.scale
+        draw_grid_simple(.1*meter, 1)
+        draw_grid_simple(.5*meter, 2)
+        draw_grid_simple(1*meter, 2, color="gray87")
+        draw_grid_simple(5*meter, 4, color="gray87")
+        draw_grid_simple(10*meter, 4, color="gray80")
 
     def update(self) -> None:
         """Adjust the display to the window size, redraws everything."""
@@ -97,13 +124,13 @@ class GeometryDisplay(CTkFrame):
                                     self.origin[1] + prev_sec.leading_edge_position[0] * self.scale,
                                     self.origin[0] + curr_sec.leading_edge_position[1] * self.scale,
                                     self.origin[1] + curr_sec.leading_edge_position[0] * self.scale,
-                                    width=3, fill='gray70', capstyle='round', tags='edge')
+                                    width=3, fill='black', capstyle='round', tags='edge')
             # Draw trailing edge
             self.canvas.create_line(self.origin[0] + prev_sec.trailing_edge_position[1] * self.scale,
                                     self.origin[1] + prev_sec.trailing_edge_position[0] * self.scale,
                                     self.origin[0] + curr_sec.trailing_edge_position[1] * self.scale,
                                     self.origin[1] + curr_sec.trailing_edge_position[0] * self.scale,
-                                    width=3, fill='gray70', capstyle='round', tags='edge')
+                                    width=3, fill='black', capstyle='round', tags='edge')
             # Draw 25% MAC line
             self.canvas.create_line(self.origin[0] + prev_sec.leading_edge_position[1] * self.scale,
                                     self.origin[1] + (prev_sec.leading_edge_position[0] + prev_sec.chord * .25) * self.scale,
