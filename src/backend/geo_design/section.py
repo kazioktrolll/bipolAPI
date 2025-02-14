@@ -52,7 +52,8 @@ class Section:
 
     def string(self) -> str:
         """Returns the current geometry as a .avl type string."""
-        _r = (f"SECTION\n"
+        _r = (f"\n"
+              f"SECTION\n"
               f"{self.leading_edge_position[0]} {self.leading_edge_position[1]} {self.leading_edge_position[2]} "
               f"{self.chord} 0\n")
         _r += self.airfoil.string()
@@ -89,9 +90,9 @@ class Control:
     def string(self) -> str:
         """Returns the current geometry as a .avl type string."""
         return ("CONTROL\n"
-                f"{self.name} {self.gain} {self.x_hinge}"
-                f"{self.xyz_h_vec[0]} {self.xyz_h_vec[1]} {self.xyz_h_vec[2]}"
-                f"{self.SgnDup}\n")
+                f"{self.name} {self.gain} {self.x_hinge} "
+                f"{self.xyz_h_vec[0]} {self.xyz_h_vec[1]} {self.xyz_h_vec[2]} "
+                f"{"+1" if self.SgnDup else "-1"}\n")
 
 
 class Flap(Control):

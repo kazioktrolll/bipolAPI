@@ -96,6 +96,13 @@ class GeometryDisplay(CTkFrame):
         self.canvas.create_line(self.origin[0] + yle * self.scale, self.origin[1] + xle * self.scale,
                                 self.origin[0] + yle * self.scale, self.origin[1] + xte * self.scale,
                                 fill='blue', width=3, capstyle='round', tags='section')
+        # mechanisation
+        if not section.has_control: return
+        x0 = self.origin[1] + (xle + section.control.x_hinge * section.chord) * self.scale -3
+        y0 = self.origin[0] + yle * self.scale -3
+        self.canvas.create_oval(y0, x0, y0+6, x0+6,
+                                outline='black',
+                                fill='yellow' if type(section.control) is Flap else 'green')
 
     def display_wing(self, wing: Surface | list[Surface]) -> None:
         """Displays a ``Surface``. If given a list of Surfaces, displays all."""
@@ -138,7 +145,8 @@ class GeometryDisplay(CTkFrame):
                                     self.origin[1] + (curr_sec.leading_edge_position[0] + curr_sec.chord * .25) * self.scale,
                                     width=2, fill='red', capstyle='round', dash=20, tags='edge')
             # Draw control surface, if exists
-            if prev_sec.control is None: continue
+            if prev_sec.control is None or curr_sec.control is None: continue
+            if type(prev_sec.control) is not type(curr_sec.control): continue
             color = 'yellow' if type(prev_sec.control) is Flap else 'green'
             x_hinge = prev_sec.control.x_hinge
             y_prev = self.origin[0] + prev_sec.leading_edge_position[1] * self.scale

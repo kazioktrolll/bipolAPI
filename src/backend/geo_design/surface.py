@@ -225,29 +225,27 @@ class SimpleSurface(Surface):
             self.ailerons = ailerons
             # To add a control surface in AVL, you add a control surface to a section, and it is valid up to the next section.
             for start, end, hinge_x in self.ailerons:
-                # Ensure there is a ``Section`` at 'y' == 'start'.
+                # Ensure there is a ``Section`` at 'y' == 'start' and 'end'.
                 if not self.has_section_at(start): self.add_section_gentle(start)
-                # Add ``Control`` to every Section between 'start' and 'end', including 'start', excluding 'end'.
-                sections = self.get_sections_between(start, end)
+                if not self.has_section_at(end): self.add_section_gentle(end)
+                # Add ``Control`` to every Section between 'start' and 'end'.
+                sections = self.get_sections_between(start, end, include_end=True)
                 for section in sections:
                     if section.has_control: raise Exception("A section already has a control surface!")
                     section.control = Aileron(x_hinge=hinge_x)
-                # Add ``Section`` without ``Control`` at the end.
-                if not self.has_section_at(end): self.add_section_gentle(end)
 
         if flaps:
             self.flaps = flaps
             # To add a control surface in AVL, you add a control surface to a section, and it is valid up to the next section.
             for start, end, x_hinge in self.flaps:
-                # Ensure there is a ``Section`` at 'y' == 'start'.
+                # Ensure there is a ``Section`` at 'y' == 'start' and 'end'.
                 if not self.has_section_at(start): self.add_section_gentle(start)
-                # Add ``Control`` to every Section between 'start' and 'end', including 'start', excluding 'end'.
-                sections = self.get_sections_between(start, end)
+                if not self.has_section_at(end): self.add_section_gentle(end)
+                # Add ``Control`` to every Section between 'start' and 'end'.
+                sections = self.get_sections_between(start, end, include_end=True)
                 for section in sections:
                     if section.has_control: raise Exception("A section already has a control surface!")
                     section.control = Flap(x_hinge=x_hinge)
-                # Add ``Section`` without ``Control`` at the end.
-                if not self.has_section_at(end): self.add_section_gentle(end)
 
     def get_symmetric(self) -> 'SimpleSurface':
         surf = super().get_symmetric()
