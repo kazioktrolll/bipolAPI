@@ -1,5 +1,7 @@
 from typing import Callable
-from customtkinter import CTkFrame
+from customtkinter import CTkFrame, CTkButton
+from tkinter import filedialog
+from pathlib import Path
 from .scene import Scene
 from ..frontend import GeometryDisplay, ParameterField, ListPreset, FlapItem, AirfoilChooser
 from ..backend.geo_design import Geometry, SimpleSurface
@@ -43,6 +45,9 @@ class GeoDesignLeftMenu(CTkFrame):
         self.airfoil_chooser = AirfoilChooser(self)
         self.airfoil_chooser.grid(row=7, column=0, padx=10, pady=10, sticky='nsew')
 
+        CTkButton(self, text="Save to File", command=self.save_to_file
+                  ).grid(row=8, column=0, padx=10, pady=10, sticky='nsew')
+
     def init_pfs(self):
         messages = [
             "The wingspan of the aircraft.",
@@ -80,3 +85,11 @@ class GeoDesignLeftMenu(CTkFrame):
         wing.set_mechanization(ailerons=self.ailerons.get_values(), flaps=self.flaps.get_values()) # noqa The types match.
         self.geometry.replace_surface(wing)
         self.do_on_update()
+
+    def save_to_file(self):
+        self.update_wing()
+        path = Path(filedialog.asksaveasfilename(confirmoverwrite=True,
+                                                 initialfile=f"{self.geometry.name}.avl",
+                                                 defaultextension='.avl',
+                                                 filetypes=[("AVL file", "*.avl"), ("All files", "*.*")]))
+        self.geometry.save_to_avl(self.geometry.name, path)
