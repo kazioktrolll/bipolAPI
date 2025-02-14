@@ -40,14 +40,18 @@ class ListPreset(CTkFrame):
         item = self.item_class()
         self.items.append(item)
 
+        edit_item = lambda: item.edit(lambda: (display.update(), self.do_on_update())) # noqa
+
         display = item.display(position)
         display.grid(column=0, row=0, sticky='nsw', padx=5, pady=5)
         CTkButton(position, text='E', width=25, height=25,
-                  command=lambda: (item.edit(lambda: (display.update(), self.do_on_update())))  # noqa
+                  command=edit_item
                   ).grid(column=1, row=0, sticky="e", padx=5, pady=5)
         CTkButton(position, text='-', fg_color='red3', hover_color='red4', width=25, height=25,
                   command=lambda: (position.destroy(), self.items.remove(item), self.do_on_update())
                   ).grid(column=2, row=0, sticky="e", padx=5, pady=5)
+
+        edit_item()
 
     def get_values(self) -> list[tuple]:
         return [item.get_values() for item in self.items]
