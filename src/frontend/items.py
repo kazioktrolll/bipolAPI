@@ -1,5 +1,5 @@
 from typing import Callable
-from customtkinter import CTkFrame, CTkLabel, DoubleVar, StringVar, CTkToplevel, CTkEntry, CTkButton
+from customtkinter import CTkFrame, CTkLabel, DoubleVar, StringVar, CTkEntry, CTkButton
 from abc import ABC, abstractmethod
 from .parameter_field import HelpTopLevel
 from .popup import Popup
@@ -67,6 +67,11 @@ class FlapItem(Item):
         endvar = StringVar(value=str(self.end.get()))
         xcvar = StringVar(value=str(self.xc.get()))
 
+        if startvar.get() == "0.0" and endvar.get() == "0.0" and xcvar.get() == "0.0":
+            startvar.set("")
+            endvar.set("")
+            xcvar.set("")
+
         window.columnconfigure(1, minsize=10)
 
         CTkLabel(window, text="start:"
@@ -96,14 +101,19 @@ class FlapItem(Item):
                   ).grid(column=0, row=3, columnspan=2, sticky='nsew')
 
         CTkButton(window, text="Set",
-                  command=lambda: (self.set_values(float(startvar.get()), float(endvar.get()), float(xcvar.get())),
+                  command=lambda: (self.set_values(startvar, endvar, xcvar),
                                    window.destroy(),
                                    do_on_update())
                   ).grid(column=2, row=3, sticky='nsew')
 
         window.run()
 
-    def set_values(self, start: float, end: float, xc: float) -> None:
+    def set_values(self, start: StringVar, end: StringVar, xc: StringVar) -> None:
+        try:
+            start = float(start.get())
+            end = float(end.get())
+            xc = float(xc.get())
+        except ValueError: return
         if not abs(start) <= abs(end): return
         if not 0 < xc < 1: return
         self.start.set(start)
