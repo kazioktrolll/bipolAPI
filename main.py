@@ -1,9 +1,7 @@
-from Graphics import App, Avl_handler, SceneAvlInitial, SceneGeneralInitial
-from temp import TrialScene
+from src.app import App
+from src.scenes import GeoDesignScene
 
 
 app = App()
-avl = Avl_handler()
-app.active_handler = avl
-app.set_scene(SceneGeneralInitial(app))
+app.set_scene(GeoDesignScene(app))
 app.run()
