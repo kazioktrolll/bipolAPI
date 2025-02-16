@@ -3,4 +3,5 @@ from .geometry_display import GeometryDisplay
 from .list_preset import ListPreset
 from .items import Item, FlapItem
 from .help_top_level import HelpTopLevel
-from .airfoil_chooser import AirfoilChooser
+from .geo_design import *
+from .popup import Popup

@@ -19,9 +19,11 @@ class App:
     run_path: Path
 
     def __init__(self):
-        from customtkinter import CTk
+        from customtkinter import CTk, set_appearance_mode, set_default_color_theme
         from .scenes import Scene
         from .backend.geo_design import Geometry
+        set_appearance_mode("Dark")
+        set_default_color_theme("blue")
         self.root = CTk()
         self.scene = Scene(self)  # Placeholder
         self.geometry: Geometry = Geometry(name='Plane', chord_length=1, span_length=8)  # Placeholder
