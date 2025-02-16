@@ -18,32 +18,36 @@ class GeoDesignLeftMenu(CTkFrame):
 
         wing = SimpleSurface(name='Wing', span=8, chord_length=1)   # Placeholder, to be adjusted by User.
         geometry.add_surface(wing)
+        self.pf_frame = CTkFrame(self, fg_color=self.cget('fg_color'))
+        self.pf_frame.grid(row=0, column=0, sticky='nsew')
         self.init_pfs()
 
         self.ailerons = ListPreset(self, 'Ailerons', FlapItem, lambda: self.update_wing())
-        self.ailerons.grid(row=5, column=0, padx=10, pady=10, sticky='nsew')
+        self.ailerons.grid(row=1, column=0, padx=10, pady=10, sticky='nsew')
         self.flaps = ListPreset(self, 'Flaps', FlapItem, lambda: self.update_wing())
-        self.flaps.grid(row=6, column=0, padx=10, pady=10, sticky='nsew')
+        self.flaps.grid(row=2, column=0, padx=10, pady=10, sticky='nsew')
 
         self.airfoil_chooser = AirfoilChooser(self)
-        self.airfoil_chooser.grid(row=7, column=0, padx=10, pady=10, sticky='nsew')
+        self.airfoil_chooser.grid(row=3, column=0, padx=10, pady=10, sticky='nsew')
 
         CTkButton(self, text="Save to File", command=self.save_to_file
-                  ).grid(row=8, column=0, padx=10, pady=10, sticky='nsew')
+                  ).grid(row=4, column=0, padx=10, pady=10, sticky='nsew')
 
     def init_pfs(self):
         messages = [
             "The wingspan of the aircraft.",
             "",
             "",
+            "",
             ""
         ]
 
         self.pfs = {
-            'wingspan': ParameterField(self, 'wingspan', help_message=messages[0], on_set=self.update_wing),
-            'mean_chord': ParameterField(self, 'MAC', help_message=messages[1], on_set=self.update_wing),
-            'taper': ParameterField(self, 'taper ratio', help_message=messages[2], on_set=self.update_wing),
-            'sweep': ParameterField(self, 'sweep angle', help_message=messages[3], on_set=self.update_wing)
+            'wingspan': ParameterField(self.pf_frame, 'wingspan', help_message=messages[0], on_set=self.update_wing),
+            'mean_chord': ParameterField(self.pf_frame, 'MAC', help_message=messages[1], on_set=self.update_wing),
+            'taper': ParameterField(self.pf_frame, 'taper ratio', help_message=messages[2], on_set=self.update_wing),
+            'sweep': ParameterField(self.pf_frame, 'sweep angle', help_message=messages[3], on_set=self.update_wing),
+            'cm_pos': ParameterField(self.pf_frame, 'CM Position', help_message=messages[4], on_set=self.update_wing)
         }
 
         for pf in self.pfs.values(): pf.name_label.configure(width=80)
@@ -56,6 +60,7 @@ class GeoDesignLeftMenu(CTkFrame):
         self.pfs['taper'].set(1)
         self.pfs['sweep'].grid(row=4, column=0, padx=10, pady=10, sticky='e')
         self.pfs['sweep'].set(0)
+        self.pfs['cm_pos'].grid(row=5, column=0, padx=10, pady=10, sticky='e')
         self.initialized = True
 
     def update_wing(self, _=None):
@@ -64,6 +69,7 @@ class GeoDesignLeftMenu(CTkFrame):
         wing = SimpleSurface(name='Wing',
                              span=self.pfs['wingspan'].value, chord_length=self.pfs['mean_chord'].value,
                              taper_ratio=self.pfs['taper'].value, sweep_angle=self.pfs['sweep'].value,
+                             origin_position=(-self.pfs['cm_pos'].value * self.pfs['mean_chord'].value, 0, 0),
                              airfoil=self.airfoil_chooser.airfoil)
         wing.set_mechanization(ailerons=self.ailerons.get_values(), flaps=self.flaps.get_values()) # noqa The types match.
         self.geometry.replace_surface(wing)

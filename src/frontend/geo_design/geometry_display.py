@@ -1,5 +1,5 @@
 from customtkinter import CTkCanvas, CTkFrame, CTkButton
-from ..backend.geo_design import Section, Surface, Geometry, Flap
+from ...backend.geo_design import Section, Surface, Geometry, Flap
 
 
 class GeometryDisplay(CTkFrame):
@@ -81,18 +81,18 @@ class GeometryDisplay(CTkFrame):
         y += self.origin[0]
         self.canvas.create_oval(y - 5, x - 5, y + 5, x + 5, fill='yellow')
 
-    def display_section(self, section: Section | list[Section]) -> None:
+    def display_section(self, section: Section | list[Section], surface: Surface) -> None:
         """Displays a ``Section`` as a single blue line. If given a list of Sections, displays all."""
         if isinstance(section, list):
             for s in section:
-                self.display_section(s)
+                self.display_section(s, surface)
             return
 
         assert isinstance(section, Section)
 
-        xle = section.leading_edge_position[0]
-        yle = section.leading_edge_position[1]
-        xte = section.trailing_edge_position[0]
+        xle = section.leading_edge_position[0] + surface.origin_position[0]
+        yle = section.leading_edge_position[1] + surface.origin_position[1]
+        xte = section.trailing_edge_position[0] + surface.origin_position[0]
         self.canvas.create_line(self.origin[0] + yle * self.scale, self.origin[1] + xle * self.scale,
                                 self.origin[0] + yle * self.scale, self.origin[1] + xte * self.scale,
                                 fill='blue', width=3, capstyle='round', tags='section')
@@ -121,41 +121,53 @@ class GeometryDisplay(CTkFrame):
         sections = list(wing.sections)
         if len(wing.sections) < 2: raise Exception("Can't display a wing with less that 2 sections!")
 
-        self.display_section(sections[0])
+        self.display_section(sections[0], wing)
         for i in range(1, len(sections)):
             curr_sec = sections[i]
             prev_sec = sections[i - 1]
-            self.display_section(curr_sec)
+            self.display_section(curr_sec, wing)
+
+            x0 = self.origin[1] + wing.origin_position[0] * self.scale
+            y0 = self.origin[0] + wing.origin_position[1] * self.scale
+
             # Draw leading edge
-            self.canvas.create_line(self.origin[0] + prev_sec.leading_edge_position[1] * self.scale,
-                                    self.origin[1] + prev_sec.leading_edge_position[0] * self.scale,
-                                    self.origin[0] + curr_sec.leading_edge_position[1] * self.scale,
-                                    self.origin[1] + curr_sec.leading_edge_position[0] * self.scale,
+            self.canvas.create_line(y0 + prev_sec.leading_edge_position[1] * self.scale,
+                                    x0 + prev_sec.leading_edge_position[0] * self.scale,
+                                    y0 + curr_sec.leading_edge_position[1] * self.scale,
+                                    x0 + curr_sec.leading_edge_position[0] * self.scale,
                                     width=3, fill='black', capstyle='round', tags='edge')
             # Draw trailing edge
-            self.canvas.create_line(self.origin[0] + prev_sec.trailing_edge_position[1] * self.scale,
-                                    self.origin[1] + prev_sec.trailing_edge_position[0] * self.scale,
-                                    self.origin[0] + curr_sec.trailing_edge_position[1] * self.scale,
-                                    self.origin[1] + curr_sec.trailing_edge_position[0] * self.scale,
+            self.canvas.create_line(y0 + prev_sec.trailing_edge_position[1] * self.scale,
+                                    x0 + prev_sec.trailing_edge_position[0] * self.scale,
+                                    y0 + curr_sec.trailing_edge_position[1] * self.scale,
+                                    x0 + curr_sec.trailing_edge_position[0] * self.scale,
                                     width=3, fill='black', capstyle='round', tags='edge')
             # Draw 25% MAC line
-            self.canvas.create_line(self.origin[0] + prev_sec.leading_edge_position[1] * self.scale,
-                                    self.origin[1] + (prev_sec.leading_edge_position[0] + prev_sec.chord * .25) * self.scale,
-                                    self.origin[0] + curr_sec.leading_edge_position[1] * self.scale,
-                                    self.origin[1] + (curr_sec.leading_edge_position[0] + curr_sec.chord * .25) * self.scale,
+            self.canvas.create_line(y0 + prev_sec.leading_edge_position[1] * self.scale,
+                                    x0 + (prev_sec.leading_edge_position[0] + prev_sec.chord * .25) * self.scale,
+                                    y0 + curr_sec.leading_edge_position[1] * self.scale,
+                                    x0 + (curr_sec.leading_edge_position[0] + curr_sec.chord * .25) * self.scale,
                                     width=2, fill='red', capstyle='round', dash=20, tags='edge')
+
             # Draw control surface, if exists
             if prev_sec.control is None or curr_sec.control is None: continue
             if type(prev_sec.control) is not type(curr_sec.control): continue
+
             color = 'yellow' if type(prev_sec.control) is Flap else 'green'
             x_hinge = prev_sec.control.x_hinge
-            y_prev = self.origin[0] + prev_sec.leading_edge_position[1] * self.scale
-            x_prev_te = self.origin[1] + prev_sec.trailing_edge_position[0] * self.scale
+
+            y_prev = y0 + prev_sec.leading_edge_position[1] * self.scale
+            x_prev_te = x0 + prev_sec.trailing_edge_position[0] * self.scale
             x_prev_le = x_prev_te - (1-x_hinge) * prev_sec.chord * self.scale
-            y_curr = self.origin[0] + curr_sec.leading_edge_position[1] * self.scale
-            x_curr_te = self.origin[1] + curr_sec.trailing_edge_position[0] * self.scale
+
+            y_curr = y0 + curr_sec.leading_edge_position[1] * self.scale
+            x_curr_te = x0 + curr_sec.trailing_edge_position[0] * self.scale
             x_curr_le = x_curr_te - (1-x_hinge) * curr_sec.chord * self.scale
-            self.canvas.create_polygon(((y_prev, x_prev_le), (y_prev, x_prev_te), (y_curr, x_curr_te), (y_curr, x_curr_le)),
+
+            self.canvas.create_polygon(((y_prev, x_prev_le),
+                                        (y_prev, x_prev_te),
+                                        (y_curr, x_curr_te),
+                                        (y_curr, x_curr_le)),
                                        fill=color, outline='black')
 
         # Order layers

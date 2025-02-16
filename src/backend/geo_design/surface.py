@@ -206,7 +206,7 @@ class SimpleSurface(Surface):
         mac025 = lambda y: root_chord * .25 + y * tan(radians(sweep_angle))
         leading_edge_y = lambda y: mac025(y) - chord(y) * .25
 
-        root = Section(origin_position, chord(0), airfoil)
+        root = Section((0, 0, 0), chord(0), airfoil)
         tip = Section((leading_edge_y(span / 2), span / 2, 0.0), chord(span / 2), airfoil)
 
         return root, tip
