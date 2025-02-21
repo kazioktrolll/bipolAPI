@@ -1,5 +1,5 @@
 from .scene import Scene
-from ..frontend import GeometryDisplay, GeoDesignLeftMenu
+from ..frontend import GeometryDisplay, LeftMenuWing, LeftMenu
 
 
 class GeoDesignScene(Scene):
@@ -13,7 +13,7 @@ class GeoDesignScene(Scene):
         geometry_display.grid(row=0, column=1, sticky='nsew')
         geometry_display.draw()
 
-        GeoDesignLeftMenu(self, self.app.geometry, self.geometry_display.update).grid(row=0, column=0, sticky='nsew')
+        LeftMenu(self, self.app.geometry, self.geometry_display.update).grid(row=0, column=0, sticky='nsew', padx=5, pady=5)
 
     @property
     def geometry_display(self):

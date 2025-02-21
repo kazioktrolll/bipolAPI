@@ -8,7 +8,7 @@ from ..list_preset import ListPreset
 from ...backend.geo_design import Geometry, SimpleSurface
 
 
-class GeoDesignLeftMenu(CTkFrame):
+class LeftMenuWing(CTkFrame):
     def __init__(self, parent, geometry: Geometry, do_on_update: Callable[[], None]):
         super().__init__(parent)
         self.geometry = geometry
