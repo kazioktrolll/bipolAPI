@@ -1,5 +1,5 @@
 from typing import Callable
-from customtkinter import CTkFrame, CTkLabel, DoubleVar, StringVar, CTkEntry, CTkButton
+from customtkinter import CTkFrame, CTkLabel, DoubleVar, StringVar, CTkEntry, CTkButton, CTkFont
 from abc import ABC, abstractmethod
 from .parameter_field import HelpTopLevel
 from .popup import Popup
@@ -61,7 +61,7 @@ class FlapItem(Item):
         self.xc = DoubleVar(value=0)
 
     def edit(self, do_on_update: Callable[[], None]):
-        window = Popup(master=None, title="Edit")
+        window = Popup(master=None)
 
         startvar = StringVar(value=str(self.start.get()))
         endvar = StringVar(value=str(self.end.get()))
@@ -72,22 +72,25 @@ class FlapItem(Item):
             endvar.set("")
             xcvar.set("")
 
-        window.columnconfigure(1, minsize=10)
+        window.columnconfigure(1, minsize=5)
+
+        CTkLabel(window, text="Specify geometry of the device", font=CTkFont(weight='bold')
+                 ).grid(column=0, row=0, columnspan=3, sticky='nsew', padx=5, pady=5)
 
         CTkLabel(window, text="start:"
-                 ).grid(column=0, row=0)
+                 ).grid(column=0, row=1, sticky="e")
         CTkEntry(window, textvariable=startvar
-                 ).grid(column=2, row=0)
+                 ).grid(column=2, row=1, sticky='nsew')
 
         CTkLabel(window, text="end: "
-                 ).grid(column=0, row=1)
+                 ).grid(column=0, row=2, sticky="e")
         CTkEntry(window, textvariable=endvar
-                 ).grid(column=2, row=1)
+                 ).grid(column=2, row=2, sticky='nsew')
 
         CTkLabel(window, text="xc: "
-                 ).grid(column=0, row=2)
+                 ).grid(column=0, row=3, sticky="e")
         CTkEntry(window, textvariable=xcvar
-                 ).grid(column=2, row=2)
+                 ).grid(column=2, row=3, sticky='nsew')
 
         CTkButton(window, text='?', width=25, height=25,
                   command=lambda: HelpTopLevel(None, message="Input new parameters of the device.\n"
@@ -98,13 +101,13 @@ class FlapItem(Item):
                                                                "xc: chord-wise position of the hinge as a percentage "
                                                                "of the chord. Must be between 0 and 1.",
                                                max_width=40)
-                  ).grid(column=0, row=3, columnspan=2, sticky='nsew')
+                  ).grid(column=0, row=4, columnspan=2, sticky='nsew')
 
         CTkButton(window, text="Set",
                   command=lambda: (self.set_values(startvar, endvar, xcvar),
                                    window.destroy(),
                                    do_on_update())
-                  ).grid(column=2, row=3, sticky='nsew')
+                  ).grid(column=2, row=4, sticky='nsew')
 
         window.run()
 

@@ -29,7 +29,7 @@ class AirfoilChooser(CTkFrame):
                   ).grid(row=2, column=2, sticky="nse", padx=5, pady=5)
 
     def load_naca(self):
-        window = Popup(self, "Load NACA")
+        window = Popup(self)
         entry = CTkEntry(window)
         entry.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
 

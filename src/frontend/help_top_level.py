@@ -5,7 +5,7 @@ import textwrap
 
 class HelpTopLevel(Popup):
     def __init__(self, master, message, padding=10, max_width=30):
-        super().__init__(master, title="Help")
+        super().__init__(master)
 
         # Wrap text into lines to make it roughly square
         for i, paragraph in enumerate(message.splitlines()):
