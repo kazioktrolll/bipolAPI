@@ -1,3 +1,4 @@
+from sys import platform
 from .scene import Scene
 from ..frontend import GeometryDisplay, LeftMenu
 
@@ -13,6 +14,11 @@ class GeoDesignScene(Scene):
         geometry_display.grid(row=0, column=1, sticky='nsew')
         geometry_display.draw()
 
+        if platform == "linux" or platform == "linux2":
+            self.bind("<Button-4>", lambda e: geometry_display.zoom())
+            self.bind("<Button-5>", lambda e: geometry_display.unzoom())
+        else:
+            self.bind("<MouseWheel>", geometry_display.scroll_zoom)
         self.bind("<Button-1>", geometry_display.start_drag)
         self.bind("<B1-Motion>", geometry_display.drag)
         self.bind("<ButtonRelease-1>", geometry_display.stop_drag)

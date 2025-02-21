@@ -30,8 +30,7 @@ class GeometryDisplay(CTkFrame):
         self.columnconfigure(0, weight=1)
         self.canvas.grid(row=0, column=0, sticky='nsew')
 
-        self.zoom_button = CTkButton(self, text='+', command=self.zoom, width=30, height=30, corner_radius=0)
-        self.unzoom_button = CTkButton(self, text='-', command=self.unzoom, width=30, height=30, corner_radius=0)
+        self.reset_camera_button = CTkButton(self, text='0', command=self.reset_camera, width=30, height=30, corner_radius=0)
 
         self.is_dragged = False
         self.drag_origin = (0, 0)
@@ -74,8 +73,7 @@ class GeometryDisplay(CTkFrame):
         """Adjust the display to the window size, redraws everything."""
         self.origin = (self.winfo_width() / 2 + self.drag_offset[0],
                        self.winfo_height() / 4 + self.drag_offset[1])
-        self.unzoom_button.place(x=self.winfo_width() - 40, y=self.winfo_height() - 40)
-        self.zoom_button.place(x=self.winfo_width() - 40, y=self.winfo_height() - 80)
+        self.reset_camera_button.place(x=self.winfo_width() - 40, y=self.winfo_height() - 40)
         self.clear()
         self.draw()
 
@@ -195,6 +193,11 @@ class GeometryDisplay(CTkFrame):
         self.scale /= 1.2
         self.update()
 
+    def scroll_zoom(self, event: Event) -> None:
+        direction = event.delta // abs(event.delta)
+        if direction == -1: self.unzoom()
+        elif direction == 1: self.zoom()
+
     def start_drag(self, event: Event) -> None:
         if event.widget is not self.canvas: return
         self.is_dragged = True
@@ -208,4 +211,8 @@ class GeometryDisplay(CTkFrame):
         if not self.is_dragged: return
         self.drag_offset = (event.x - self.drag_origin[0], event.y - self.drag_origin[1])
         self.update()
-        self.draw()
+
+    def reset_camera(self) -> None:
+        self.scale = 100
+        self.drag_offset = (0, 0)
+        self.update()
