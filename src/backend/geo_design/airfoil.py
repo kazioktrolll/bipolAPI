@@ -108,7 +108,7 @@ class Airfoil:
             return ""
 
         if self.naca:
-            return f"NACA {self.active_range[0]} {self.active_range[1]}\n{self.naca}"
+            return f"NACA {self.active_range[0]} {self.active_range[1]}\n{self.naca}\n"
 
         _r = f"AIRFOIL {self.active_range[0]} {self.active_range[1]}\n"
         for x, y in self.points:
