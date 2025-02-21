@@ -5,6 +5,7 @@ from .airfoil_chooser import AirfoilChooser
 from ..parameter_field import ParameterField
 from ..items import FlapItem
 from ..list_preset import ListPreset
+from ..help_top_level import HelpTopLevel
 from ...backend.geo_design import Geometry, SimpleSurface
 
 
@@ -81,7 +82,13 @@ class LeftMenuWing(CTkFrame):
                              taper_ratio=self.pfs['taper'].value, sweep_angle=self.pfs['sweep'].value,
                              origin_position=(-self.pfs['cm_pos'].value * self.pfs['mean_chord'].value, 0, 0),
                              airfoil=self.airfoil_chooser.airfoil)
-        wing.set_mechanization(ailerons=self.ailerons.get_values(), flaps=self.flaps.get_values())
+        try:
+            wing.set_mechanization(ailerons=self.ailerons.get_values(), flaps=self.flaps.get_values()) # noqa
+        except ValueError:
+            HelpTopLevel(self, "Can't have multiple control surfaces intersecting!\n"
+                               "If your control surfaces intersect, please don't.\n"
+                               "If your control surfaces don't intersect, but one ends in the same point the next starts, give them a little space in between.")
+            return
         self.geometry.replace_surface(wing)
         self.do_on_update()
 

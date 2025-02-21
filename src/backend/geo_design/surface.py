@@ -213,7 +213,7 @@ class SimpleSurface(Surface):
     def set_mechanization(self,
                           **kwargs: list[tuple[float, float, float]]
                           ) -> None:
-        if self.mechanization: raise Exception("The surface {} already has mechanization!".format(self.name))
+        if self.mechanization: raise ValueError("The surface {} already has mechanization!".format(self.name))
         # This is not necessary for method's working, but if the function is called with both arguments empty then it's
         # probably due to user's mistake, so it should be raised to attention.
         # Can be bypassed by setting either of the arguments as ``[]``.
