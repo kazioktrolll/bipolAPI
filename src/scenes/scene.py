@@ -31,3 +31,6 @@ class Scene(CTkFrame):
 
     def update(self) -> None:
         for tu in self.to_update: tu.update()
+
+    def bind(self, *args, **kwargs):
+        self.app.root.bind(*args, **kwargs)

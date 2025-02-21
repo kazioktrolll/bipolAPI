@@ -1,5 +1,5 @@
 from .scene import Scene
-from ..frontend import GeometryDisplay, LeftMenuWing, LeftMenu
+from ..frontend import GeometryDisplay, LeftMenu
 
 
 class GeoDesignScene(Scene):
@@ -12,6 +12,10 @@ class GeoDesignScene(Scene):
         self.to_update.append(geometry_display)
         geometry_display.grid(row=0, column=1, sticky='nsew')
         geometry_display.draw()
+
+        self.bind("<Button-1>", geometry_display.start_drag)
+        self.bind("<B1-Motion>", geometry_display.drag)
+        self.bind("<ButtonRelease-1>", geometry_display.stop_drag)
 
         LeftMenu(self, self.app.geometry, self.geometry_display.update).grid(row=0, column=0, sticky='nsew', padx=5, pady=5)
 

@@ -1,4 +1,5 @@
 from customtkinter import CTkCanvas, CTkFrame, CTkButton
+from tkinter import Event
 from ...backend.geo_design import Section, Surface, Geometry, Flap, Aileron, Elevator
 
 
@@ -31,6 +32,10 @@ class GeometryDisplay(CTkFrame):
 
         self.zoom_button = CTkButton(self, text='+', command=self.zoom, width=30, height=30, corner_radius=0)
         self.unzoom_button = CTkButton(self, text='-', command=self.unzoom, width=30, height=30, corner_radius=0)
+
+        self.is_dragged = False
+        self.drag_origin = (0, 0)
+        self.drag_offset = (0, 0)
 
     def draw(self) -> None:
         """Draws geometry's surfaces and center of mass."""
@@ -67,7 +72,8 @@ class GeometryDisplay(CTkFrame):
 
     def update(self) -> None:
         """Adjust the display to the window size, redraws everything."""
-        self.origin = (self.winfo_width() / 2, self.winfo_height() / 4)
+        self.origin = (self.winfo_width() / 2 + self.drag_offset[0],
+                       self.winfo_height() / 4 + self.drag_offset[1])
         self.unzoom_button.place(x=self.winfo_width() - 40, y=self.winfo_height() - 40)
         self.zoom_button.place(x=self.winfo_width() - 40, y=self.winfo_height() - 80)
         self.clear()
@@ -188,3 +194,18 @@ class GeometryDisplay(CTkFrame):
         """Unzooms the current display."""
         self.scale /= 1.2
         self.update()
+
+    def start_drag(self, event: Event) -> None:
+        if event.widget is not self.canvas: return
+        self.is_dragged = True
+        self.drag_origin = (event.x - self.drag_offset[0],
+                            event.y - self.drag_offset[1])
+
+    def stop_drag(self, _) -> None:
+        self.is_dragged = False
+
+    def drag(self, event: Event) -> None:
+        if not self.is_dragged: return
+        self.drag_offset = (event.x - self.drag_origin[0], event.y - self.drag_origin[1])
+        self.update()
+        self.draw()
