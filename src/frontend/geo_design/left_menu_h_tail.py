@@ -83,6 +83,6 @@ class LeftMenuHTail(CTkFrame):
                                taper_ratio=self.pfs['taper'].value, sweep_angle=self.pfs['sweep'].value,
                                origin_position=(self.pfs['x'].value, 0, self.pfs['z'].value),
                                airfoil=self.airfoil_chooser.airfoil)
-        h_tail.set_mechanization(ailerons=self.elevator.get_values()) # noqa The types match.
+        h_tail.set_mechanization(elevators=self.elevator.get_values()) # noqa The types match.
         self.geometry.replace_surface(h_tail)
         self.do_on_update()

@@ -81,7 +81,7 @@ class LeftMenuWing(CTkFrame):
                              taper_ratio=self.pfs['taper'].value, sweep_angle=self.pfs['sweep'].value,
                              origin_position=(-self.pfs['cm_pos'].value * self.pfs['mean_chord'].value, 0, 0),
                              airfoil=self.airfoil_chooser.airfoil)
-        wing.set_mechanization(ailerons=self.ailerons.get_values(), flaps=self.flaps.get_values()) # noqa The types match.
+        wing.set_mechanization(ailerons=self.ailerons.get_values(), flaps=self.flaps.get_values())
         self.geometry.replace_surface(wing)
         self.do_on_update()
 

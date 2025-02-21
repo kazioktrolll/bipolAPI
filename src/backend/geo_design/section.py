@@ -121,3 +121,16 @@ class Aileron(Control):
     def copy(self) -> 'Aileron':
         """Returns a copy of this aileron."""
         return Aileron(self.x_hinge)
+
+class Elevator(Control):
+    def __init__(self, x_hinge: float):
+        """
+        Parameters:
+            x_hinge (float): The x/c position of the hinge.
+        """
+        assert 0 < x_hinge < 1
+        super().__init__(name='elevator', x_hinge=x_hinge, SgnDup=True)
+
+    def copy(self) -> 'Elevator':
+        """Returns a copy of this aileron."""
+        return Elevator(self.x_hinge)

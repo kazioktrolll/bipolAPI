@@ -1,4 +1,4 @@
-from .section import Section, Flap, Aileron
+from .section import Section, Flap, Aileron, Elevator
 from .airfoil import Airfoil
 
 
@@ -175,8 +175,7 @@ class SimpleSurface(Surface):
         super().__init__(name=name, chord_length=chord_length, root_section=root, tip_section=tip, y_duplicate=True,
                          origin_position=origin_position, airfoil=airfoil, inclination_angle=inclination_angle)
 
-        self.flaps = []
-        self.ailerons = []
+        self.mechanization = {}
 
     @classmethod
     def create_geometry(cls, chord_length: float, span: float,
@@ -212,19 +211,17 @@ class SimpleSurface(Surface):
         return root, tip
 
     def set_mechanization(self,
-                          ailerons: list[tuple[float, float, float]] = None,
-                          flaps: list[tuple[float, float, float]] = None
+                          **kwargs: list[tuple[float, float, float]]
                           ) -> None:
-        if self.ailerons or self.flaps: raise Exception("The surface {} already has mechanization!".format(self.name))
+        if self.mechanization: raise Exception("The surface {} already has mechanization!".format(self.name))
         # This is not necessary for method's working, but if the function is called with both arguments empty then it's
         # probably due to user's mistake, so it should be raised to attention.
         # Can be bypassed by setting either of the arguments as ``[]``.
-        if ailerons is None and flaps is None: raise ValueError("Both ailerons and flaps are be None")
+        if not kwargs: raise ValueError
 
-        if ailerons:
-            self.ailerons = ailerons
+        for key, value in kwargs.items():
             # To add a control surface in AVL, you add a control surface to a section, and it is valid up to the next section.
-            for start, end, hinge_x in self.ailerons:
+            for start, end, hinge_x in value:
                 # Ensure there is a ``Section`` at 'y' == 'start' and 'end'.
                 if not self.has_section_at(start): self.add_section_gentle(start)
                 if not self.has_section_at(end): self.add_section_gentle(end)
@@ -232,24 +229,11 @@ class SimpleSurface(Surface):
                 sections = self.get_sections_between(start, end, include_end=True)
                 for section in sections:
                     if section.has_control: raise Exception("A section already has a control surface!")
-                    section.control = Aileron(x_hinge=hinge_x)
-
-        if flaps:
-            self.flaps = flaps
-            # To add a control surface in AVL, you add a control surface to a section, and it is valid up to the next section.
-            for start, end, x_hinge in self.flaps:
-                # Ensure there is a ``Section`` at 'y' == 'start' and 'end'.
-                if not self.has_section_at(start): self.add_section_gentle(start)
-                if not self.has_section_at(end): self.add_section_gentle(end)
-                # Add ``Control`` to every Section between 'start' and 'end'.
-                sections = self.get_sections_between(start, end, include_end=True)
-                for section in sections:
-                    if section.has_control: raise Exception("A section already has a control surface!")
-                    section.control = Flap(x_hinge=x_hinge)
+                    mech_type = {"ailerons": Aileron, "flaps": Flap, "elevators":Elevator}[key]
+                    section.control = mech_type(x_hinge=hinge_x)
 
     def get_symmetric(self) -> 'SimpleSurface':
         surf = super().get_symmetric()
         assert isinstance(surf, SimpleSurface)
-        surf.ailerons = [(-s, -e, xc) for s, e, xc in surf.ailerons]
-        surf.flaps = [(-s, -e, xc) for s, e, xc in surf.flaps]
+        surf.mechanization = {k: (-s, -e, xc) for k, (s, e, xc) in surf.mechanization}
         return surf

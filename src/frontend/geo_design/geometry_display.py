@@ -1,5 +1,5 @@
 from customtkinter import CTkCanvas, CTkFrame, CTkButton
-from ...backend.geo_design import Section, Surface, Geometry, Flap
+from ...backend.geo_design import Section, Surface, Geometry, Flap, Aileron, Elevator
 
 
 class GeometryDisplay(CTkFrame):
@@ -153,7 +153,7 @@ class GeometryDisplay(CTkFrame):
             if prev_sec.control is None or curr_sec.control is None: continue
             if type(prev_sec.control) is not type(curr_sec.control): continue
 
-            color = 'yellow' if type(prev_sec.control) is Flap else 'green'
+            color = {Flap: 'yellow', Aileron: 'green', Elevator: 'green3'}[type(prev_sec.control)]
             x_hinge = prev_sec.control.x_hinge
 
             y_prev = y0 + prev_sec.leading_edge_position[1] * self.scale
