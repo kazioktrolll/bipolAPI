@@ -22,7 +22,8 @@ class ParameterField(CTkFrame):
     def __init__(self, master: CTkFrame,
                  name: str,
                  help_message: str,
-                 on_set: Callable[[float], None] = lambda _: None
+                 on_set: Callable[[float], None] = lambda _: None,
+                 assert_test: Callable[[float], bool] = lambda _: True,
                  ) -> None:
         """
         Parameters:
@@ -30,6 +31,7 @@ class ParameterField(CTkFrame):
             name (str): Name of the parameter.
             help_message (str): Contents of the 'Help' window shown by pressing the '?' button.
             on_set (Callable[[float], None], optional): Function to be called when the parameter is changed.
+            assert_test (Callable[[float], bool], optional): A condition the new parameter has to fulfill when changed.
         """
 
         super().__init__(master, fg_color=master.cget('fg_color'))
@@ -37,6 +39,7 @@ class ParameterField(CTkFrame):
         self.name = name
         self.help_message = help_message
         self.on_set = on_set
+        self.assert_test = assert_test
         self.value = 0
 
         # Set the display
@@ -56,15 +59,17 @@ class ParameterField(CTkFrame):
         self.set_button = CTkButton(self, text="Set", width=30, command=self.set)
         self.set_button.grid(column=4, row=0, sticky="e")
 
-    def set(self, value: float = None) -> None:
-        """Sets the value in the entry as the new value of the parameter."""
+    def set(self, value: float = None) -> bool:
+        """Sets the value in the entry as the new value of the parameter. Returns True if changed successfully."""
         if value is None: value = self.entry.get()
-        if value == '': return  # When the entry is empty
+        if value == '': return False  # When the entry is empty
         self.value = float(value)
+        if not self.assert_test(self.value): return False # When the new value doesn't fulfill the design criteria
         self.entry.delete(0, "end")
         self.value_label.configure(text=value)
         self.focus()
         self.on_set(self.value)
+        return True
 
     def disable(self) -> None:
         """Disables the change of the parameter."""

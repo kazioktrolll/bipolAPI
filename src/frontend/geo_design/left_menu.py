@@ -35,19 +35,29 @@ class GeoDesignLeftMenu(CTkFrame):
 
     def init_pfs(self):
         messages = [
-            "The wingspan of the aircraft.",
-            "",
-            "",
-            "",
-            ""
+            "The wingspan of the aircraft.\n"
+            "Has to be positive.",
+
+            "The mean aerodynamic chord of the wing.\n"
+            "Has to be positive.",
+
+            "The taper ratio of the wing - c_tip / c_root.\n"
+            "Has to be between 0 and 1.",
+
+            "Sweep angle of the wing, in degrees.\n"
+            "The angle between Y-axis and the 25%MAC line. Positive means wing deflected backwards.\n"
+            "Has to be between -90 and 90.",
+
+            "Position of the Center of Mass of the aircraft relative to MAC, given as a fraction of MAC.\n"
+            "This will affect the calculations of the pitching moment coefficient, as C_M is calculated about CoM."
         ]
 
         self.pfs = {
-            'wingspan': ParameterField(self.pf_frame, 'wingspan', help_message=messages[0], on_set=self.update_wing),
-            'mean_chord': ParameterField(self.pf_frame, 'MAC', help_message=messages[1], on_set=self.update_wing),
-            'taper': ParameterField(self.pf_frame, 'taper ratio', help_message=messages[2], on_set=self.update_wing),
-            'sweep': ParameterField(self.pf_frame, 'sweep angle', help_message=messages[3], on_set=self.update_wing),
-            'cm_pos': ParameterField(self.pf_frame, 'CM Position', help_message=messages[4], on_set=self.update_wing)
+            'wingspan': ParameterField(self.pf_frame, 'wingspan', help_message=messages[0], on_set=self.update_wing, assert_test=lambda w: w>0),
+            'mean_chord': ParameterField(self.pf_frame, 'MAC', help_message=messages[1], on_set=self.update_wing, assert_test=lambda c: c>0),
+            'taper': ParameterField(self.pf_frame, 'taper ratio', help_message=messages[2], on_set=self.update_wing, assert_test=lambda tr: 1>tr>0),
+            'sweep': ParameterField(self.pf_frame, 'sweep angle', help_message=messages[3], on_set=self.update_wing, assert_test=lambda s: -90<s<90),
+            'cm_pos': ParameterField(self.pf_frame, 'CM Position', help_message=messages[4], on_set=self.update_wing, assert_test=lambda cm: True)
         }
 
         for pf in self.pfs.values(): pf.name_label.configure(width=80)
