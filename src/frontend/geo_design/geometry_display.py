@@ -189,15 +189,15 @@ class GeometryDisplay(CTkFrame):
             color = {Flap: 'yellow', Aileron: 'green', Elevator: 'green3'}[type(prev_sec.control)]
             x_hinge = prev_sec.control.x_hinge
 
-            y_prev = prev_sec.leading_edge_position[1]
-            x_prev_te = prev_sec.trailing_edge_position[0]
+            y_prev =    wing.origin_position[1] + prev_sec.leading_edge_position[1]
+            x_prev_te = wing.origin_position[0] + prev_sec.trailing_edge_position[0]
             x_prev_le = x_prev_te - (1-x_hinge) * prev_sec.chord
-            z_prev = prev_sec.leading_edge_position[2]
+            z_prev =    wing.origin_position[2] + prev_sec.leading_edge_position[2]
 
-            y_curr = curr_sec.leading_edge_position[1]
-            x_curr_te = curr_sec.trailing_edge_position[0]
+            y_curr =    wing.origin_position[1] + curr_sec.leading_edge_position[1]
+            x_curr_te = wing.origin_position[0] + curr_sec.trailing_edge_position[0]
             x_curr_le = x_curr_te - (1-x_hinge) * curr_sec.chord
-            z_curr = curr_sec.leading_edge_position[2]
+            z_curr =    wing.origin_position[2] + curr_sec.leading_edge_position[2]
 
             self.canvas.create_polygon((self.project(x_prev_le, y_prev, z_prev),
                                         self.project(x_prev_te, y_prev, z_prev),
