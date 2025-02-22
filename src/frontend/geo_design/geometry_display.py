@@ -1,5 +1,6 @@
 from customtkinter import CTkCanvas, CTkFrame, CTkButton
 from tkinter import Event
+from enum import IntEnum
 from ...backend.geo_design import Section, Surface, Geometry, Flap, Aileron, Elevator
 
 
@@ -13,6 +14,8 @@ class GeometryDisplay(CTkFrame):
         origin (tuple[int, int]): Center point of the display.
         scale (int): A scale used while transforming meters to pixels.
     """
+
+    # General
 
     def __init__(self, parent, geometry: Geometry):
         """
@@ -36,12 +39,54 @@ class GeometryDisplay(CTkFrame):
         self.drag_origin = (0, 0)
         self.drag_offset = (0, 0)
 
+        self.view_mode = ViewMode.TOP
+
+    def update(self) -> None:
+        """Adjust the display to the window size, redraws everything."""
+        self.origin = (self.winfo_width() / 2 + self.drag_offset[0],
+                       self.winfo_height() / 4 + self.drag_offset[1])
+        self.reset_camera_button.place(x=self.winfo_width() - 40, y=self.winfo_height() - 40)
+        self.clear()
+        self.draw()
+
+    def project(self, x: float, y: float, z: float) -> tuple[int, int]:
+        """Transforms 'real' 3D coordinates into 2D pixel coordinates."""
+        match self.view_mode:
+            case ViewMode.TOP:
+                X = y
+                Y = x
+            case ViewMode.BOTTOM:
+                X = y
+                Y = -x
+            case ViewMode.LEFT:
+                X = x
+                Y = -z
+            case ViewMode.RIGHT:
+                X = -x
+                Y = -z
+            case ViewMode.FRONT:
+                X = -y
+                Y = -z
+            case ViewMode.BACK:
+                X = y
+                Y = -z
+            case _:
+                raise NotImplementedError
+
+        X *= self.scale
+        Y *= self.scale
+        X += self.origin[0]
+        Y += self.origin[1]
+        return int(X), int(Y)
+
+    # Displaying
+
     def draw(self) -> None:
         """Draws geometry's surfaces and center of mass."""
         self.draw_grid()
         for surface in self.geometry.surfaces.values():
             self.display_wing(surface)
-        self.display_CG(*self.geometry.ref_pos[:2])
+        self.display_CG(*self.geometry.ref_pos)
 
     def draw_grid(self) -> None:
         """Draws a grid to give a sense of scale."""
@@ -69,21 +114,10 @@ class GeometryDisplay(CTkFrame):
         draw_grid_simple(5*meter, 4, color="gray87")
         draw_grid_simple(10*meter, 4, color="gray80")
 
-    def update(self) -> None:
-        """Adjust the display to the window size, redraws everything."""
-        self.origin = (self.winfo_width() / 2 + self.drag_offset[0],
-                       self.winfo_height() / 4 + self.drag_offset[1])
-        self.reset_camera_button.place(x=self.winfo_width() - 40, y=self.winfo_height() - 40)
-        self.clear()
-        self.draw()
-
-    def display_CG(self, x: float, y: float) -> None:
+    def display_CG(self, x: float, y: float, z: float) -> None:
         """Displays a center-of-mass marker at given coordinates."""
-        x *= self.scale
-        y *= self.scale
-        x += self.origin[1]
-        y += self.origin[0]
-        self.canvas.create_oval(y - 5, x - 5, y + 5, x + 5, fill='yellow')
+        X, Y = self.project(x, y, z)
+        self.canvas.create_oval(X - 5, Y - 5, X + 5, Y + 5, fill='yellow')
 
     def display_section(self, section: Section | list[Section], surface: Surface) -> None:
         """Displays a ``Section`` as a single blue line. If given a list of Sections, displays all."""
@@ -183,6 +217,8 @@ class GeometryDisplay(CTkFrame):
         """Clears the current display."""
         self.canvas.delete('all')
 
+    # Camera Operations
+
     def zoom(self) -> None:
         """Zooms the current display."""
         self.scale *= 1.2
@@ -216,3 +252,12 @@ class GeometryDisplay(CTkFrame):
         self.scale = 100
         self.drag_offset = (0, 0)
         self.update()
+
+
+class ViewMode(IntEnum):
+    TOP = 1
+    BOTTOM = 2
+    LEFT = 3
+    RIGHT = 4
+    FRONT = 5
+    BACK = 6
