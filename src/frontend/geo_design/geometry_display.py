@@ -39,13 +39,13 @@ class GeometryDisplay(CTkFrame):
         self.drag_origin = (0, 0)
         self.drag_offset = (0, 0)
 
-        self.view_mode = ViewMode.FRONT
+        self.view_mode = ViewMode.TOP
 
     def update(self) -> None:
         """Adjust the display to the window size, redraws everything."""
         self.origin = (self.winfo_width() / 2 + self.drag_offset[0],
                        self.winfo_height() / 4 + self.drag_offset[1])
-        self.reset_camera_button.place(x=self.winfo_width() - 40, y=self.winfo_height() - 40)
+        self.reset_camera_button.place(x=10, y=self.winfo_height() - 40)
         self.clear()
         self.draw()
 
@@ -221,17 +221,16 @@ class GeometryDisplay(CTkFrame):
                 self.canvas.tag_raise('trailing_edge')
             case mode if mode in [ViewMode.TOP, ViewMode.BOTTOM]:
                 self.canvas.tag_raise('control')
+                self.canvas.tag_raise('mac25')
                 self.canvas.tag_raise('section')
                 self.canvas.tag_raise('leading_edge')
                 self.canvas.tag_raise('trailing_edge')
-                self.canvas.tag_raise('mac25')
             case mode if mode in [ViewMode.LEFT, ViewMode.RIGHT]:
-                self.canvas.tag_raise('leading_edge')
                 self.canvas.tag_raise('mac25')
-                self.canvas.tag_raise('trailing_edge')
                 self.canvas.tag_raise('control')
                 self.canvas.tag_raise('section')
-
+                self.canvas.tag_raise('leading_edge')
+                self.canvas.tag_raise('trailing_edge')
 
     def clear(self) -> None:
         """Clears the current display."""
@@ -271,6 +270,10 @@ class GeometryDisplay(CTkFrame):
     def reset_camera(self) -> None:
         self.scale = 100
         self.drag_offset = (0, 0)
+        self.update()
+
+    def change_view(self, mode: 'ViewMode') -> None:
+        self.view_mode = mode
         self.update()
 
 
