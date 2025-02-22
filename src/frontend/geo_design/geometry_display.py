@@ -39,7 +39,7 @@ class GeometryDisplay(CTkFrame):
         self.drag_origin = (0, 0)
         self.drag_offset = (0, 0)
 
-        self.view_mode = ViewMode.TOP
+        self.view_mode = ViewMode.FRONT
 
     def update(self) -> None:
         """Adjust the display to the window size, redraws everything."""
@@ -130,16 +130,17 @@ class GeometryDisplay(CTkFrame):
 
         xle = section.leading_edge_position[0] + surface.origin_position[0]
         yle = section.leading_edge_position[1] + surface.origin_position[1]
+        zle = section.leading_edge_position[2] + surface.origin_position[2]
         xte = section.trailing_edge_position[0] + surface.origin_position[0]
-        self.canvas.create_line(self.origin[0] + yle * self.scale, self.origin[1] + xle * self.scale,
-                                self.origin[0] + yle * self.scale, self.origin[1] + xte * self.scale,
+        self.canvas.create_line(self.project(xle, yle, zle),
+                                self.project(xte, yle, zle),
                                 fill='blue', width=3, capstyle='round', tags='section')
         # mechanisation
         if not section.has_control: return
-        x0 = self.origin[1] + (xle + section.control.x_hinge * section.chord) * self.scale -3
-        y0 = self.origin[0] + yle * self.scale -3
-        self.canvas.create_oval(y0, x0, y0+6, x0+6,
-                                outline='black',
+        x0 = xle + section.control.x_hinge * section.chord
+        X, Y = self.project(x0, yle, zle)
+        self.canvas.create_oval(X-3, Y-3, X+3, Y+3,
+                                outline='black', tags="control",
                                 fill='yellow' if type(section.control) is Flap else 'green')
 
     def display_wing(self, wing: Surface | list[Surface]) -> None:
@@ -165,27 +166,21 @@ class GeometryDisplay(CTkFrame):
             prev_sec = sections[i - 1]
             self.display_section(curr_sec, wing)
 
-            x0 = self.origin[1] + wing.origin_position[0] * self.scale
-            y0 = self.origin[0] + wing.origin_position[1] * self.scale
+            def globalize(x: float, y: float, z: float) -> tuple[float, float, float]:
+                return x + wing.origin_position[0], y + wing.origin_position[1], z + wing.origin_position[2]
 
             # Draw leading edge
-            self.canvas.create_line(y0 + prev_sec.leading_edge_position[1] * self.scale,
-                                    x0 + prev_sec.leading_edge_position[0] * self.scale,
-                                    y0 + curr_sec.leading_edge_position[1] * self.scale,
-                                    x0 + curr_sec.leading_edge_position[0] * self.scale,
-                                    width=3, fill='black', capstyle='round', tags='edge')
+            self.canvas.create_line(self.project(*globalize(*prev_sec.leading_edge_position)),
+                                    self.project(*globalize(*curr_sec.leading_edge_position)),
+                                    width=3, fill='black', capstyle='round', tags='leading_edge')
             # Draw trailing edge
-            self.canvas.create_line(y0 + prev_sec.trailing_edge_position[1] * self.scale,
-                                    x0 + prev_sec.trailing_edge_position[0] * self.scale,
-                                    y0 + curr_sec.trailing_edge_position[1] * self.scale,
-                                    x0 + curr_sec.trailing_edge_position[0] * self.scale,
-                                    width=3, fill='black', capstyle='round', tags='edge')
+            self.canvas.create_line(self.project(*globalize(*prev_sec.trailing_edge_position)),
+                                    self.project(*globalize(*curr_sec.trailing_edge_position)),
+                                    width=3, fill='black', capstyle='round', tags='trailing_edge')
             # Draw 25% MAC line
-            self.canvas.create_line(y0 + prev_sec.leading_edge_position[1] * self.scale,
-                                    x0 + (prev_sec.leading_edge_position[0] + prev_sec.chord * .25) * self.scale,
-                                    y0 + curr_sec.leading_edge_position[1] * self.scale,
-                                    x0 + (curr_sec.leading_edge_position[0] + curr_sec.chord * .25) * self.scale,
-                                    width=2, fill='red', capstyle='round', dash=20, tags='edge')
+            self.canvas.create_line(self.project(*globalize(prev_sec.leading_edge_position[0] + prev_sec.chord * .25, *prev_sec.leading_edge_position[1:])),
+                                    self.project(*globalize(curr_sec.leading_edge_position[0] + curr_sec.chord * .25, *curr_sec.leading_edge_position[1:])),
+                                    width=2, fill='red', capstyle='round', dash=20, tags='mac25')
 
             # Draw control surface, if exists
             if prev_sec.control is None or curr_sec.control is None: continue
@@ -194,24 +189,49 @@ class GeometryDisplay(CTkFrame):
             color = {Flap: 'yellow', Aileron: 'green', Elevator: 'green3'}[type(prev_sec.control)]
             x_hinge = prev_sec.control.x_hinge
 
-            y_prev = y0 + prev_sec.leading_edge_position[1] * self.scale
-            x_prev_te = x0 + prev_sec.trailing_edge_position[0] * self.scale
-            x_prev_le = x_prev_te - (1-x_hinge) * prev_sec.chord * self.scale
+            y_prev = prev_sec.leading_edge_position[1]
+            x_prev_te = prev_sec.trailing_edge_position[0]
+            x_prev_le = x_prev_te - (1-x_hinge) * prev_sec.chord
+            z_prev = prev_sec.leading_edge_position[2]
 
-            y_curr = y0 + curr_sec.leading_edge_position[1] * self.scale
-            x_curr_te = x0 + curr_sec.trailing_edge_position[0] * self.scale
-            x_curr_le = x_curr_te - (1-x_hinge) * curr_sec.chord * self.scale
+            y_curr = curr_sec.leading_edge_position[1]
+            x_curr_te = curr_sec.trailing_edge_position[0]
+            x_curr_le = x_curr_te - (1-x_hinge) * curr_sec.chord
+            z_curr = curr_sec.leading_edge_position[2]
 
-            self.canvas.create_polygon(((y_prev, x_prev_le),
-                                        (y_prev, x_prev_te),
-                                        (y_curr, x_curr_te),
-                                        (y_curr, x_curr_le)),
-                                       fill=color, outline='black')
+            self.canvas.create_polygon((self.project(x_prev_le, y_prev, z_prev),
+                                        self.project(x_prev_te, y_prev, z_prev),
+                                        self.project(x_curr_te, y_curr, z_curr),
+                                        self.project(x_curr_le, y_curr, z_curr)),
+                                       fill=color, outline='black', tags="control")
 
         # Order layers
-        self.canvas.tag_raise('control')
-        self.canvas.tag_raise('section')
-        self.canvas.tag_raise('edge')
+        match self.view_mode:
+            case ViewMode.FRONT:
+                self.canvas.tag_raise('trailing_edge')
+                self.canvas.tag_raise('control')
+                self.canvas.tag_raise('section')
+                self.canvas.tag_raise('mac25')
+                self.canvas.tag_raise('leading_edge')
+            case ViewMode.BACK:
+                self.canvas.tag_raise('leading_edge')
+                self.canvas.tag_raise('mac25')
+                self.canvas.tag_raise('section')
+                self.canvas.tag_raise('control')
+                self.canvas.tag_raise('trailing_edge')
+            case mode if mode in [ViewMode.TOP, ViewMode.BOTTOM]:
+                self.canvas.tag_raise('control')
+                self.canvas.tag_raise('section')
+                self.canvas.tag_raise('leading_edge')
+                self.canvas.tag_raise('trailing_edge')
+                self.canvas.tag_raise('mac25')
+            case mode if mode in [ViewMode.LEFT, ViewMode.RIGHT]:
+                self.canvas.tag_raise('leading_edge')
+                self.canvas.tag_raise('mac25')
+                self.canvas.tag_raise('trailing_edge')
+                self.canvas.tag_raise('control')
+                self.canvas.tag_raise('section')
+
 
     def clear(self) -> None:
         """Clears the current display."""
