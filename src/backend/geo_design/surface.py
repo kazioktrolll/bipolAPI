@@ -1,10 +1,12 @@
 from .section import Section, Flap, Aileron, Elevator
 from .airfoil import Airfoil
+from ..to_re_docstring_decorator import to_re_docstring
+from abc import ABC, abstractmethod
 
 
-class Surface:
+class Surface(ABC):
     """
-    A class representing a single lifting surface of the aircraft.
+    An abstract class representing a single lifting surface of the aircraft.
 
     Attributes:
         name (str): The name of the lifting surface.
@@ -12,8 +14,7 @@ class Surface:
         y_duplicate (bool): Whether the lifting surface should be mirrored about Y-axis.
         origin_position (tuple[float, float, float]): Position of the leading edge of the root chord.
         airfoil (Airfoil): The airfoil of the surface.
-        inclination_angle (float): The inclination of the surface.
-        sections (list[Section]): The sections of the surface. Is always sorted left wingtip-to-right wingtip.
+        sections (list[Section]): The sections of the surface. Is always sorted along the surface's major axis, ascending.
     """
 
     def __init__(self,
@@ -23,8 +24,7 @@ class Surface:
                  tip_section: Section,
                  y_duplicate: bool,
                  origin_position: tuple[float, float, float],
-                 airfoil: Airfoil,
-                 inclination_angle: float):
+                 airfoil: Airfoil,):
         """
         Parameters:
             name (str): The name of the lifting surface.
@@ -37,57 +37,77 @@ class Surface:
                 Set ``True`` when defining only one half of a symmetric surface.
             origin_position (tuple[float, float, float]): Position of the leading edge of the root chord.
             airfoil (Airfoil): The airfoil of the surface.
-            inclination_angle (float): The inclination of the surface, in degrees. Zero means horizontal, positive means leading edge up.
         """
         self.name = name
         self.chord_length = chord_length
         self.y_duplicate = y_duplicate
         self.origin_position = origin_position
         self.airfoil = airfoil
-        self.inclination_angle = inclination_angle
         self.sections: list[Section] = [root_section, tip_section]
-        self.sections.sort(key=lambda section: section.y)
+        self.sort_sections()
 
-    @property
+    @abstractmethod
+    def major_axis(self, section: Section) -> float:
+        """Returns the position of the section along the major axis of the surface."""
+
+    @abstractmethod
+    def minor_axis(self, section: Section) -> float:
+        """Returns the position of the section along the minor axis of the surface."""
+
+    @abstractmethod
+    def xmamina_to_xyz(self, x: float, ma: float, mina: float) -> tuple[float, float, float]:
+        """
+        Transforms coordinates from xmamina base to xyz base.
+
+        Parameters:
+            x (float): The x position of the section.
+            ma (float): The major axis position of the section.
+            mina (float): The minor axis position of the section.
+        """
+
+    @abstractmethod
     def span(self) -> float:
-        span = self.sections[-1].y - self.sections[0].y
-        if self.y_duplicate: span *= 2
-        return abs(span)
+        """Returns the span of the surface."""
 
-    def add_section(self, section: Section):
+    def sort_sections(self) -> None:
+        """Sorts the sections along the major axis of the surface."""
+        self.sections.sort(key=lambda section: self.major_axis(section))
+
+    def add_section(self, section: Section) -> None:
         """Add a new section to the surface and ensures the sections are well-ordered."""
         # Check whether the section is not outside the wing.
-        if not self.sections[0].y < section.y < self.sections[-1].y: return
-        # Check if a section with identical `y` doesn't already exist.
-        if section.y in [sec.y for sec in self.sections]: return
+        if not self.major_axis(self.sections[0]) < self.major_axis(section) < self.major_axis(self.sections[-1]): return
+        # Check if a section with identical major axis coordinate doesn't already exist.
+        if self.major_axis(section) in [self.major_axis(sec) for sec in self.sections]: return
 
         self.sections.append(section)
-        self.sections.sort(key=lambda sec: sec.y)
+        self.sort_sections()
 
-    def add_section_gentle(self, y: float | list[float]):
+    @to_re_docstring
+    def add_section_gentle(self, ma: float | list[float]) -> None:
         """Add a new section to the surface without modifying the shape of the surface."""
-        if isinstance(y, list):
-            for yi in y:
-                self.add_section_gentle(yi)
+        if isinstance(ma, list):
+            for ma_i in ma:
+                self.add_section_gentle(ma_i)
             return
 
-        assert isinstance(y, (int, float))
+        assert isinstance(ma, (int, float))
 
         for i, sec in enumerate(self.sections):
-            if sec.y >= y:
+            if self.major_axis(sec) >= ma:
                 prev_sec = self.sections[i - 1]
                 next_sec = sec
                 break
         else:
-            raise Exception('Incorrect y!')
+            raise Exception('Incorrect major axis coordinate!')
 
-        # Calculate leading edge position as prev.x + dy * dx
-        dy = (y - prev_sec.y) / (next_sec.y - prev_sec.y)
-        xle = prev_sec.leading_edge_position[0] + dy * (next_sec.leading_edge_position[0] - prev_sec.leading_edge_position[0])
-        zle = prev_sec.leading_edge_position[2] + dy * (next_sec.leading_edge_position[2] - prev_sec.leading_edge_position[2])
-        chord = prev_sec.chord + dy * (next_sec.chord - prev_sec.chord)
-        inc = prev_sec.inclination + dy * (next_sec.inclination - prev_sec.inclination)
-        sec = Section((xle, y, zle), chord, inc, self.airfoil)
+        # Calculate leading edge position as prev.x + dma * dx
+        dma = (ma - self.major_axis(prev_sec)) / (self.major_axis(next_sec) - self.major_axis(prev_sec))
+        xle = prev_sec.leading_edge_position[0] + dma * (next_sec.leading_edge_position[0] - prev_sec.leading_edge_position[0])
+        mina = self.minor_axis(prev_sec) + dma * (self.minor_axis(next_sec) - self.minor_axis(prev_sec))
+        chord = prev_sec.chord + dma * (next_sec.chord - prev_sec.chord)
+        inc = prev_sec.inclination + dma * (next_sec.inclination - prev_sec.inclination)
+        sec = Section(self.xmamina_to_xyz(xle, ma, mina), chord, inc, self.airfoil)
         self.add_section(sec)
 
     def get_symmetric(self) -> 'Surface':
@@ -99,30 +119,33 @@ class Surface:
         surf.sections = reflected_sections
         return surf
 
-    def has_section_at(self, y: float) -> bool:
-        """Returns ``True`` if the surface has a section at ``y``."""
-        ys = [section.y for section in self.sections]
-        return y in ys
+    @to_re_docstring
+    def has_section_at(self, ma: float) -> bool:
+        """Returns ``True`` if the surface has a section at given major axis coordinate."""
+        mas = [self.major_axis(section) for section in self.sections]
+        return ma in mas
 
-    def get_section_at(self, y: float) -> Section | None:
-        """Returns the section at ``y``, if exists, else returns ``None``."""
-        if not self.has_section_at(y): return None
+    @to_re_docstring
+    def get_section_at(self, ma: float) -> Section | None:
+        """Returns the section at given major axis coordinate, if exists, else returns ``None``."""
+        if not self.has_section_at(ma): return None
         for sec in self.sections:
-            if sec.y == y:
+            if self.major_axis(sec) == ma:
                 return sec
 
-    def get_sections_between(self, y_start: float, y_end: float,
+    @to_re_docstring
+    def get_sections_between(self, ma_start: float, ma_end: float,
                              include_start: bool = True, include_end: bool = False
                              ) -> list[Section]:
-        """Returns a list of sections between ``y_start`` and ``y_end``."""
+        """Returns a list of sections between ``ma_start`` and ``ma_end``."""
         secs = []
-        if include_start and self.has_section_at(y_start):
-            secs.append(self.get_section_at(y_start))
+        if include_start and self.has_section_at(ma_start):
+            secs.append(self.get_section_at(ma_start))
 
-        secs += [section for section in self.sections if y_start < section.y < y_end]
+        secs += [section for section in self.sections if ma_start < self.major_axis(section) < ma_end]
 
-        if include_end and self.has_section_at(y_end):
-            secs.append(self.get_section_at(y_end))
+        if include_end and self.has_section_at(ma_end):
+            secs.append(self.get_section_at(ma_end))
 
         return secs
 
@@ -130,7 +153,7 @@ class Surface:
         """Returns the current geometry as a .avl type string."""
         _r = (f"SURFACE\n"
               f"{self.name}\n"
-              f"{int(self.chord_length*8)} 1.0 {int(self.span*4)} 1.0\n"
+              f"{int(self.chord_length*8)} 1.0 {int(self.span()*4)} 1.0\n"
               f"YDUPLICATE\n"
               f"0.0\n"
               f"SCALE\n"
@@ -138,14 +161,56 @@ class Surface:
               f"TRANSLATE\n"
               f"{self.origin_position[0]} {self.origin_position[1]} {self.origin_position[2]}\n"
               f"ANGLE\n"
-              f"{self.inclination_angle}\n")
+              f"0\n")
         for sec in self.sections:
             _r += sec.string()
         return _r
 
 
-class SimpleSurface(Surface):
-    """ A subclass of the ``Surface`` representing a simple, trapezoidal lifting surface. """
+class HorizontalSurface(Surface):
+    """
+        A class representing a single lifting surface of the aircraft, oriented more-or-less horizontally.
+
+        Attributes:
+            name (str): The name of the lifting surface.
+            chord_length (float): The nominal mean aerodynamic chord length of the lifting surface.
+            y_duplicate (bool): Whether the lifting surface should be mirrored about Y-axis.
+            origin_position (tuple[float, float, float]): Position of the leading edge of the root chord.
+            airfoil (Airfoil): The airfoil of the surface.
+            sections (list[Section]): The sections of the surface. Is always sorted left wingtip-to-right wingtip.
+        """
+    def major_axis(self, section: Section) -> float:
+        return section.y
+
+    def minor_axis(self, section: Section) -> float:
+        return section.z
+
+    def xmamina_to_xyz(self, x: float, ma: float, mina: float) -> tuple[float, float, float]:
+        return x, ma, mina
+
+    def span(self) -> float:
+        span = self.sections[-1].y - self.sections[0].y
+        if self.y_duplicate: span *= 2
+        return span
+
+    def add_section_gentle(self, y: float | list[float]) -> None:
+        super().add_section_gentle(ma=y)
+
+    def has_section_at(self, y: float) -> bool:
+        """Returns ``True`` if the surface has a section at given ``y``."""
+        return super().has_section_at(ma=y)
+
+    def get_section_at(self, y: float) -> Section | None:
+        """Returns the section at given ``y``, if exists, else returns ``None``."""
+        return super().get_section_at(ma=y)
+
+    def get_sections_between(self, y_start: float, y_end: float, include_start: bool = True, include_end: bool = False ) -> list[Section]:
+        """Returns a list of sections between ``y_start`` and ``y_end``."""
+        return super().get_sections_between(ma_start=y_start, ma_end=y_end, include_start=include_start, include_end=include_end)
+
+
+class SimpleSurface(HorizontalSurface):
+    """ A subclass of the ``Surface`` representing a simple, horizontal, trapezoidal lifting surface. """
 
     def __init__(self,
                  name: str,
@@ -174,7 +239,7 @@ class SimpleSurface(Surface):
 
         root, tip = SimpleSurface.create_geometry(chord_length, span, taper_ratio, sweep_angle, airfoil)
         super().__init__(name=name, chord_length=chord_length, root_section=root, tip_section=tip, y_duplicate=True,
-                         origin_position=origin_position, airfoil=airfoil, inclination_angle=inclination_angle)
+                         origin_position=origin_position, airfoil=airfoil)
 
         self.mechanization = {}
 

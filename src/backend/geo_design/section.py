@@ -60,6 +60,11 @@ class Section:
         """Returns the y position of the section."""
         return self.leading_edge_position[1]
 
+    @property
+    def z(self):
+        """Returns the z position of the section."""
+        return self.leading_edge_position[2]
+
     def string(self) -> str:
         """Returns the current geometry as a .avl type string."""
         _r = (f"\n"

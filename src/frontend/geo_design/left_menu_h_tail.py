@@ -66,7 +66,7 @@ class LeftMenuHTail(CTkFrame):
         self.pfs['z'].grid(row=1, column=0, padx=10, pady=10, sticky='e')
         self.pfs['z'].set(self.geometry.h_tail.origin_position[2])
         self.pfs['span'].grid(row=2, column=0, padx=10, pady=10, sticky='e')
-        self.pfs['span'].set(self.geometry.h_tail.span)
+        self.pfs['span'].set(self.geometry.h_tail.span())
         self.pfs['mean_chord'].grid(row=3, column=0, padx=10, pady=10, sticky='e')
         self.pfs['mean_chord'].set(self.geometry.h_tail.chord_length)
         self.pfs['taper'].grid(row=4, column=0, padx=10, pady=10, sticky='e')
