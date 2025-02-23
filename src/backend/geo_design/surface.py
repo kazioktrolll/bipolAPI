@@ -16,7 +16,7 @@ class Surface(ABC):
         airfoil (Airfoil): The airfoil of the surface.
         sections (list[Section]): The sections of the surface. Is always sorted along the surface's major axis, ascending.
     """
-
+    @to_re_docstring
     def __init__(self,
                  name: str,
                  chord_length: float,
@@ -169,16 +169,41 @@ class Surface(ABC):
 
 class HorizontalSurface(Surface):
     """
-        A class representing a single lifting surface of the aircraft, oriented more-or-less horizontally.
+    A class representing a single lifting surface of the aircraft, oriented more-or-less horizontally.
 
-        Attributes:
+    Attributes:
+        name (str): The name of the lifting surface.
+        chord_length (float): The nominal mean aerodynamic chord length of the lifting surface.
+        y_duplicate (bool): Whether the lifting surface should be mirrored about Y-axis.
+        origin_position (tuple[float, float, float]): Position of the leading edge of the root chord.
+        airfoil (Airfoil): The airfoil of the surface.
+        sections (list[Section]): The sections of the surface. Is always sorted left wingtip-to-right wingtip.
+        """
+
+    def __init__(self,
+                 name: str,
+                 chord_length: float,
+                 root_section: Section,
+                 tip_section: Section,
+                 y_duplicate: bool,
+                 origin_position: tuple[float, float, float],
+                 airfoil: Airfoil,):
+        """
+        Parameters:
             name (str): The name of the lifting surface.
+                If named 'Wing', 'H_tail', 'V_tail' - will be recognized as such by the ``Geometry`` instance.
             chord_length (float): The nominal mean aerodynamic chord length of the lifting surface.
+                It is not used for geometry generation, just for calculations.
+            root_section (Section): The root section of the surface.
+            tip_section (Section): The tip section of the surface.
             y_duplicate (bool): Whether the lifting surface should be mirrored about Y-axis.
+                Set ``True`` when defining only one half of a symmetric surface.
             origin_position (tuple[float, float, float]): Position of the leading edge of the root chord.
             airfoil (Airfoil): The airfoil of the surface.
-            sections (list[Section]): The sections of the surface. Is always sorted left wingtip-to-right wingtip.
         """
+        super().__init__(name=name, chord_length=chord_length, root_section=root_section, tip_section=tip_section,
+                         y_duplicate=y_duplicate, origin_position=origin_position, airfoil=airfoil)
+
     def major_axis(self, section: Section) -> float:
         return section.y
 
@@ -301,3 +326,69 @@ class SimpleSurface(HorizontalSurface):
         assert isinstance(surf, SimpleSurface)
         surf.mechanization = {k: (-s, -e, xc) for k, (s, e, xc) in surf.mechanization}
         return surf
+
+
+class VerticalSurface(Surface):
+    """
+    A class representing a single lifting surface of the aircraft, oriented more-or-less vertically.
+
+    Attributes:
+        name (str): The name of the lifting surface.
+        chord_length (float): The nominal mean aerodynamic chord length of the lifting surface.
+        y_duplicate (bool): Whether the lifting surface should be mirrored about Y-axis.
+        origin_position (tuple[float, float, float]): Position of the leading edge of the root chord.
+        airfoil (Airfoil): The airfoil of the surface.
+        sections (list[Section]): The sections of the surface. Is always sorted bottom to top.
+    """
+
+    def __init__(self,
+                 name: str,
+                 chord_length: float,
+                 root_section: Section,
+                 tip_section: Section,
+                 y_duplicate: bool,
+                 origin_position: tuple[float, float, float],
+                 airfoil: Airfoil,):
+        """
+        Parameters:
+            name (str): The name of the lifting surface.
+                If named 'Wing', 'H_tail', 'V_tail' - will be recognized as such by the ``Geometry`` instance.
+            chord_length (float): The nominal mean aerodynamic chord length of the lifting surface.
+                It is not used for geometry generation, just for calculations.
+            root_section (Section): The root section of the surface.
+            tip_section (Section): The tip section of the surface.
+            y_duplicate (bool): Whether the lifting surface should be mirrored about Y-axis.
+                Set ``True`` when defining only one half of a symmetric surface.
+            origin_position (tuple[float, float, float]): Position of the leading edge of the root chord.
+            airfoil (Airfoil): The airfoil of the surface.
+        """
+        super().__init__(name=name, chord_length=chord_length, root_section=root_section, tip_section=tip_section,
+                         y_duplicate=y_duplicate, origin_position=origin_position, airfoil=airfoil)
+
+    def major_axis(self, section: Section) -> float:
+        return section.z
+
+    def minor_axis(self, section: Section) -> float:
+        return section.y
+
+    def xmamina_to_xyz(self, x: float, ma: float, mina: float) -> tuple[float, float, float]:
+        return x, mina, ma
+
+    def span(self) -> float:
+        span = self.sections[-1].z - self.sections[0].z
+        return span
+
+    def add_section_gentle(self, z: float | list[float]) -> None:
+        super().add_section_gentle(ma=z)
+
+    def has_section_at(self, z: float) -> bool:
+        """Returns ``True`` if the surface has a section at given ``z``."""
+        return super().has_section_at(ma=z)
+
+    def get_section_at(self, z: float) -> Section | None:
+        """Returns the section at given ``z``, if exists, else returns ``None``."""
+        return super().get_section_at(ma=z)
+
+    def get_sections_between(self, z_start: float, z_end: float, include_start: bool = True, include_end: bool = False) -> list[Section]:
+        """Returns a list of sections between ``z_start`` and ``z_end``."""
+        return super().get_sections_between(ma_start=z_start, ma_end=z_end, include_start=include_start, include_end=include_end)
