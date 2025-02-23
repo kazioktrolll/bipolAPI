@@ -132,13 +132,14 @@ class GeometryDisplay(CTkFrame):
         yle = section.leading_edge_position[1] + surface.origin_position[1]
         zle = section.leading_edge_position[2] + surface.origin_position[2]
         xte = section.trailing_edge_position[0] + surface.origin_position[0]
+        yte = section.trailing_edge_position[1] + surface.origin_position[1]
+        zte = section.trailing_edge_position[2] + surface.origin_position[2]
         self.canvas.create_line(self.project(xle, yle, zle),
-                                self.project(xte, yle, zle),
+                                self.project(xte, yte, zte),
                                 fill='blue', width=3, capstyle='round', tags='section')
         # mechanisation
         if not section.has_control: return
-        x0 = xle + section.control.x_hinge * section.chord
-        X, Y = self.project(x0, yle, zle)
+        X, Y = self.project(*section.get_position_at_xc(section.control.x_hinge))
         self.canvas.create_oval(X-3, Y-3, X+3, Y+3,
                                 outline='black', tags="control",
                                 fill='yellow' if type(section.control) is Flap else 'green')
@@ -178,8 +179,8 @@ class GeometryDisplay(CTkFrame):
                                     self.project(*globalize(*curr_sec.trailing_edge_position)),
                                     width=3, fill='black', capstyle='round', tags='trailing_edge')
             # Draw 25% MAC line
-            self.canvas.create_line(self.project(*globalize(prev_sec.leading_edge_position[0] + prev_sec.chord * .25, *prev_sec.leading_edge_position[1:])),
-                                    self.project(*globalize(curr_sec.leading_edge_position[0] + curr_sec.chord * .25, *curr_sec.leading_edge_position[1:])),
+            self.canvas.create_line(self.project(*globalize(*prev_sec.get_position_at_xc(.25))),
+                                    self.project(*globalize(*curr_sec.get_position_at_xc(.25))),
                                     width=2, fill='red', capstyle='round', dash=20, tags='mac25')
 
             # Draw control surface, if exists
@@ -191,18 +192,20 @@ class GeometryDisplay(CTkFrame):
 
             y_prev =    wing.origin_position[1] + prev_sec.leading_edge_position[1]
             x_prev_te = wing.origin_position[0] + prev_sec.trailing_edge_position[0]
-            x_prev_le = x_prev_te - (1-x_hinge) * prev_sec.chord
-            z_prev =    wing.origin_position[2] + prev_sec.leading_edge_position[2]
+            z_prev_te = wing.origin_position[2] + prev_sec.trailing_edge_position[2]
+            x_prev_le = wing.origin_position[0] + prev_sec.get_position_at_xc(x_hinge)[0]
+            z_prev_le = wing.origin_position[2] + prev_sec.get_position_at_xc(x_hinge)[2]
 
             y_curr =    wing.origin_position[1] + curr_sec.leading_edge_position[1]
             x_curr_te = wing.origin_position[0] + curr_sec.trailing_edge_position[0]
-            x_curr_le = x_curr_te - (1-x_hinge) * curr_sec.chord
-            z_curr =    wing.origin_position[2] + curr_sec.leading_edge_position[2]
+            z_curr_te = wing.origin_position[2] + curr_sec.trailing_edge_position[2]
+            x_curr_le = wing.origin_position[0] + curr_sec.get_position_at_xc(x_hinge)[0]
+            z_curr_le = wing.origin_position[2] + curr_sec.get_position_at_xc(x_hinge)[2]
 
-            self.canvas.create_polygon((self.project(x_prev_le, y_prev, z_prev),
-                                        self.project(x_prev_te, y_prev, z_prev),
-                                        self.project(x_curr_te, y_curr, z_curr),
-                                        self.project(x_curr_le, y_curr, z_curr)),
+            self.canvas.create_polygon((self.project(x_prev_le, y_prev, z_prev_le),
+                                        self.project(x_prev_te, y_prev, z_prev_te),
+                                        self.project(x_curr_te, y_curr, z_curr_te),
+                                        self.project(x_curr_le, y_curr, z_curr_le)),
                                        fill=color, outline='black', tags="control")
 
         # Order layers

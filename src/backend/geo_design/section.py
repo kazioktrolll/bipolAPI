@@ -1,4 +1,5 @@
 from typing import Optional
+from math import tan, radians
 from .airfoil import Airfoil
 
 
@@ -16,22 +17,25 @@ class Section:
     def __init__(self,
                  leading_edge_position: tuple[float, float, float],
                  chord: float,
+                 inclination: float,
                  airfoil: Airfoil):
         """
         Parameters:
             leading_edge_position (tuple[float, float, float]): Position of the leading edge of the section.
             chord (float): The chord of the section.
+            inclination (float): The total inclination of the section, in degrees.
             airfoil (Airfoil): The airfoil of the section.
         """
         self.leading_edge_position = leading_edge_position
         self.chord = chord
+        self.inclination = inclination
         self.airfoil = airfoil
         self.control: Optional['Control'] = None
 
     def mirror(self) -> 'Section':
         """Returns a copy of self, mirrored about Y-axis."""
         lep = self.leading_edge_position[0], self.leading_edge_position[1] * -1, self.leading_edge_position[2]
-        sec = Section(lep, self.chord, self.airfoil)
+        sec = Section(lep, self.chord, self.inclination, self.airfoil)
         sec.control = self.control.copy() if self.control is not None else None
         return sec
 
@@ -40,10 +44,16 @@ class Section:
         """Returns True if the section has a control surface."""
         return self.control is not None
 
+    def get_position_at_xc(self, xc: float) -> tuple[float, float, float]:
+        """Returns the position of the section at the given x/c."""
+        return (self.leading_edge_position[0] + self.chord * xc,
+                self.leading_edge_position[1],
+                self.leading_edge_position[2] - self.chord * xc * tan(radians(self.inclination)))
+
     @property
     def trailing_edge_position(self) -> tuple[float, float, float]:
         """Returns the trailing edge position of the section."""
-        return self.leading_edge_position[0] + self.chord, self.leading_edge_position[1], self.leading_edge_position[2]
+        return self.leading_edge_position[0] + self.chord, self.leading_edge_position[1], self.leading_edge_position[2] - self.chord * tan(radians(self.inclination))
 
     @property
     def y(self):
@@ -55,7 +65,7 @@ class Section:
         _r = (f"\n"
               f"SECTION\n"
               f"{self.leading_edge_position[0]} {self.leading_edge_position[1]} {self.leading_edge_position[2]} "
-              f"{self.chord} 0\n")
+              f"{self.chord} {self.inclination}\n")
         _r += self.airfoil.string()
         if self.has_control:
             _r += self.control.string()

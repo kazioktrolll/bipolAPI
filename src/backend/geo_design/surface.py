@@ -86,7 +86,8 @@ class Surface:
         xle = prev_sec.leading_edge_position[0] + dy * (next_sec.leading_edge_position[0] - prev_sec.leading_edge_position[0])
         zle = prev_sec.leading_edge_position[2] + dy * (next_sec.leading_edge_position[2] - prev_sec.leading_edge_position[2])
         chord = prev_sec.chord + dy * (next_sec.chord - prev_sec.chord)
-        sec = Section((xle, y, zle), chord, self.airfoil)
+        inc = prev_sec.inclination + dy * (next_sec.inclination - prev_sec.inclination)
+        sec = Section((xle, y, zle), chord, inc, self.airfoil)
         self.add_section(sec)
 
     def get_symmetric(self) -> 'Surface':
@@ -171,7 +172,7 @@ class SimpleSurface(Surface):
         self.taper_ratio = taper_ratio
         self.sweep_angle = sweep_angle
 
-        root, tip = SimpleSurface.create_geometry(chord_length, span, taper_ratio, sweep_angle, airfoil, origin_position)
+        root, tip = SimpleSurface.create_geometry(chord_length, span, taper_ratio, sweep_angle, airfoil)
         super().__init__(name=name, chord_length=chord_length, root_section=root, tip_section=tip, y_duplicate=True,
                          origin_position=origin_position, airfoil=airfoil, inclination_angle=inclination_angle)
 
@@ -180,8 +181,7 @@ class SimpleSurface(Surface):
     @classmethod
     def create_geometry(cls, chord_length: float, span: float,
                         taper_ratio: float, sweep_angle: float,
-                        airfoil: Airfoil,
-                        origin_position: tuple[float, float, float] = (0, 0, 0)
+                        airfoil: Airfoil
                         ) -> tuple[Section, Section]:
         """
         Returns the root and tip Sections generated based on input parameters.
@@ -192,7 +192,6 @@ class SimpleSurface(Surface):
             taper_ratio (float): The taper ratio of the surface.
             sweep_angle (float): The sweep angle of the surface in degrees.
             airfoil (Airfoil): The airfoil of the surface.
-            origin_position (tuple[float, float, float]): Position of the leading edge of the root chord.
 
         Returns:
             Root and tip Sections, in that order.
@@ -205,8 +204,8 @@ class SimpleSurface(Surface):
         mac025 = lambda y: root_chord * .25 + y * tan(radians(sweep_angle))
         leading_edge_y = lambda y: mac025(y) - chord(y) * .25
 
-        root = Section((0, 0, 0), chord(0), airfoil)
-        tip = Section((leading_edge_y(span / 2), span / 2, 0.0), chord(span / 2), airfoil)
+        root = Section((0, 0, 0), chord(0), 0, airfoil)
+        tip = Section((leading_edge_y(span / 2), span / 2, 0.0), chord(span / 2), 0, airfoil)
 
         return root, tip
 
