@@ -56,6 +56,11 @@ class Section:
         return self.leading_edge_position[0] + self.chord, self.leading_edge_position[1], self.leading_edge_position[2] - self.chord * tan(radians(self.inclination))
 
     @property
+    def x(self):
+        """Returns the y position of the section."""
+        return self.leading_edge_position[0]
+
+    @property
     def y(self):
         """Returns the y position of the section."""
         return self.leading_edge_position[1]

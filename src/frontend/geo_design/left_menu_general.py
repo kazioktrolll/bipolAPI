@@ -2,6 +2,7 @@ from customtkinter import CTkFrame, CTkButton, ThemeManager
 from typing import Callable
 
 from .left_menu_wing import LeftMenuWing
+from .left_menu_v_tail import LeftMenuVTail
 from .left_menu_h_tail import LeftMenuHTail
 from ...backend.geo_design import Geometry
 
@@ -29,24 +30,33 @@ class LeftMenu(CTkFrame):
         self.rowconfigure(1, minsize=4)
 
         self.wing = LeftMenuWing(self, geometry, do_on_update)
+        self.v_tail = LeftMenuVTail(self, geometry, do_on_update)
         self.h_tail = LeftMenuHTail(self, geometry, do_on_update)
 
         self.show_wing()
 
     def show_wing(self):
         if self.wing.grid_info() != {}: return
-        self.h_tail.grid_forget()
+        self.v_tail.place(x=-1e4, y=-1e4)
+        self.h_tail.place(x=-2e4, y=-2e4)
         self.wing.grid(row=2, column=0, sticky='nsew', padx=10)
         self.wing_button.configure(fg_color=ThemeManager.theme["CTkButton"]["fg_color"], state="enabled")   # noqa
         self.v_tail_button.configure(fg_color=ThemeManager.theme["CTkFrame"]["fg_color"], state="normal")   # noqa
         self.h_tail_button.configure(fg_color=ThemeManager.theme["CTkFrame"]["fg_color"], state="normal")   # noqa
 
     def show_v_tail(self):
-        pass
+        if self.v_tail.grid_info() != {}: return
+        self.wing.place(x=-1e4, y=-1e4)
+        self.h_tail.place(x=-2e4, y=-2e4)
+        self.v_tail.grid(row=2, column=0, sticky='nsew', padx=10)
+        self.wing_button.configure(fg_color=ThemeManager.theme["CTkFrame"]["fg_color"], state="normal")   # noqa
+        self.v_tail_button.configure(fg_color=ThemeManager.theme["CTkButton"]["fg_color"], state="enabled")   # noqa
+        self.h_tail_button.configure(fg_color=ThemeManager.theme["CTkFrame"]["fg_color"], state="normal")   # noqa
 
     def show_h_tail(self):
         if self.h_tail.grid_info() != {}: return
-        self.wing.grid_forget()
+        self.wing.place(x=-1e4, y=-1e4)
+        self.v_tail.place(x=-2e4, y=-2e4)
         self.h_tail.grid(row=2, column=0, sticky='nsew', padx=10)
         self.wing_button.configure(fg_color=ThemeManager.theme["CTkFrame"]["fg_color"], state="normal")  # noqa
         self.v_tail_button.configure(fg_color=ThemeManager.theme["CTkFrame"]["fg_color"], state="normal")  # noqa
