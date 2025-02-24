@@ -1,7 +1,10 @@
-from typing import Optional
+from typing import Optional, TypeVar
 from math import tan, radians
 from .airfoil import Airfoil
 from ..vector3 import Vector3, AnyVector3
+
+
+T = TypeVar('T', bound='Control')
 
 
 class Section:
@@ -106,7 +109,7 @@ class Control:
         self.xyz_h_vec = Vector3(*xyz_h_vec)
         self.color = color
 
-    def copy(self) -> 'Control':
+    def copy(self: T) -> T:
         """Returns a copy of this control surface."""
         return Control(self.name, self.x_hinge, self.SgnDup, self.gain, self.xyz_h_vec.copy())
 
@@ -125,10 +128,6 @@ class Flap(Control):
         assert 0 < x_hinge < 1
         super().__init__(name='flap', x_hinge=x_hinge, SgnDup=True, color='yellow')
 
-    def copy(self) -> 'Flap':
-        """Returns a copy of this flap."""
-        return Flap(self.x_hinge)
-
 
 class Aileron(Control):
     def __init__(self, x_hinge: float):
@@ -139,9 +138,6 @@ class Aileron(Control):
         assert 0 < x_hinge < 1
         super().__init__(name='aileron', x_hinge=x_hinge, SgnDup=False)
 
-    def copy(self) -> 'Aileron':
-        """Returns a copy of this aileron."""
-        return Aileron(self.x_hinge)
 
 class Elevator(Control):
     def __init__(self, x_hinge: float):
@@ -151,7 +147,3 @@ class Elevator(Control):
         """
         assert 0 < x_hinge < 1
         super().__init__(name='elevator', x_hinge=x_hinge, SgnDup=True, color='green3')
-
-    def copy(self) -> 'Elevator':
-        """Returns a copy of this aileron."""
-        return Elevator(self.x_hinge)
