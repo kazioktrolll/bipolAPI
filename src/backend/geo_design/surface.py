@@ -1,6 +1,7 @@
 from .section import Section, Flap, Aileron, Elevator
 from .airfoil import Airfoil
 from ..to_re_docstring_decorator import to_re_docstring
+from ..vector3 import Vector3, AnyVector3
 from abc import ABC, abstractmethod
 
 
@@ -12,7 +13,7 @@ class Surface(ABC):
         name (str): The name of the lifting surface.
         chord_length (float): The nominal mean aerodynamic chord length of the lifting surface.
         y_duplicate (bool): Whether the lifting surface should be mirrored about Y-axis.
-        origin_position (tuple[float, float, float]): Position of the leading edge of the root chord.
+        origin_position (Vector3): Position of the leading edge of the root chord.
         airfoil (Airfoil): The airfoil of the surface.
         sections (list[Section]): The sections of the surface. Is always sorted along the surface's major axis, ascending.
     """
@@ -23,7 +24,7 @@ class Surface(ABC):
                  root_section: Section,
                  tip_section: Section,
                  y_duplicate: bool,
-                 origin_position: tuple[float, float, float],
+                 origin_position: AnyVector3,
                  airfoil: Airfoil,):
         """
         Parameters:
@@ -35,13 +36,13 @@ class Surface(ABC):
             tip_section (Section): The tip section of the surface.
             y_duplicate (bool): Whether the lifting surface should be mirrored about Y-axis.
                 Set ``True`` when defining only one half of a symmetric surface.
-            origin_position (tuple[float, float, float]): Position of the leading edge of the root chord.
+            origin_position (AnyVector3): Position of the leading edge of the root chord.
             airfoil (Airfoil): The airfoil of the surface.
         """
         self.name = name
         self.chord_length = chord_length
         self.y_duplicate = y_duplicate
-        self.origin_position = origin_position
+        self.origin_position = Vector3(*origin_position)
         self.airfoil = airfoil
         self.sections: list[Section] = [root_section, tip_section]
         self.sort_sections()
@@ -55,7 +56,7 @@ class Surface(ABC):
         """Returns the position of the section along the minor axis of the surface."""
 
     @abstractmethod
-    def xmamina_to_xyz(self, x: float, ma: float, mina: float) -> tuple[float, float, float]:
+    def xmamina_to_xyz(self, x: float, ma: float, mina: float) -> Vector3:
         """
         Transforms coordinates from xmamina base to xyz base.
 
@@ -103,7 +104,7 @@ class Surface(ABC):
 
         # Calculate leading edge position as prev.x + dma * dx
         dma = (ma - self.major_axis(prev_sec)) / (self.major_axis(next_sec) - self.major_axis(prev_sec))
-        xle = prev_sec.leading_edge_position[0] + dma * (next_sec.leading_edge_position[0] - prev_sec.leading_edge_position[0])
+        xle = prev_sec.leading_edge_position.x + dma * (next_sec.leading_edge_position.x - prev_sec.leading_edge_position.x)
         mina = self.minor_axis(prev_sec) + dma * (self.minor_axis(next_sec) - self.minor_axis(prev_sec))
         chord = prev_sec.chord + dma * (next_sec.chord - prev_sec.chord)
         inc = prev_sec.inclination + dma * (next_sec.inclination - prev_sec.inclination)
@@ -159,7 +160,7 @@ class Surface(ABC):
               f"SCALE\n"
               f"1.0 1.0 1.0\n"
               f"TRANSLATE\n"
-              f"{self.origin_position[0]} {self.origin_position[1]} {self.origin_position[2]}\n"
+              f"{self.origin_position.avl_string}\n"
               f"ANGLE\n"
               f"0\n")
         for sec in self.sections:
@@ -175,7 +176,7 @@ class HorizontalSurface(Surface):
         name (str): The name of the lifting surface.
         chord_length (float): The nominal mean aerodynamic chord length of the lifting surface.
         y_duplicate (bool): Whether the lifting surface should be mirrored about Y-axis.
-        origin_position (tuple[float, float, float]): Position of the leading edge of the root chord.
+        origin_position (Vector3): Position of the leading edge of the root chord.
         airfoil (Airfoil): The airfoil of the surface.
         sections (list[Section]): The sections of the surface. Is always sorted left wingtip-to-right wingtip.
         """
@@ -186,7 +187,7 @@ class HorizontalSurface(Surface):
                  root_section: Section,
                  tip_section: Section,
                  y_duplicate: bool,
-                 origin_position: tuple[float, float, float],
+                 origin_position: AnyVector3,
                  airfoil: Airfoil,):
         """
         Parameters:
@@ -198,7 +199,7 @@ class HorizontalSurface(Surface):
             tip_section (Section): The tip section of the surface.
             y_duplicate (bool): Whether the lifting surface should be mirrored about Y-axis.
                 Set ``True`` when defining only one half of a symmetric surface.
-            origin_position (tuple[float, float, float]): Position of the leading edge of the root chord.
+            origin_position (AnyVector3): Position of the leading edge of the root chord.
             airfoil (Airfoil): The airfoil of the surface.
         """
         super().__init__(name=name, chord_length=chord_length, root_section=root_section, tip_section=tip_section,
@@ -210,8 +211,8 @@ class HorizontalSurface(Surface):
     def minor_axis(self, section: Section) -> float:
         return section.z
 
-    def xmamina_to_xyz(self, x: float, ma: float, mina: float) -> tuple[float, float, float]:
-        return x, ma, mina
+    def xmamina_to_xyz(self, x: float, ma: float, mina: float) -> Vector3:
+        return Vector3(x, ma, mina)
 
     def span(self) -> float:
         span = self.sections[-1].y - self.sections[0].y
@@ -243,7 +244,7 @@ class SimpleSurface(HorizontalSurface):
                  chord_length: float,
                  taper_ratio: float = 1,
                  sweep_angle: float = 0,
-                 origin_position: tuple[float, float, float] = (0, 0, 0),
+                 origin_position: AnyVector3 = Vector3.zero(),
                  inclination_angle: float = 0,
                  airfoil=None,
                  ) -> None:
@@ -251,7 +252,7 @@ class SimpleSurface(HorizontalSurface):
         Parameters:
             span (float): The span of the surface.
             chord_length (float): The mean aerodynamic chord length of the surface.
-            origin_position (tuple[float, float, float]): Position of the leading edge of the root chord.
+            origin_position (AnyVector3): Position of the leading edge of the root chord.
             inclination_angle (float): The inclination of the surface, in degrees. Zero means horizontal, positive means leading edge up.
             airfoil (Airfoil): The airfoil of the surface.
             taper_ratio (float): The taper ratio of the surface.
@@ -302,13 +303,22 @@ class SimpleSurface(HorizontalSurface):
     def set_mechanization(self,
                           **kwargs: list[tuple[float, float, float]]
                           ) -> None:
+        """Sets the mechanization of the surface.
+
+        Parameters:
+            **kwargs (list[tuple[float, float, float]]): For each type of control a tuple (y_start, y_stop, x_hinge).
+
+        Usage:
+            surface_instance.set_mechanization(ailerons=[(1, 2, .7), (3, 3.5, .6)], flaps=[(2.1, 2.9, .6)])
+
+            This will create **ailerons** for ``y`` = <1 : 2> ``hinge`` 0.7 x/c and ``y`` = <3 : 3.5> ``hinge`` 0.6 x/c,
+            and **flaps** for ``y`` = <2.1 : 2.9> ``hinge`` 0.6 x/c.
+        """
         if self.mechanization: raise ValueError("The surface {} already has mechanization!".format(self.name))
-        # This is not necessary for method's working, but if the function is called with both arguments empty then it's
-        # probably due to user's mistake, so it should be raised to attention.
-        # Can be bypassed by setting either of the arguments as ``[]``.
-        if not kwargs: raise ValueError
 
         for key, value in kwargs.items():
+            try: mech_type = {"ailerons": Aileron, "flaps": Flap, "elevators":Elevator}[key]
+            except KeyError: raise ValueError(f"Unknown mechanism type: {key}")
             # To add a control surface in AVL, you add a control surface to a section, and it is valid up to the next section.
             for start, end, hinge_x in value:
                 # Ensure there is a ``Section`` at 'y' == 'start' and 'end'.
@@ -318,7 +328,6 @@ class SimpleSurface(HorizontalSurface):
                 sections = self.get_sections_between(start, end, include_end=True)
                 for section in sections:
                     if section.has_control: raise Exception("A section already has a control surface!")
-                    mech_type = {"ailerons": Aileron, "flaps": Flap, "elevators":Elevator}[key]
                     section.control = mech_type(x_hinge=hinge_x)
 
     def get_symmetric(self) -> 'SimpleSurface':
@@ -336,7 +345,7 @@ class VerticalSurface(Surface):
         name (str): The name of the lifting surface.
         chord_length (float): The nominal mean aerodynamic chord length of the lifting surface.
         y_duplicate (bool): Whether the lifting surface should be mirrored about Y-axis.
-        origin_position (tuple[float, float, float]): Position of the leading edge of the root chord.
+        origin_position (Vector3): Position of the leading edge of the root chord.
         airfoil (Airfoil): The airfoil of the surface.
         sections (list[Section]): The sections of the surface. Is always sorted bottom to top.
     """
@@ -347,8 +356,8 @@ class VerticalSurface(Surface):
                  root_section: Section,
                  tip_section: Section,
                  y_duplicate: bool,
-                 origin_position: tuple[float, float, float],
-                 airfoil: Airfoil,):
+                 origin_position: AnyVector3,
+                 airfoil: Airfoil) -> None:
         """
         Parameters:
             name (str): The name of the lifting surface.
@@ -359,7 +368,7 @@ class VerticalSurface(Surface):
             tip_section (Section): The tip section of the surface.
             y_duplicate (bool): Whether the lifting surface should be mirrored about Y-axis.
                 Set ``True`` when defining only one half of a symmetric surface.
-            origin_position (tuple[float, float, float]): Position of the leading edge of the root chord.
+            origin_position (AnyVector3): Position of the leading edge of the root chord.
             airfoil (Airfoil): The airfoil of the surface.
         """
         super().__init__(name=name, chord_length=chord_length, root_section=root_section, tip_section=tip_section,
@@ -371,8 +380,8 @@ class VerticalSurface(Surface):
     def minor_axis(self, section: Section) -> float:
         return section.y
 
-    def xmamina_to_xyz(self, x: float, ma: float, mina: float) -> tuple[float, float, float]:
-        return x, mina, ma
+    def xmamina_to_xyz(self, x: float, ma: float, mina: float) -> Vector3:
+        return Vector3(x, mina, ma)
 
     def span(self) -> float:
         span = self.sections[-1].z - self.sections[0].z

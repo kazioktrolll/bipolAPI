@@ -63,9 +63,9 @@ class LeftMenuVTail(CTkFrame):
         for pf in self.pfs.values(): pf.name_label.configure(width=80)
 
         self.pfs['x'].grid(row=0, column=0, padx=10, pady=10, sticky='e')
-        self.pfs['x'].set(self.geometry.v_tail.origin_position[0])
+        self.pfs['x'].set(self.geometry.v_tail.origin_position.x)
         self.pfs['z'].grid(row=1, column=0, padx=10, pady=10, sticky='e')
-        self.pfs['z'].set(self.geometry.v_tail.origin_position[2])
+        self.pfs['z'].set(self.geometry.v_tail.origin_position.z)
         self.pfs['height'].grid(row=2, column=0, padx=10, pady=10, sticky='e')
         self.pfs['height'].set(self.geometry.v_tail.span())
         self.pfs['root_chord'].grid(row=3, column=0, padx=10, pady=10, sticky='e')
@@ -80,7 +80,7 @@ class LeftMenuVTail(CTkFrame):
         if not self.initialized: return
 
         h_tail = VerticalSurface(name="V_tail",
-                                 chord_length=self.pfs['mean_chord'].value,
+                                 chord_length=(self.pfs['root_chord'].value + self.pfs['tip_chord'].value) / 2,
                                  root_section=Section(leading_edge_position=(0,0,0),
                                                       chord=self.pfs['root_chord'].value,
                                                       inclination=0, airfoil=Airfoil.empty()),

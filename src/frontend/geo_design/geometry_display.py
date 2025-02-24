@@ -2,6 +2,7 @@ from customtkinter import CTkCanvas, CTkFrame, CTkButton
 from tkinter import Event
 from enum import IntEnum
 from ...backend.geo_design import Section, Surface, Geometry, Flap, Aileron, Elevator
+from ...backend import Vector3, AnyVector3
 
 
 class GeometryDisplay(CTkFrame):
@@ -128,18 +129,15 @@ class GeometryDisplay(CTkFrame):
 
         assert isinstance(section, Section)
 
-        xle = section.leading_edge_position[0] + surface.origin_position[0]
-        yle = section.leading_edge_position[1] + surface.origin_position[1]
-        zle = section.leading_edge_position[2] + surface.origin_position[2]
-        xte = section.trailing_edge_position[0] + surface.origin_position[0]
-        yte = section.trailing_edge_position[1] + surface.origin_position[1]
-        zte = section.trailing_edge_position[2] + surface.origin_position[2]
-        self.canvas.create_line(self.project(xle, yle, zle),
-                                self.project(xte, yte, zte),
+        global_leading_edge_position = section.leading_edge_position + surface.origin_position
+        global_trailing_edge_position = section.trailing_edge_position + surface.origin_position
+        self.canvas.create_line(self.project(*global_leading_edge_position),
+                                self.project(*global_trailing_edge_position),
                                 fill='blue', width=3, capstyle='round', tags='section')
         # mechanisation
         if not section.has_control: return
         X, Y = self.project(*section.get_position_at_xc(section.control.x_hinge))
+        # TODO: /\ check
         self.canvas.create_oval(X-3, Y-3, X+3, Y+3,
                                 outline='black', tags="control",
                                 fill='yellow' if type(section.control) is Flap else 'green')
@@ -167,20 +165,20 @@ class GeometryDisplay(CTkFrame):
             prev_sec = sections[i - 1]
             self.display_section(curr_sec, wing)
 
-            def globalize(x: float, y: float, z: float) -> tuple[float, float, float]:
-                return x + wing.origin_position[0], y + wing.origin_position[1], z + wing.origin_position[2]
+            def globalize(pos: Vector3) -> Vector3:
+                return pos + wing.origin_position
 
             # Draw leading edge
-            self.canvas.create_line(self.project(*globalize(*prev_sec.leading_edge_position)),
-                                    self.project(*globalize(*curr_sec.leading_edge_position)),
+            self.canvas.create_line(self.project(*globalize(prev_sec.leading_edge_position)),
+                                    self.project(*globalize(curr_sec.leading_edge_position)),
                                     width=3, fill='black', capstyle='round', tags='leading_edge')
             # Draw trailing edge
-            self.canvas.create_line(self.project(*globalize(*prev_sec.trailing_edge_position)),
-                                    self.project(*globalize(*curr_sec.trailing_edge_position)),
+            self.canvas.create_line(self.project(*globalize(prev_sec.trailing_edge_position)),
+                                    self.project(*globalize(curr_sec.trailing_edge_position)),
                                     width=3, fill='black', capstyle='round', tags='trailing_edge')
             # Draw 25% MAC line
-            self.canvas.create_line(self.project(*globalize(*prev_sec.get_position_at_xc(.25))),
-                                    self.project(*globalize(*curr_sec.get_position_at_xc(.25))),
+            self.canvas.create_line(self.project(*globalize(prev_sec.get_position_at_xc(.25))),
+                                    self.project(*globalize(curr_sec.get_position_at_xc(.25))),
                                     width=2, fill='red', capstyle='round', dash=20, tags='mac25')
 
             # Draw control surface, if exists
@@ -190,22 +188,16 @@ class GeometryDisplay(CTkFrame):
             color = {Flap: 'yellow', Aileron: 'green', Elevator: 'green3'}[type(prev_sec.control)]
             x_hinge = prev_sec.control.x_hinge
 
-            y_prev =    wing.origin_position[1] + prev_sec.leading_edge_position[1]
-            x_prev_te = wing.origin_position[0] + prev_sec.trailing_edge_position[0]
-            z_prev_te = wing.origin_position[2] + prev_sec.trailing_edge_position[2]
-            x_prev_le = wing.origin_position[0] + prev_sec.get_position_at_xc(x_hinge)[0]
-            z_prev_le = wing.origin_position[2] + prev_sec.get_position_at_xc(x_hinge)[2]
+            prev_te = globalize(prev_sec.trailing_edge_position)
+            prev_le = globalize(prev_sec.get_position_at_xc(x_hinge))
 
-            y_curr =    wing.origin_position[1] + curr_sec.leading_edge_position[1]
-            x_curr_te = wing.origin_position[0] + curr_sec.trailing_edge_position[0]
-            z_curr_te = wing.origin_position[2] + curr_sec.trailing_edge_position[2]
-            x_curr_le = wing.origin_position[0] + curr_sec.get_position_at_xc(x_hinge)[0]
-            z_curr_le = wing.origin_position[2] + curr_sec.get_position_at_xc(x_hinge)[2]
+            curr_te = globalize(curr_sec.trailing_edge_position)
+            curr_le = globalize(curr_sec.get_position_at_xc(x_hinge))
 
-            self.canvas.create_polygon((self.project(x_prev_le, y_prev, z_prev_le),
-                                        self.project(x_prev_te, y_prev, z_prev_te),
-                                        self.project(x_curr_te, y_curr, z_curr_te),
-                                        self.project(x_curr_le, y_curr, z_curr_le)),
+            self.canvas.create_polygon((self.project(*prev_le),
+                                        self.project(*prev_te),
+                                        self.project(*curr_te),
+                                        self.project(*curr_le)),
                                        fill=color, outline='black', tags="control")
 
         # Order layers

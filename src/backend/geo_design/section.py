@@ -1,6 +1,7 @@
 from typing import Optional
 from math import tan, radians
 from .airfoil import Airfoil
+from ..vector3 import Vector3, AnyVector3
 
 
 class Section:
@@ -8,25 +9,25 @@ class Section:
     A class representing a section of the surface.
 
     Attributes:
-        leading_edge_position (tuple[float, float, float]): Position of the leading edge of the section.
+        leading_edge_position (Vector3): Position of the leading edge of the section.
         chord (float): The chord of the section.
         airfoil (list[tuple[float, float]]): The airfoil of the section.
         control (Control): The control surface of the section.
     """
 
     def __init__(self,
-                 leading_edge_position: tuple[float, float, float],
+                 leading_edge_position: AnyVector3,
                  chord: float,
                  inclination: float,
                  airfoil: Airfoil):
         """
         Parameters:
-            leading_edge_position (tuple[float, float, float]): Position of the leading edge of the section.
+            leading_edge_position (AnyVector3): Position of the leading edge of the section.
             chord (float): The chord of the section.
             inclination (float): The total inclination of the section, in degrees.
             airfoil (Airfoil): The airfoil of the section.
         """
-        self.leading_edge_position = leading_edge_position
+        self.leading_edge_position = Vector3(*leading_edge_position)
         self.chord = chord
         self.inclination = inclination
         self.airfoil = airfoil
@@ -34,7 +35,7 @@ class Section:
 
     def mirror(self) -> 'Section':
         """Returns a copy of self, mirrored about Y-axis."""
-        lep = self.leading_edge_position[0], self.leading_edge_position[1] * -1, self.leading_edge_position[2]
+        lep = self.leading_edge_position.scale((1, -1, 1))
         sec = Section(lep, self.chord, self.inclination, self.airfoil)
         sec.control = self.control.copy() if self.control is not None else None
         return sec
@@ -44,38 +45,37 @@ class Section:
         """Returns True if the section has a control surface."""
         return self.control is not None
 
-    def get_position_at_xc(self, xc: float) -> tuple[float, float, float]:
+    def get_position_at_xc(self, xc: float) -> Vector3:
         """Returns the position of the section at the given x/c."""
-        return (self.leading_edge_position[0] + self.chord * xc,
-                self.leading_edge_position[1],
-                self.leading_edge_position[2] - self.chord * xc * tan(radians(self.inclination)))
+        return self.leading_edge_position + (self.chord * xc,
+                                             0,
+                                             -self.chord * xc * tan(radians(self.inclination)))
 
     @property
-    def trailing_edge_position(self) -> tuple[float, float, float]:
+    def trailing_edge_position(self) -> Vector3:
         """Returns the trailing edge position of the section."""
-        return self.leading_edge_position[0] + self.chord, self.leading_edge_position[1], self.leading_edge_position[2] - self.chord * tan(radians(self.inclination))
+        return self.get_position_at_xc(1)
 
     @property
     def x(self):
         """Returns the y position of the section."""
-        return self.leading_edge_position[0]
+        return self.leading_edge_position.x
 
     @property
     def y(self):
         """Returns the y position of the section."""
-        return self.leading_edge_position[1]
+        return self.leading_edge_position.y
 
     @property
     def z(self):
         """Returns the z position of the section."""
-        return self.leading_edge_position[2]
+        return self.leading_edge_position.z
 
     def string(self) -> str:
         """Returns the current geometry as a .avl type string."""
         _r = (f"\n"
               f"SECTION\n"
-              f"{self.leading_edge_position[0]} {self.leading_edge_position[1]} {self.leading_edge_position[2]} "
-              f"{self.chord} {self.inclination}\n")
+              f"{self.leading_edge_position.avl_string} {self.chord} {self.inclination}\n")
         _r += self.airfoil.string()
         if self.has_control:
             _r += self.control.string()
@@ -85,7 +85,7 @@ class Section:
 class Control:
     """Class representing a control surface attached to a section."""
     def __init__(self, name: str, x_hinge: float, SgnDup: bool,
-                 gain: float = 1, xyz_h_vec: tuple[float, float, float] = (0, 0, 0)):
+                 gain: float = 1, xyz_h_vec: AnyVector3 = Vector3.zero()) -> None:
         """
         Parameters:
             name (str): The name of the control surface.
@@ -93,7 +93,7 @@ class Control:
             SgnDup (bool): The sign of the sign of the hinge.
                 ``True`` for symmetric deflection, ``False`` for antisymmetric defection.
             gain (float): The gain of the control surface. Defaults to 1.
-            xyz_h_vec (tuple[float, float, float]): The xyz position of the hinge. Defaults to (0, 0, 0).
+            xyz_h_vec (AnyVector3): The xyz position of the hinge. Defaults to (0, 0, 0).
         """
         assert -1 < x_hinge < 1
 
@@ -101,18 +101,16 @@ class Control:
         self.x_hinge = x_hinge
         self.SgnDup = SgnDup
         self.gain = gain
-        self.xyz_h_vec = xyz_h_vec
+        self.xyz_h_vec = Vector3(*xyz_h_vec)
 
     def copy(self) -> 'Control':
         """Returns a copy of this control surface."""
-        return Control(self.name, self.x_hinge, self.SgnDup, self.gain, self.xyz_h_vec)
+        return Control(self.name, self.x_hinge, self.SgnDup, self.gain, self.xyz_h_vec.copy())
 
     def string(self) -> str:
         """Returns the current geometry as a .avl type string."""
         return ("CONTROL\n"
-                f"{self.name} {self.gain} {self.x_hinge} "
-                f"{self.xyz_h_vec[0]} {self.xyz_h_vec[1]} {self.xyz_h_vec[2]} "
-                f"{"+1" if self.SgnDup else "-1"}\n")
+                f"{self.name} {self.gain} {self.x_hinge} {self.xyz_h_vec.avl_string} {"+1" if self.SgnDup else "-1"}\n")
 
 
 class Flap(Control):

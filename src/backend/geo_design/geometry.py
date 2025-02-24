@@ -1,6 +1,7 @@
 from typing import Optional, TextIO
-from .surface import Surface
 from pathlib import Path
+from .surface import Surface
+from ..vector3 import Vector3, AnyVector3
 
 
 class Geometry:
@@ -13,7 +14,7 @@ class Geometry:
         chord_length (float): The mean aerodynamic chord length of the aircraft.
         span_length (float): The wingspan of the aircraft.
         mach (float): The cruise speed of the aircraft as Mach number.
-        ref_pos (tuple(float, float, float)): The reference position of the aircraft, ideally the position of the center of mass.
+        ref_pos (Vector3): The reference position of the aircraft, ideally the position of the center of mass.
         surfaces (Dict[str, Surface]): The ``Surface`` objects associated with the aircraft.
         wing (Surface|None): The wing of the aircraft. Returns 'None' if the aircraft has no defined wing.
     """
@@ -24,7 +25,7 @@ class Geometry:
                  span_length: float,
                  surface_area: float = 0,
                  mach: float = 0,
-                 ref_pos: tuple[float, float, float] = (.0, .0, .0)):
+                 ref_pos: AnyVector3 = Vector3.zero()):
         """
         Parameters:
             name (str): The name of the aircraft.
@@ -32,14 +33,14 @@ class Geometry:
             span_length (float): The wingspan of the aircraft.
             surface_area (float): The surface area of the aircraft. If not given, will be calculated as chord*span.
             mach (float): The cruise speed of the aircraft as Mach number.
-            ref_pos (Tuple[float, float, float]): The reference position of the aircraft, ideally the position of the center of mass.
+            ref_pos (AnyVector3): The reference position of the aircraft, ideally the position of the center of mass.
         """
         self.name = name
         self.mach = mach
         self.chord_length = chord_length
         self.span_length = span_length
         self.surface_area = surface_area or chord_length * span_length
-        self.ref_pos = ref_pos
+        self.ref_pos = Vector3(*ref_pos)
         self.surfaces: dict[str, Surface] = {}
 
     def add_surface(self, surface: 'Surface') -> None:
@@ -81,7 +82,7 @@ class Geometry:
         _r = (f"0.0 | Mach\n"
               f"0 0 0 | iYsym iZsym Zsym\n"
               f"{self.surface_area} {self.chord_length} {self.span_length} | Sref Cref Bref\n"
-              f"{self.ref_pos[0]} {self.ref_pos[1]} {self.ref_pos[2]} | Xref Yref Zref\n"
+              f"{self.ref_pos.avl_string} | Xref Yref Zref\n"
               f"0.0 | CDp\n")
 
         for surf in self.surfaces.values():
