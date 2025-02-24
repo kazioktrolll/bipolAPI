@@ -1,8 +1,8 @@
 from customtkinter import CTkCanvas, CTkFrame, CTkButton
 from tkinter import Event
 from enum import IntEnum
-from ...backend.geo_design import Section, Surface, Geometry, Flap, Aileron, Elevator
-from ...backend import Vector3, AnyVector3
+from ...backend.geo_design import Section, Surface, Geometry
+from ...backend import Vector3
 
 
 class GeometryDisplay(CTkFrame):
@@ -136,11 +136,11 @@ class GeometryDisplay(CTkFrame):
                                 fill='blue', width=3, capstyle='round', tags='section')
         # mechanisation
         if not section.has_control: return
-        X, Y = self.project(*section.get_position_at_xc(section.control.x_hinge))
-        # TODO: /\ check
+        if section.y == 0 and surface.y_duplicate: return
+        X, Y = self.project(*(section.get_position_at_xc(section.control.x_hinge) + surface.origin_position))
         self.canvas.create_oval(X-3, Y-3, X+3, Y+3,
                                 outline='black', tags="control",
-                                fill='yellow' if type(section.control) is Flap else 'green')
+                                fill=section.control.color)
 
     def display_wing(self, wing: Surface | list[Surface]) -> None:
         """Displays a ``Surface``. If given a list of Surfaces, displays all."""
@@ -185,7 +185,7 @@ class GeometryDisplay(CTkFrame):
             if prev_sec.control is None or curr_sec.control is None: continue
             if type(prev_sec.control) is not type(curr_sec.control): continue
 
-            color = {Flap: 'yellow', Aileron: 'green', Elevator: 'green3'}[type(prev_sec.control)]
+            color = prev_sec.control.color
             x_hinge = prev_sec.control.x_hinge
 
             prev_te = globalize(prev_sec.trailing_edge_position)

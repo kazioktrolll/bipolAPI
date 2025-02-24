@@ -85,7 +85,8 @@ class Section:
 class Control:
     """Class representing a control surface attached to a section."""
     def __init__(self, name: str, x_hinge: float, SgnDup: bool,
-                 gain: float = 1, xyz_h_vec: AnyVector3 = Vector3.zero()) -> None:
+                 gain: float = 1, xyz_h_vec: AnyVector3 = Vector3.zero(),
+                 color: str = 'green') -> None:
         """
         Parameters:
             name (str): The name of the control surface.
@@ -94,6 +95,7 @@ class Control:
                 ``True`` for symmetric deflection, ``False`` for antisymmetric defection.
             gain (float): The gain of the control surface. Defaults to 1.
             xyz_h_vec (AnyVector3): The xyz position of the hinge. Defaults to (0, 0, 0).
+            color (str): The color of the control surface. Defaults to 'green'.
         """
         assert -1 < x_hinge < 1
 
@@ -102,6 +104,7 @@ class Control:
         self.SgnDup = SgnDup
         self.gain = gain
         self.xyz_h_vec = Vector3(*xyz_h_vec)
+        self.color = color
 
     def copy(self) -> 'Control':
         """Returns a copy of this control surface."""
@@ -120,7 +123,7 @@ class Flap(Control):
             x_hinge (float): The x/c position of the hinge.
         """
         assert 0 < x_hinge < 1
-        super().__init__(name='flap', x_hinge=x_hinge, SgnDup=True)
+        super().__init__(name='flap', x_hinge=x_hinge, SgnDup=True, color='yellow')
 
     def copy(self) -> 'Flap':
         """Returns a copy of this flap."""
@@ -147,7 +150,7 @@ class Elevator(Control):
             x_hinge (float): The x/c position of the hinge.
         """
         assert 0 < x_hinge < 1
-        super().__init__(name='elevator', x_hinge=x_hinge, SgnDup=True)
+        super().__init__(name='elevator', x_hinge=x_hinge, SgnDup=True, color='green3')
 
     def copy(self) -> 'Elevator':
         """Returns a copy of this aileron."""
