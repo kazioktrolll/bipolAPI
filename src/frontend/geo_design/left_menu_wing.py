@@ -10,15 +10,14 @@ from ...backend.geo_design import Geometry, SimpleSurface
 
 
 class LeftMenuWing(CTkFrame):
-    def __init__(self, parent, geometry: Geometry, do_on_update: Callable[[], None]):
+    def __init__(self, parent, do_on_update: Callable[[], None]):
         super().__init__(parent)
-        self.geometry = geometry
         self.pfs: dict[str, ParameterField] = {}
         self.initialized = False
         self.do_on_update = do_on_update
 
         wing = SimpleSurface(name='Wing', span=8, chord_length=1)   # Placeholder, to be adjusted by User.
-        geometry.add_surface(wing)
+        self.geometry.add_surface(wing)
         self.pf_frame = CTkFrame(self, fg_color=self.cget('fg_color'))
         self.pf_frame.grid(row=0, column=0, sticky='nsew')
         self.init_pfs()
@@ -33,6 +32,12 @@ class LeftMenuWing(CTkFrame):
 
         CTkButton(self, text="Save to File", command=self.save_to_file
                   ).grid(row=4, column=0, padx=10, pady=10, sticky='nsew')
+
+    @property
+    def geometry(self) -> Geometry:
+        from .left_menu_general import LeftMenu
+        assert isinstance(self.master, LeftMenu)
+        return self.master.geometry
 
     def init_pfs(self):
         messages = [

@@ -6,26 +6,14 @@ from ...backend import Vector3
 
 
 class GeometryDisplay(CTkFrame):
-    """
-    A widget for displaying current aircraft's geometry while specifying parameters.
-
-    Attributes:
-        geometry (Geometry): Top-level geometry object that is being displayed.
-        canvas (CTkCanvas): Canvas widget used for creating the graphic.
-        origin (tuple[int, int]): Center point of the display.
-        scale (int): A scale used while transforming meters to pixels.
-    """
-
     # General
 
-    def __init__(self, parent, geometry: Geometry):
+    def __init__(self, parent: CTkFrame):
         """
         Parameters:
             parent (CTkFrame): Parent widget to nest the GeometryDisplay instance in.
-            geometry (Geometry): Top-level geometry object that is being displayed.
         """
         super().__init__(parent)
-        self.geometry = geometry
         self.scale = 100
         self.origin = (0, 0)
         self.canvas = CTkCanvas(self)
@@ -41,6 +29,12 @@ class GeometryDisplay(CTkFrame):
         self.drag_offset = (0, 0)
 
         self.view_mode = ViewMode.TOP
+
+    @property
+    def geometry(self) -> Geometry:
+        from ...scenes import GeoDesignScene
+        assert isinstance(self.master, GeoDesignScene)
+        return self.master.geometry
 
     def update(self) -> None:
         """Adjust the display to the window size, redraws everything."""

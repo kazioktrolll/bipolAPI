@@ -1,5 +1,6 @@
 from sys import platform
 from .scene import Scene
+from ..backend.geo_design import Geometry
 from ..frontend import GeometryDisplay, LeftMenu, ViewMode
 
 
@@ -9,7 +10,7 @@ class GeoDesignScene(Scene):
         self.columnconfigure(1, weight=1)
         self.rowconfigure(0, weight=1)
 
-        geometry_display = GeometryDisplay(self, self.app.geometry)
+        geometry_display = GeometryDisplay(self)
         self.to_update.append(geometry_display)
         geometry_display.grid(row=0, column=1, sticky='nsew')
         geometry_display.draw()
@@ -26,7 +27,11 @@ class GeoDesignScene(Scene):
         self.bind("<s>", lambda e: geometry_display.change_view(ViewMode.FRONT))
         self.bind("<d>", lambda e: geometry_display.change_view(ViewMode.RIGHT))
 
-        LeftMenu(self, self.app.geometry, self.geometry_display.update).grid(row=0, column=0, sticky='nsew', padx=5, pady=5)
+        LeftMenu(self, self.geometry_display.update).grid(row=0, column=0, sticky='nsew', padx=5, pady=5)
+
+    @property
+    def geometry(self) -> Geometry:
+        return self.app.geometry
 
     @property
     def geometry_display(self):

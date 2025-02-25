@@ -9,9 +9,8 @@ from ...backend.geo_design import Geometry, VerticalSurface, Section, Airfoil
 
 
 class LeftMenuVTail(CTkFrame):
-    def __init__(self, parent, geometry: Geometry, do_on_update: Callable[[], None]):
+    def __init__(self, parent, do_on_update: Callable[[], None]):
         super().__init__(parent)
-        self.geometry = geometry
         self.pfs: dict[str, ParameterField] = {}
         self.initialized = False
         self.do_on_update = do_on_update
@@ -20,7 +19,7 @@ class LeftMenuVTail(CTkFrame):
                                  sections=[Section(leading_edge_position=(0,0,0), chord=.5, inclination=0, airfoil=Airfoil.empty()),
                                            Section(leading_edge_position=(.3,0,.5), chord=.3, inclination=0, airfoil=Airfoil.empty())],
                                  y_duplicate=False, origin_position=(3.7,0,.5), airfoil=Airfoil.empty())   # Placeholder, to be adjusted by User.
-        geometry.add_surface(h_tail)
+        self.geometry.add_surface(h_tail)
         self.pf_frame = CTkFrame(self, fg_color=self.cget('fg_color'))
         self.pf_frame.grid(row=0, column=0, sticky='nsew')
         self.init_pfs()
@@ -30,6 +29,12 @@ class LeftMenuVTail(CTkFrame):
 
         self.airfoil_chooser = AirfoilChooser(self)
         self.airfoil_chooser.grid(row=3, column=0, padx=10, pady=10, sticky='nsew')
+
+    @property
+    def geometry(self) -> Geometry:
+        from .left_menu_general import LeftMenu
+        assert isinstance(self.master, LeftMenu)
+        return self.master.geometry
 
     def init_pfs(self):
         messages = [

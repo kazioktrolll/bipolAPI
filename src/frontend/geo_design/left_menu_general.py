@@ -8,7 +8,7 @@ from ...backend.geo_design import Geometry
 
 
 class LeftMenu(CTkFrame):
-    def __init__(self, parent, geometry: Geometry, do_on_update: Callable[[], None]):
+    def __init__(self, parent, do_on_update: Callable[[], None]):
         super().__init__(parent)
 
         self.columnconfigure(0, weight=1)
@@ -29,11 +29,17 @@ class LeftMenu(CTkFrame):
 
         self.rowconfigure(1, minsize=4)
 
-        self.wing = LeftMenuWing(self, geometry, do_on_update)
-        self.v_tail = LeftMenuVTail(self, geometry, do_on_update)
-        self.h_tail = LeftMenuHTail(self, geometry, do_on_update)
+        self.wing = LeftMenuWing(self, do_on_update)
+        self.v_tail = LeftMenuVTail(self, do_on_update)
+        self.h_tail = LeftMenuHTail(self, do_on_update)
 
         self.show_wing()
+
+    @property
+    def geometry(self) -> Geometry:
+        from ...scenes import GeoDesignScene
+        assert isinstance(self.master, GeoDesignScene)
+        return self.master.geometry
 
     def show_wing(self):
         if self.wing.grid_info() != {}: return
