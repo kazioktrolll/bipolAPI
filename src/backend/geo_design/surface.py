@@ -21,8 +21,7 @@ class Surface(ABC):
     def __init__(self,
                  name: str,
                  chord_length: float,
-                 root_section: Section,
-                 tip_section: Section,
+                 sections: list[Section],
                  y_duplicate: bool,
                  origin_position: AnyVector3,
                  airfoil: Airfoil,):
@@ -32,8 +31,7 @@ class Surface(ABC):
                 If named 'Wing', 'H_tail', 'V_tail' - will be recognized as such by the ``Geometry`` instance.
             chord_length (float): The nominal mean aerodynamic chord length of the lifting surface.
                 It is not used for geometry generation, just for calculations.
-            root_section (Section): The root section of the surface.
-            tip_section (Section): The tip section of the surface.
+            sections (list[Section]): Sections of the surface.
             y_duplicate (bool): Whether the lifting surface should be mirrored about Y-axis.
                 Set ``True`` when defining only one half of a symmetric surface.
             origin_position (AnyVector3): Position of the leading edge of the root chord.
@@ -44,7 +42,8 @@ class Surface(ABC):
         self.y_duplicate = y_duplicate
         self.origin_position = Vector3(*origin_position)
         self.airfoil = airfoil
-        self.sections: list[Section] = [root_section, tip_section]
+        if not len(sections) >= 2: raise ValueError("Cannot create a surface with less than two sections.")
+        self.sections = sections
         self.sort_sections()
 
     @abstractmethod
@@ -184,8 +183,7 @@ class HorizontalSurface(Surface):
     def __init__(self,
                  name: str,
                  chord_length: float,
-                 root_section: Section,
-                 tip_section: Section,
+                 sections: list[Section],
                  y_duplicate: bool,
                  origin_position: AnyVector3,
                  airfoil: Airfoil,):
@@ -195,14 +193,13 @@ class HorizontalSurface(Surface):
                 If named 'Wing', 'H_tail', 'V_tail' - will be recognized as such by the ``Geometry`` instance.
             chord_length (float): The nominal mean aerodynamic chord length of the lifting surface.
                 It is not used for geometry generation, just for calculations.
-            root_section (Section): The root section of the surface.
-            tip_section (Section): The tip section of the surface.
+            sections (list[Section]): Sections of the surface.
             y_duplicate (bool): Whether the lifting surface should be mirrored about Y-axis.
                 Set ``True`` when defining only one half of a symmetric surface.
             origin_position (AnyVector3): Position of the leading edge of the root chord.
             airfoil (Airfoil): The airfoil of the surface.
         """
-        super().__init__(name=name, chord_length=chord_length, root_section=root_section, tip_section=tip_section,
+        super().__init__(name=name, chord_length=chord_length, sections=sections,
                          y_duplicate=y_duplicate, origin_position=origin_position, airfoil=airfoil)
 
     def major_axis(self, section: Section) -> float:
@@ -264,7 +261,7 @@ class SimpleSurface(HorizontalSurface):
         self.sweep_angle = sweep_angle
 
         root, tip = SimpleSurface.create_geometry(chord_length, span, taper_ratio, sweep_angle, airfoil)
-        super().__init__(name=name, chord_length=chord_length, root_section=root, tip_section=tip, y_duplicate=True,
+        super().__init__(name=name, chord_length=chord_length, sections=[root, tip], y_duplicate=True,
                          origin_position=origin_position, airfoil=airfoil)
 
         self.mechanization = {}
@@ -353,8 +350,7 @@ class VerticalSurface(Surface):
     def __init__(self,
                  name: str,
                  chord_length: float,
-                 root_section: Section,
-                 tip_section: Section,
+                 sections: list[Section],
                  y_duplicate: bool,
                  origin_position: AnyVector3,
                  airfoil: Airfoil) -> None:
@@ -364,14 +360,13 @@ class VerticalSurface(Surface):
                 If named 'Wing', 'H_tail', 'V_tail' - will be recognized as such by the ``Geometry`` instance.
             chord_length (float): The nominal mean aerodynamic chord length of the lifting surface.
                 It is not used for geometry generation, just for calculations.
-            root_section (Section): The root section of the surface.
-            tip_section (Section): The tip section of the surface.
+            sections (list[Section]): Sections of the surface.
             y_duplicate (bool): Whether the lifting surface should be mirrored about Y-axis.
                 Set ``True`` when defining only one half of a symmetric surface.
             origin_position (AnyVector3): Position of the leading edge of the root chord.
             airfoil (Airfoil): The airfoil of the surface.
         """
-        super().__init__(name=name, chord_length=chord_length, root_section=root_section, tip_section=tip_section,
+        super().__init__(name=name, chord_length=chord_length, sections=sections,
                          y_duplicate=y_duplicate, origin_position=origin_position, airfoil=airfoil)
 
     def major_axis(self, section: Section) -> float:

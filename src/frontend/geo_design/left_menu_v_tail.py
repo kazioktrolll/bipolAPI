@@ -17,8 +17,8 @@ class LeftMenuVTail(CTkFrame):
         self.do_on_update = do_on_update
 
         h_tail = VerticalSurface(name="V_tail", chord_length=.4,
-                                 root_section=Section(leading_edge_position=(0,0,0), chord=.5, inclination=0, airfoil=Airfoil.empty()),
-                                 tip_section=Section(leading_edge_position=(.3,0,.5), chord=.3, inclination=0, airfoil=Airfoil.empty()),
+                                 sections=[Section(leading_edge_position=(0,0,0), chord=.5, inclination=0, airfoil=Airfoil.empty()),
+                                           Section(leading_edge_position=(.3,0,.5), chord=.3, inclination=0, airfoil=Airfoil.empty())],
                                  y_duplicate=False, origin_position=(3.7,0,.5), airfoil=Airfoil.empty())   # Placeholder, to be adjusted by User.
         geometry.add_surface(h_tail)
         self.pf_frame = CTkFrame(self, fg_color=self.cget('fg_color'))
@@ -81,12 +81,12 @@ class LeftMenuVTail(CTkFrame):
 
         h_tail = VerticalSurface(name="V_tail",
                                  chord_length=(self.pfs['root_chord'].value + self.pfs['tip_chord'].value) / 2,
-                                 root_section=Section(leading_edge_position=(0,0,0),
+                                 sections=[Section(leading_edge_position=(0,0,0),
                                                       chord=self.pfs['root_chord'].value,
                                                       inclination=0, airfoil=Airfoil.empty()),
-                                 tip_section=Section(leading_edge_position=(self.pfs['x_offset'].value, 0, self.pfs['height'].value),
+                                           Section(leading_edge_position=(self.pfs['x_offset'].value, 0, self.pfs['height'].value),
                                                      chord=self.pfs['tip_chord'].value,
-                                                     inclination=0, airfoil=Airfoil.empty()),
+                                                     inclination=0, airfoil=Airfoil.empty())],
                                  y_duplicate=False,
                                  origin_position=(self.pfs['x'].value, 0, self.pfs['z'].value),
                                  airfoil=Airfoil.empty())
