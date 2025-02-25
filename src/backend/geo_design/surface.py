@@ -396,3 +396,25 @@ class VerticalSurface(Surface):
     def get_sections_between(self, z_start: float, z_end: float, include_start: bool = True, include_end: bool = False) -> list[Section]:
         """Returns a list of sections between ``z_start`` and ``z_end``."""
         return super().get_sections_between(ma_start=z_start, ma_end=z_end, include_start=include_start, include_end=include_end)
+
+
+class SurfaceCreator:
+    @classmethod
+    def UnknownSurface(cls,
+                       name: str,
+                       chord_length: float,
+                       sections: list[Section],
+                       y_duplicate: bool,
+                       origin_position: AnyVector3,
+                       airfoil: Airfoil
+                       ) -> HorizontalSurface | VerticalSurface:
+        sections.sort(key=lambda section: section.y)
+        dy = sections[-1].y - sections[0].y
+        sections.sort(key=lambda section: section.z)
+        dz = sections[-1].z - sections[0].z
+        """Decides which Surface class is appropriate based on input parameters, creates and returns an instance accordingly."""
+        if dy >= dz:
+            return HorizontalSurface(name=name, chord_length=chord_length, sections=sections, y_duplicate=y_duplicate, origin_position=origin_position, airfoil=airfoil)
+        else:
+            return VerticalSurface(name=name, chord_length=chord_length, sections=sections, y_duplicate=y_duplicate, origin_position=origin_position, airfoil=airfoil)
+
