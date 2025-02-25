@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Any
 from .geometry import Geometry
 from .surface import Surface, SurfaceCreator
 from .section import Section, Control
@@ -52,8 +53,11 @@ class GeometryGenerator:
         syms = tuple(map(float, lines.pop(0).split()))
         refs = tuple(map(float, lines.pop(0).split()))
         ref_pos = tuple(map(float, lines.pop(0).split()))
-        try: CDp = float(lines.pop(0))
-        except ValueError: CDp = 0
+        next_line = lines.pop(0)
+        try: CDp = float(next_line)
+        except ValueError:
+            CDp = 0
+            lines.insert(0, next_line)
         geometry_data = {
             'name': name,
             'chord_length': refs[1],
@@ -74,7 +78,7 @@ class GeometryGenerator:
     @classmethod
     def handle_surface_level(cls, block: list[str]) -> Surface:
         """Returns a Surface based on .avl description lines."""
-        surface_data = {
+        surface_data: dict[str, Any] = {
             'name': None,
             'chord_length': None,
             'sections': [],
