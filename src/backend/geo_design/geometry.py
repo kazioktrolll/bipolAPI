@@ -25,7 +25,8 @@ class Geometry:
                  span_length: float,
                  surface_area: float = 0,
                  mach: float = 0,
-                 ref_pos: AnyVector3 = Vector3.zero()):
+                 ref_pos: AnyVector3 = Vector3.zero(),
+                 surfaces: list[Surface] = None):
         """
         Parameters:
             name (str): The name of the aircraft.
@@ -34,6 +35,7 @@ class Geometry:
             surface_area (float): The surface area of the aircraft. If not given, will be calculated as chord*span.
             mach (float): The cruise speed of the aircraft as Mach number.
             ref_pos (AnyVector3): The reference position of the aircraft, ideally the position of the center of mass.
+            surfaces (list[Surface]): The ``Surface`` objects associated with the aircraft.
         """
         self.name = name
         self.mach = mach
@@ -41,20 +43,20 @@ class Geometry:
         self.span_length = span_length
         self.surface_area = surface_area or chord_length * span_length
         self.ref_pos = Vector3(*ref_pos)
-        self.surfaces: dict[str, Surface] = {}
+        self.surfaces = {surf.name: surf for surf in surfaces} if surfaces else {}
 
-    def add_surface(self, surface: 'Surface') -> None:
+    def add_surface(self, surface: Surface) -> None:
         """Add a new surface. The name must be unique."""
         if surface.name in self.surfaces.keys(): raise AttributeError("A surface with name {} already exists.".format(surface.name))
         self.surfaces[surface.name] = surface
 
-    def replace_surface(self, surface: 'Surface') -> None:
+    def replace_surface(self, surface: Surface) -> None:
         """Replace an existing surface with the new surface."""
         if surface.name not in self.surfaces.keys(): raise AttributeError("No surface named {}.".format(surface.name))
         self.surfaces[surface.name] = surface
 
     @property
-    def wing(self) -> Optional['Surface']:
+    def wing(self) -> Optional[Surface]:
         """The wing of the aircraft. Returns 'None' if the aircraft has no defined wing."""
         try:
             return self.surfaces["Wing"]
@@ -62,7 +64,7 @@ class Geometry:
             return None
 
     @property
-    def h_tail(self) -> Optional['Surface']:
+    def h_tail(self) -> Optional[Surface]:
         """The horizontal tail of the aircraft. Returns 'None' if the aircraft has no defined horizontal tail."""
         try:
             return self.surfaces["H_tail"]
@@ -70,7 +72,7 @@ class Geometry:
             return None
 
     @property
-    def v_tail(self) -> Optional['Surface']:
+    def v_tail(self) -> Optional[Surface]:
         """The vertical tail of the aircraft. Returns 'None' if the aircraft has no defined vertical tail."""
         try:
             return self.surfaces["V_tail"]
