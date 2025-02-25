@@ -1,4 +1,4 @@
-from typing import Optional, TypeVar
+from typing import TypeVar
 from math import tan, radians
 from .airfoil import Airfoil
 from ..vector3 import Vector3, AnyVector3
@@ -22,7 +22,8 @@ class Section:
                  leading_edge_position: AnyVector3,
                  chord: float,
                  inclination: float,
-                 airfoil: Airfoil):
+                 airfoil: Airfoil,
+                 control: 'Control' = None) -> None:
         """
         Parameters:
             leading_edge_position (AnyVector3): Position of the leading edge of the section.
@@ -34,7 +35,7 @@ class Section:
         self.chord = chord
         self.inclination = inclination
         self.airfoil = airfoil
-        self.control: Optional['Control'] = None
+        self.control = control
 
     def mirror(self) -> 'Section':
         """Returns a copy of self, mirrored about Y-axis."""
