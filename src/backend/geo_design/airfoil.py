@@ -53,8 +53,10 @@ class Airfoil:
         self.active_range = active_range
 
     @classmethod
-    def from_file(cls, path: Path, name: str, active_range=(0.0, 1.0)) -> 'Airfoil':
+    def from_file(cls, path: Path | str, name: str = None, active_range=(0.0, 1.0)) -> 'Airfoil':
         """Creates an Airfoil object using geometry from a file."""
+        if isinstance(path, str): path = Path(path)
+        name = name or path.stem
         with open(path) as f: raw_lines = f.readlines()
 
         lines = []
