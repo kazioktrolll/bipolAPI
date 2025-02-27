@@ -136,6 +136,8 @@ class FromAvl:
         )
 
         blocks = cls.split_into_blocks(block, keywords)
+        scale = (1,1,1)
+        angle = 0
         for b in blocks:
             match b[0]:
                 case kw if kw in ('COMPONENT', 'INDEX'):
@@ -146,30 +148,30 @@ class FromAvl:
                     else:
                         cls.error(f"YDUPLICATE cannot be non-zero!")  # TODO: fix?
                 case 'SCALE':
-                    cls.error("SCALE")  # TODO: handle!
+                    scale = tuple(map(float, b[1].split()))
                 case 'TRANSLATE':
                     vals = map(float, b[1].split())
                     surface_data['origin_position'] = Vector3(*vals)
                 case 'ANGLE':
-                    cls.error(f"{kw}")  # TODO: handle!
+                    angle = float(b[1])
                 case kw if kw in ('NOWAKE', 'NOALBE', 'NOLOAD'):
                     cls.error(f"{kw}")
                 case 'CDCL':
                     cls.error("CDCL")
                 case 'SECTION':
-                    surface_data['sections'].append(cls.handle_section_level(b[1:]))
+                    surface_data['sections'].append(cls.handle_section_level(b[1:], scale, angle))
 
         surface_data['airfoil'] = surface_data['sections'][0].airfoil
         return SurfaceCreator.UnknownSurface(**surface_data)
 
     @classmethod
-    def handle_section_level(cls, block: list[str]) -> Section:
+    def handle_section_level(cls, block: list[str], scale=(1,1,1), angle=0) -> Section:
         """Returns a Section based on .avl description lines."""
         vals = list(map(float, block.pop(0).split()))
         section_data = {
-            'leading_edge_position': Vector3(*vals[:3]),
+            'leading_edge_position': Vector3(*vals[:3]).scale(scale),
             'chord': vals[3],
-            'inclination': vals[4],
+            'inclination': vals[4] + angle,
             'airfoil': None,
             'control': None
         }
