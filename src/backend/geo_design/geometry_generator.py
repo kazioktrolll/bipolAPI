@@ -1,13 +1,36 @@
 from pathlib import Path
 from typing import Any
 from .geometry import Geometry
-from .surface import Surface, SurfaceCreator, SimpleSurface
+from .surface import Surface, SurfaceCreator, SimpleSurface, VerticalSurface
 from .section import Section, Control
 from .airfoil import Airfoil
 from ..vector3 import Vector3
 
 
 class GeometryGenerator:
+    @classmethod
+    def default(cls) -> Geometry:
+        wing = SimpleSurface(name='wing', span=8, chord_length=1)
+        h_tail = SimpleSurface(name='h_tail', span=1, chord_length=1, origin_position=(4, 0, 1))
+        v_tail = VerticalSurface(
+            name='v_tail',
+            chord_length=.9,
+            sections=[
+                Section((0,0,0), 1.1, 0),
+                Section((.1,0,.5), .9, 0),
+            ],
+            origin_position=(3.9, 0, .5),
+            y_duplicate=False
+        )
+        g = Geometry(
+            name="default",
+            chord_length=wing.chord_length,
+            span_length=wing.span(),
+            surfaces=[wing, h_tail, v_tail],
+            surface_area=wing.chord_length * wing.span(),
+        )
+        return g
+
     @classmethod
     def from_avl(cls, path: Path | str) -> Geometry:
         """Creates a Geometry object based on .avl file."""
