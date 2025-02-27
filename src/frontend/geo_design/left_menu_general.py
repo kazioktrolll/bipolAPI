@@ -1,15 +1,16 @@
 from customtkinter import CTkFrame, CTkButton, ThemeManager
 from typing import Callable
 
-from .left_menu_wing import LeftMenuWing
-from .left_menu_v_tail import LeftMenuVTail
-from .left_menu_h_tail import LeftMenuHTail
+from .left_menu_simple_surface import LeftMenuSimpleSurface
+from .left_menu_vertical_surface import LeftMenuVerticalSurface
 from ...backend.geo_design import Geometry
 
 
 class LeftMenu(CTkFrame):
     def __init__(self, parent, do_on_update: Callable[[], None]):
         super().__init__(parent)
+
+        self._do_on_update = do_on_update
 
         self.columnconfigure(0, weight=1)
         self.rowconfigure(2, weight=1)
@@ -29,9 +30,9 @@ class LeftMenu(CTkFrame):
 
         self.rowconfigure(1, minsize=4)
 
-        self.wing = LeftMenuWing(self, do_on_update)
-        self.v_tail = LeftMenuVTail(self, do_on_update)
-        self.h_tail = LeftMenuHTail(self, do_on_update)
+        self.wing = LeftMenuSimpleSurface.default(self, 'wing')
+        self.v_tail = LeftMenuVerticalSurface.default(self, 'v_tail')
+        self.h_tail = LeftMenuSimpleSurface.default(self, 'h_tail')
 
         self.show_wing()
 
@@ -40,6 +41,9 @@ class LeftMenu(CTkFrame):
         from ...scenes import GeoDesignScene
         assert isinstance(self.master, GeoDesignScene)
         return self.master.geometry
+
+    def do_on_update(self) -> None:
+        self._do_on_update()
 
     def show_wing(self):
         if self.wing.grid_info() != {}: return

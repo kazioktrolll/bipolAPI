@@ -1,7 +1,7 @@
 from sys import platform
 from .scene import Scene
 from ..backend.geo_design import Geometry
-from ..frontend import GeometryDisplay, LeftMenu, ViewMode
+from ..frontend import GeometryDisplay, ViewMode, LeftMenu
 
 
 class GeoDesignScene(Scene):
@@ -15,7 +15,7 @@ class GeoDesignScene(Scene):
         geometry_display.grid(row=0, column=1, sticky='nsew')
         geometry_display.draw()
 
-        if platform == "linux" or platform == "linux2":
+        if platform in ("linux",  "linux2"):
             self.bind("<Button-4>", lambda e: geometry_display.zoom())
             self.bind("<Button-5>", lambda e: geometry_display.unzoom())
         else:
