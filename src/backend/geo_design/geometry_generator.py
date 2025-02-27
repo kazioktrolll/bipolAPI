@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Any
 from .geometry import Geometry
-from .surface import Surface, SurfaceCreator
+from .surface import Surface, SurfaceCreator, SimpleSurface
 from .section import Section, Control
 from .airfoil import Airfoil
 from ..vector3 import Vector3
@@ -10,6 +10,13 @@ from ..vector3 import Vector3
 class GeometryGenerator:
     @classmethod
     def from_avl(cls, path: Path | str) -> Geometry:
+        """Creates a Geometry object based on .avl file."""
+        return FromAvl.load(path)
+
+
+class FromAvl:
+    @classmethod
+    def load(cls, path: Path | str) -> Geometry:
         """Creates a Geometry object based on .avl file."""
         if isinstance(path, str): path = Path(path)
         with open(path) as f: raw_lines = f.readlines()
@@ -54,7 +61,8 @@ class GeometryGenerator:
         refs = tuple(map(float, lines.pop(0).split()))
         ref_pos = tuple(map(float, lines.pop(0).split()))
         next_line = lines.pop(0)
-        try: CDp = float(next_line)
+        try:
+            CDp = float(next_line)
         except ValueError:
             CDp = 0
             lines.insert(0, next_line)
@@ -88,7 +96,7 @@ class GeometryGenerator:
         }
         name = block.pop(0)
         surface_data['name'] = name
-        Nchord_etc = block.pop(0)   # TODO: implement?
+        Nchord_etc = block.pop(0)  # TODO: implement?
 
         keywords = (
             'COMPONENT',
@@ -110,8 +118,10 @@ class GeometryGenerator:
                 case kw if kw in ('COMPONENT', 'INDEX'):
                     cls.error(f"{kw}")
                 case 'YDUPLICATE':
-                    if float(b[1]) == 0.0: surface_data['y_duplicate'] = True
-                    else: cls.error(f"YDUPLICATE cannot be non-zero!")  # TODO: fix?
+                    if float(b[1]) == 0.0:
+                        surface_data['y_duplicate'] = True
+                    else:
+                        cls.error(f"YDUPLICATE cannot be non-zero!")  # TODO: fix?
                 case 'SCALE':
                     cls.error("SCALE")  # TODO: handle!
                 case 'TRANSLATE':
