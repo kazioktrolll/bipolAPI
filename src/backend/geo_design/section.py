@@ -22,7 +22,7 @@ class Section:
                  leading_edge_position: AnyVector3,
                  chord: float,
                  inclination: float,
-                 airfoil: Airfoil,
+                 airfoil: Airfoil = None,
                  control: 'Control' = None) -> None:
         """
         Parameters:
@@ -34,7 +34,7 @@ class Section:
         self.leading_edge_position = Vector3(*leading_edge_position)
         self.chord = chord
         self.inclination = inclination
-        self.airfoil = airfoil
+        self.airfoil = airfoil or Airfoil.empty()
         self.control = control
 
     def mirror(self) -> 'Section':
