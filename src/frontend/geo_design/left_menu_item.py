@@ -91,7 +91,7 @@ class LeftMenuItem(CTkFrame, ABC):
     @property
     @final
     def parent(self):
-        from .left_menu_general import LeftMenu
+        from .left_menu import LeftMenu
         assert isinstance(self.master, LeftMenu)
         return self.master
 

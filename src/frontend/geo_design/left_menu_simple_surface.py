@@ -48,7 +48,7 @@ class LeftMenuSimpleSurface(LeftMenuItem):
             span=4,
             chord_length=1
         )
-        from .left_menu_general import LeftMenu
+        from .left_menu import LeftMenu
         assert(isinstance(parent, LeftMenu))
         parent.geometry.add_surface(surface)
         return cls(parent, surface)

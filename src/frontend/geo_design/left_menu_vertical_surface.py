@@ -79,7 +79,7 @@ class LeftMenuVerticalSurface(LeftMenuItem):
             origin_position=(0, 0, 0),
             y_duplicate=False
         )
-        from .left_menu_general import LeftMenu
+        from .left_menu import LeftMenu
         assert isinstance(parent, LeftMenu)
         parent.geometry.add_surface(surface)
         return cls(parent, surface)
