@@ -24,7 +24,7 @@ class Surface(ABC):
                  sections: list[Section],
                  y_duplicate: bool,
                  origin_position: AnyVector3,
-                 airfoil: Airfoil,):
+                 airfoil: Airfoil = None,):
         """
         Parameters:
             name (str): The name of the lifting surface.
@@ -41,7 +41,7 @@ class Surface(ABC):
         self.chord_length = chord_length
         self.y_duplicate = y_duplicate
         self.origin_position = Vector3(*origin_position)
-        self.airfoil = airfoil
+        self.airfoil = airfoil if airfoil else Airfoil.empty()
         if not len(sections) >= 2: raise ValueError("Cannot create a surface with less than two sections.")
         self.sections = sections
         self.sort_sections()
@@ -186,7 +186,7 @@ class HorizontalSurface(Surface):
                  sections: list[Section],
                  y_duplicate: bool,
                  origin_position: AnyVector3,
-                 airfoil: Airfoil,):
+                 airfoil: Airfoil = None):
         """
         Parameters:
             name (str): The name of the lifting surface.
@@ -353,7 +353,7 @@ class VerticalSurface(Surface):
                  sections: list[Section],
                  y_duplicate: bool,
                  origin_position: AnyVector3,
-                 airfoil: Airfoil) -> None:
+                 airfoil: Airfoil = None) -> None:
         """
         Parameters:
             name (str): The name of the lifting surface.
@@ -406,7 +406,7 @@ class SurfaceCreator:
                        sections: list[Section],
                        y_duplicate: bool,
                        origin_position: AnyVector3,
-                       airfoil: Airfoil
+                       airfoil: Airfoil = None
                        ) -> HorizontalSurface | VerticalSurface:
         sections.sort(key=lambda section: section.y)
         dy = sections[-1].y - sections[0].y
