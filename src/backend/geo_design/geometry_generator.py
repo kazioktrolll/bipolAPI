@@ -17,9 +17,9 @@ class GeometryGenerator:
             chord_length=.9,
             sections=[
                 Section((0,0,0), 1.1, 0),
-                Section((.1,0,.5), .9, 0),
+                Section((.2,0,.5), .9, 0),
             ],
-            origin_position=(3.9, 0, .5),
+            origin_position=(3.8, 0, .5),
             y_duplicate=False
         )
         g = Geometry(
