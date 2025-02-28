@@ -232,7 +232,7 @@ class HorizontalSurface(Surface):
         return super().get_sections_between(ma_start=y_start, ma_end=y_end, include_start=include_start, include_end=include_end)
 
 
-class SimpleSurface(HorizontalSurface):
+class HorizontalSimpleSurface(HorizontalSurface):
     """ A subclass of the ``Surface`` representing a simple, horizontal, trapezoidal lifting surface. """
 
     def __init__(self,
@@ -260,7 +260,7 @@ class SimpleSurface(HorizontalSurface):
         self.taper_ratio = taper_ratio
         self.sweep_angle = sweep_angle
 
-        root, tip = SimpleSurface.create_geometry(chord_length, span, taper_ratio, sweep_angle, airfoil)
+        root, tip = HorizontalSimpleSurface.create_geometry(chord_length, span, taper_ratio, sweep_angle, airfoil)
         super().__init__(name=name, chord_length=chord_length, sections=[root, tip], y_duplicate=True,
                          origin_position=origin_position, airfoil=airfoil)
 
@@ -327,14 +327,14 @@ class SimpleSurface(HorizontalSurface):
                     if section.has_control: raise Exception("A section already has a control surface!")
                     section.control = mech_type(x_hinge=hinge_x)
 
-    def get_symmetric(self) -> 'SimpleSurface':
+    def get_symmetric(self) -> 'HorizontalSimpleSurface':
         surf = super().get_symmetric()
-        assert isinstance(surf, SimpleSurface)
+        assert isinstance(surf, HorizontalSimpleSurface)
         surf.mechanization = {k: (-s, -e, xc) for k, (s, e, xc) in surf.mechanization}
         return surf
 
 
-class VerticalSurface(Surface):
+class VerticalSimpleSurface(Surface):
     """
     A class representing a single lifting surface of the aircraft, oriented more-or-less vertically.
 
@@ -407,7 +407,7 @@ class SurfaceCreator:
                        y_duplicate: bool,
                        origin_position: AnyVector3,
                        airfoil: Airfoil = None
-                       ) -> HorizontalSurface | VerticalSurface:
+                       ) -> HorizontalSurface | VerticalSimpleSurface:
         sections.sort(key=lambda section: section.y)
         dy = sections[-1].y - sections[0].y
         sections.sort(key=lambda section: section.z)
@@ -416,5 +416,5 @@ class SurfaceCreator:
         if dy >= dz:
             return HorizontalSurface(name=name, chord_length=chord_length, sections=sections, y_duplicate=y_duplicate, origin_position=origin_position, airfoil=airfoil)
         else:
-            return VerticalSurface(name=name, chord_length=chord_length, sections=sections, y_duplicate=y_duplicate, origin_position=origin_position, airfoil=airfoil)
+            return VerticalSimpleSurface(name=name, chord_length=chord_length, sections=sections, y_duplicate=y_duplicate, origin_position=origin_position, airfoil=airfoil)
 

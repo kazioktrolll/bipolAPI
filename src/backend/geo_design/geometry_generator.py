@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Any
 from .geometry import Geometry
-from .surface import Surface, SurfaceCreator, SimpleSurface, VerticalSurface
+from .surface import Surface, SurfaceCreator, HorizontalSimpleSurface, VerticalSimpleSurface
 from .section import Section, Control
 from .airfoil import Airfoil
 from ..vector3 import Vector3
@@ -10,9 +10,9 @@ from ..vector3 import Vector3
 class GeometryGenerator:
     @classmethod
     def default(cls) -> Geometry:
-        wing = SimpleSurface(name='wing', span=8, chord_length=1)
-        h_tail = SimpleSurface(name='h_tail', span=1, chord_length=1, origin_position=(4, 0, 1))
-        v_tail = VerticalSurface(
+        wing = HorizontalSimpleSurface(name='wing', span=8, chord_length=1)
+        h_tail = HorizontalSimpleSurface(name='h_tail', span=1, chord_length=1, origin_position=(4, 0, 1))
+        v_tail = VerticalSimpleSurface(
             name='v_tail',
             chord_length=.9,
             sections=[

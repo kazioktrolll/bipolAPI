@@ -1,9 +1,9 @@
 from .left_menu_item import LeftMenuItem
-from ...backend.geo_design import VerticalSurface, Section
+from ...backend.geo_design import VerticalSimpleSurface, Section
 
 
 class LeftMenuVerticalSurface(LeftMenuItem):
-    def __init__(self, parent, surface: VerticalSurface) -> None:
+    def __init__(self, parent, surface: VerticalSimpleSurface) -> None:
         super().__init__(parent, surface)
 
     def init_pfs(self) -> None:
@@ -35,7 +35,7 @@ class LeftMenuVerticalSurface(LeftMenuItem):
         super().init_pfs()
 
     def update_surface(self, _=None) -> None:
-        surface_generator = lambda: VerticalSurface(
+        surface_generator = lambda: VerticalSimpleSurface(
             name=self.name,
             chord_length=(self.pfs['root_chord'].value + self.pfs['tip_chord'].value)/2,
             sections = [
@@ -63,7 +63,7 @@ class LeftMenuVerticalSurface(LeftMenuItem):
 
     @classmethod
     def default(cls, parent, name: str) -> 'LeftMenuVerticalSurface':
-        surface = VerticalSurface(
+        surface = VerticalSimpleSurface(
             name=name,
             chord_length=1,
             sections = [

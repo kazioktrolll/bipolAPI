@@ -1,9 +1,9 @@
 from .left_menu_item import LeftMenuItem
-from ...backend.geo_design import SimpleSurface
+from ...backend.geo_design import HorizontalSimpleSurface
 
 
 class LeftMenuSimpleSurface(LeftMenuItem):
-    def __init__(self, parent, surface: SimpleSurface):
+    def __init__(self, parent, surface: HorizontalSimpleSurface):
         super().__init__(parent, surface)
 
     def init_pfs(self) -> None:
@@ -23,7 +23,7 @@ class LeftMenuSimpleSurface(LeftMenuItem):
         super().init_pfs()
 
     def update_surface(self, _=None) -> None:
-        surface_generator = lambda: SimpleSurface(
+        surface_generator = lambda: HorizontalSimpleSurface(
             name=self.name,
             span=self.pfs['span'].value,
             chord_length=self.pfs['chord'].value,
@@ -43,7 +43,7 @@ class LeftMenuSimpleSurface(LeftMenuItem):
 
     @classmethod
     def default(cls, parent, name: str) -> 'LeftMenuSimpleSurface':
-        surface = SimpleSurface(
+        surface = HorizontalSimpleSurface(
             name=name,
             span=4,
             chord_length=1

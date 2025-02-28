@@ -4,7 +4,7 @@ from typing import Callable
 from .left_menu_item import LeftMenuItem, LeftMenuNotImplemented
 from .left_menu_simple_surface import LeftMenuSimpleSurface
 from .left_menu_vertical_surface import LeftMenuVerticalSurface
-from ...backend.geo_design import Geometry, SimpleSurface, VerticalSurface, HorizontalSurface
+from ...backend.geo_design import Geometry, HorizontalSimpleSurface, VerticalSimpleSurface, HorizontalSurface
 
 
 class LeftMenu(CTkFrame):
@@ -33,8 +33,8 @@ class LeftMenu(CTkFrame):
             self.buttons_frame.columnconfigure(i, weight=1)
 
     def update_items(self) -> None:
-        menu_item = {SimpleSurface: LeftMenuSimpleSurface,
-                     VerticalSurface: LeftMenuVerticalSurface,
+        menu_item = {HorizontalSimpleSurface: LeftMenuSimpleSurface,
+                     VerticalSimpleSurface: LeftMenuVerticalSurface,
                      HorizontalSurface: LeftMenuNotImplemented}
         for name, surface in self.geometry.surfaces.items():
             item_type = menu_item[type(surface)]
