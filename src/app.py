@@ -1,5 +1,7 @@
 from pathlib import Path
 from typing import Callable
+import pickle
+from tkinter.filedialog import asksaveasfilename, askopenfilename
 
 
 class App:
@@ -24,6 +26,7 @@ class App:
         from .backend.geo_design import Geometry
         set_appearance_mode("Dark")
         set_default_color_theme("blue")
+        self.file_path: Path | None = None
         self.root = CTk()
         self.scene = Scene(self)  # Placeholder
         self.geometry: Geometry = Geometry(name='Plane', chord_length=1, span_length=8)  # Placeholder
@@ -57,3 +60,18 @@ class App:
     def after(self, ms: int, func: Callable, *args) -> None:
         """Calls the given function with the given arguments after the delay given in milliseconds."""
         self.root.after(ms, func, *args)
+
+    def save_as(self) -> None:
+        """Saves the current geometry as a .gavl file."""
+        path = Path(asksaveasfilename(
+            defaultextension='.gavl',
+            filetypes=[('GAVL File', ['*.gavl'])]
+        ))
+        with open(path, 'wb') as f: pickle.dump(self.geometry, f)
+
+    def load(self) -> None:
+        """Loads the geometry from a .gavl file."""
+        path = Path(askopenfilename(
+            filetypes=[('GAVL File', ['*.gavl']), ('All Files', ['*.*'])]
+        ))
+        with open(path, 'rb') as f: self.geometry = pickle.load(f)
