@@ -21,6 +21,7 @@ class GeoDesignScene(Scene):
         else:
             self.bind("<MouseWheel>", geometry_display.scroll_zoom)
         self.bind("<Button-1>", geometry_display.start_drag)
+        # self.bind("<Button-1>", lambda e: print("clicked:", e.widget.cget("text")))
         self.bind("<B1-Motion>", geometry_display.drag)
         self.bind("<ButtonRelease-1>", geometry_display.stop_drag)
         self.bind("<w>", lambda e: geometry_display.change_view(ViewMode.TOP))

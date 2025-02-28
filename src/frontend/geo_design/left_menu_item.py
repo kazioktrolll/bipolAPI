@@ -14,8 +14,11 @@ class LeftMenuItem(CTkFrame, ABC):
         super().__init__(parent)
         self.pfs: dict[str, ParameterField] = {}
         self.initialized = False
-
         self.surface = surface
+
+        self.button = CTkButton(parent.buttons_frame, text=self.name, command=lambda: parent.show_item(self))
+        self.button.invoke()
+
         self.pf_frame = CTkFrame(self, fg_color=self.cget('fg_color'))
         self.pf_frame.columnconfigure(0, weight=1)
 
@@ -28,6 +31,9 @@ class LeftMenuItem(CTkFrame, ABC):
 
         self.init_pfs()
         self.build()
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}: {self.surface.name}"
 
     def build(self) -> None:
         for i, mech in enumerate(self.mechanizations.values()):
@@ -96,7 +102,6 @@ class LeftMenuItem(CTkFrame, ABC):
         return self.master
 
     @property
-    @final
     def name(self) -> str:
         return self.surface.name
 
@@ -104,3 +109,11 @@ class LeftMenuItem(CTkFrame, ABC):
     @final
     def geometry(self) -> Geometry:
         return self.parent.geometry
+
+
+class LeftMenuNotImplemented(LeftMenuItem):
+    def __init__(self, parent, surface: Surface) -> None:
+        super().__init__(parent, surface)
+
+    def init_pfs(self) -> None: ...
+    def update_surface(self, _=None) -> None: ...
