@@ -9,6 +9,15 @@ from ..vector3 import Vector3
 
 class GeometryGenerator:
     @classmethod
+    def empty(cls) -> 'Geometry':
+        g = Geometry(
+            name='Empty',
+            chord_length=0,
+            span_length=0
+        )
+        return g
+
+    @classmethod
     def default(cls) -> Geometry:
         wing = HorizontalSimpleSurface(name='wing', span=8, chord_length=1)
         h_tail = HorizontalSimpleSurface(name='h_tail', span=1, chord_length=1, origin_position=(4, 0, 1))

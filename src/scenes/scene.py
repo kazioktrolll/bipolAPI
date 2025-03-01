@@ -30,7 +30,8 @@ class Scene(CTkFrame):
         if type(self) is not Scene: raise NotImplementedError
 
     def update(self) -> None:
-        for tu in self.to_update: tu.update()
+        for tu in self.to_update:
+            tu.update()
 
     def bind(self, *args, **kwargs):
         self.app.root.bind(*args, **kwargs)

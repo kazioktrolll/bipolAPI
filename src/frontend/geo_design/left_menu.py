@@ -32,6 +32,11 @@ class LeftMenu(CTkFrame):
             item.button.grid(row=1, column=i, sticky="nsew")
             self.buttons_frame.columnconfigure(i, weight=1)
 
+    def update(self) -> None:
+        self.update_items()
+        self.build()
+        self.show_first()
+
     def update_items(self) -> None:
         menu_item = {HorizontalSimpleSurface: LeftMenuSimpleSurface,
                      VerticalSimpleSurface: LeftMenuVerticalSurface,
@@ -61,4 +66,5 @@ class LeftMenu(CTkFrame):
             item.button.configure(fg_color=ThemeManager.theme["CTkFrame"]["fg_color"], state="normal")       # noqa
 
     def show_first(self) -> None:
-        self.show_item(self.items[0])
+        if len(self.items) > 0:
+            self.show_item(self.items[0])

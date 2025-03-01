@@ -40,7 +40,7 @@ class App:
         self.root.columnconfigure(0, weight=1)
         self.scene.grid(row=0, column=0, sticky="nsew")
 
-    def update(self, _) -> None:
+    def update(self, _=None) -> None:
         """Updates the display."""
         self.scene.update()
 
@@ -65,7 +65,8 @@ class App:
         """Saves the current geometry as a .gavl file."""
         path = Path(asksaveasfilename(
             defaultextension='.gavl',
-            filetypes=[('GAVL File', ['*.gavl'])]
+            filetypes=[('GAVL File', ['*.gavl'])],
+            title=self.geometry.name
         ))
         with open(path, 'wb') as f: pickle.dump(self.geometry, f)
 
@@ -75,3 +76,7 @@ class App:
             filetypes=[('GAVL File', ['*.gavl']), ('All Files', ['*.*'])]
         ))
         with open(path, 'rb') as f: self.geometry = pickle.load(f)
+        self.update()
+        from src.scenes import GeoDesignScene
+        if isinstance(self.scene, GeoDesignScene):
+            self.scene.left_menu.update()
