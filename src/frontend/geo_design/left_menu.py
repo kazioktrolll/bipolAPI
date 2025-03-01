@@ -41,6 +41,7 @@ class LeftMenu(CTkFrame):
         menu_item = {HorizontalSimpleSurface: LeftMenuSimpleSurface,
                      VerticalSimpleSurface: LeftMenuVerticalSurface,
                      HorizontalSurface: LeftMenuNotImplemented}
+        self.items.clear()
         for name, surface in self.geometry.surfaces.items():
             item_type = menu_item[type(surface)]
             self.items.append(item_type(self, surface))
