@@ -31,14 +31,16 @@ class App:
         self.scene = Scene(self)  # Placeholder
         self.geometry: Geometry = Geometry(name='Plane', chord_length=1, span_length=8)  # Placeholder
         self.root.bind('<Configure>', self.update)
+        self.top_bar = TopBar(self)
         self.build()
 
     def build(self) -> None:
         """Builds the display upon app start."""
         self.root.title("G-AVL")
-        self.root.rowconfigure(0, weight=1)
+        self.top_bar.grid(column=0, row=0, sticky='nsew')
+        self.root.rowconfigure(1, weight=1)
         self.root.columnconfigure(0, weight=1)
-        self.scene.grid(row=0, column=0, sticky="nsew")
+        self.scene.grid(row=1, column=0, sticky="nsew")
 
     def update(self, _=None) -> None:
         """Updates the display."""
@@ -55,7 +57,7 @@ class App:
         if not isinstance(scene, Scene): raise TypeError
         self.scene.destroy()
         self.scene = scene
-        self.scene.grid(row=0, column=0, sticky="nsew")
+        self.scene.grid(row=1, column=0, sticky="nsew")
 
     def after(self, ms: int, func: Callable, *args) -> None:
         """Calls the given function with the given arguments after the delay given in milliseconds."""
@@ -68,7 +70,9 @@ class App:
             filetypes=[('GAVL File', ['*.gavl'])],
             title=self.geometry.name
         ))
-        with open(path, 'wb') as f: pickle.dump(self.geometry, f)
+        with open(path, 'wb') as f:
+            pickle.dump(self.geometry, f)   # noqa
+        self.top_bar.collapse_all()
 
     def load(self) -> None:
         """Loads the geometry from a .gavl file."""
@@ -80,3 +84,22 @@ class App:
         from src.scenes import GeoDesignScene
         if isinstance(self.scene, GeoDesignScene):
             self.scene.left_menu.update()
+        self.top_bar.collapse_all()
+
+
+from customtkinter import CTkFrame
+
+
+class TopBar(CTkFrame):
+    def __init__(self, app:App):
+        super().__init__(app.root, height=20)
+        from src.frontend import TopBarItem
+        TopBarItem(self, app.root, 'File', [
+            ('Load', app.load),
+            ('Save', app.save_as),
+        ]).grid(column=0, row=0, sticky='nsew')
+
+    def collapse_all(self):
+        for child in self.children.values():
+            try: child.collapse()   # noqa
+            except AttributeError: pass
