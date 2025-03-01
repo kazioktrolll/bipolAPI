@@ -5,12 +5,18 @@ from ..frontend import GeometryDisplay, ViewMode, LeftMenu
 
 
 class GeoDesignScene(Scene):
+    def __init__(self, app) -> None:
+        self.geometry_display = None
+        self.left_menu = None
+        super().__init__(app)
+
     def build(self):
         self.columnconfigure(0, weight=0)
         self.columnconfigure(1, weight=1)
         self.rowconfigure(0, weight=1)
 
         geometry_display = GeometryDisplay(self)
+        self.geometry_display = geometry_display
         self.to_update.append(geometry_display)
         geometry_display.grid(row=0, column=1, sticky='nsew')
         geometry_display.draw()
@@ -28,12 +34,10 @@ class GeoDesignScene(Scene):
         self.bind("<s>", lambda e: geometry_display.change_view(ViewMode.FRONT))
         self.bind("<d>", lambda e: geometry_display.change_view(ViewMode.RIGHT))
 
-        LeftMenu(self, self.geometry_display.update).grid(row=0, column=0, sticky='nsew', padx=5, pady=5)
+        lm = LeftMenu(self, self.geometry_display.update)
+        lm.grid(row=0, column=0, sticky='nsew', padx=5, pady=5)
+        self.left_menu = lm
 
     @property
     def geometry(self) -> Geometry:
         return self.app.geometry
-
-    @property
-    def geometry_display(self):
-        return self.children['!geometrydisplay']
