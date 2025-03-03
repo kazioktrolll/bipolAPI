@@ -1,9 +1,10 @@
-from customtkinter import CTkFrame, CTkButton, ThemeManager
+from customtkinter import CTkFrame, ThemeManager
 from typing import Callable
 
-from .left_menu_item import LeftMenuItem, LeftMenuNotImplemented
+from .left_menu_item import LeftMenuItem
 from .left_menu_simple_surface import LeftMenuSimpleSurface
 from .left_menu_vertical_surface import LeftMenuVerticalSurface
+from .left_menu_horizontal_surface import LeftMenuHorizontalSurface
 from ...backend.geo_design import Geometry, HorizontalSimpleSurface, VerticalSimpleSurface, HorizontalSurface
 
 
@@ -40,7 +41,7 @@ class LeftMenu(CTkFrame):
     def update_items(self) -> None:
         menu_item = {HorizontalSimpleSurface: LeftMenuSimpleSurface,
                      VerticalSimpleSurface: LeftMenuVerticalSurface,
-                     HorizontalSurface: LeftMenuNotImplemented}
+                     HorizontalSurface: LeftMenuHorizontalSurface}
         self.items.clear()
         for name, surface in self.geometry.surfaces.items():
             item_type = menu_item[type(surface)]
