@@ -133,18 +133,23 @@ class FlapItem(Item):
 
 class SectionItem(Item):
     def __init__(self):
-        self.leading_edge_position = Vector3.zero()
+        self.x = DoubleVar(value=0)
+        self.y = DoubleVar(value=0)
+        self.z = DoubleVar(value=0)
         self.chord = DoubleVar(value=0.0)
         self.inclination = DoubleVar(value=0.0)
         self.airfoil = Airfoil.empty()
         self.control = None
 
     @property
-    def position(self): return self.leading_edge_position
+    def position(self): return Vector3(self.x.get(), self.y.get(), self.z.get())
 
     def edit(self, do_on_update: Callable[[], None]) -> None:
         window = Popup(master=None)
 
+        xvar = StringVar(value=str(self.x.get()))
+        yvar = StringVar(value=str(self.y.get()))
+        zvar = StringVar(value=str(self.z.get()))
         chordvar = StringVar(value=str(self.chord.get()))
         incvar = StringVar(value=str(self.inclination.get()))
 
@@ -153,15 +158,30 @@ class SectionItem(Item):
         CTkLabel(window, text="Specify parameters of the section", font=CTkFont(weight='bold')
                  ).grid(column=0, row=0, columnspan=3, sticky='nsew', padx=5, pady=5)
 
-        CTkLabel(window, text="chord: "
+        CTkLabel(window, text="x: "
                  ).grid(column=0, row=2, sticky="e")
         CTkEntry(window, textvariable=chordvar
                  ).grid(column=2, row=2, sticky='nsew')
 
-        CTkLabel(window, text="inclination: "
+        CTkLabel(window, text="y: "
                  ).grid(column=0, row=3, sticky="e")
-        CTkEntry(window, textvariable=incvar
+        CTkEntry(window, textvariable=chordvar
                  ).grid(column=2, row=3, sticky='nsew')
+
+        CTkLabel(window, text="z: "
+                 ).grid(column=0, row=4, sticky="e")
+        CTkEntry(window, textvariable=chordvar
+                 ).grid(column=2, row=4, sticky='nsew')
+
+        CTkLabel(window, text="chord: "
+                 ).grid(column=0, row=5, sticky="e")
+        CTkEntry(window, textvariable=chordvar
+                 ).grid(column=2, row=5, sticky='nsew')
+
+        CTkLabel(window, text="inclination: "
+                 ).grid(column=0, row=6, sticky="e")
+        CTkEntry(window, textvariable=incvar
+                 ).grid(column=2, row=6, sticky='nsew')
 
         CTkButton(window, text='?', width=25, height=25,
                   command=lambda: HelpTopLevel(None, message="Input new parameters of the device.\n"
@@ -172,22 +192,28 @@ class SectionItem(Item):
                                                              "xc: chord-wise position of the hinge as a percentage "
                                                              "of the chord. Must be between 0 and 1.",
                                                max_width=40)
-                  ).grid(column=0, row=4, columnspan=2, sticky='nsew')
+                  ).grid(column=0, row=7, columnspan=2, sticky='nsew')
 
         CTkButton(window, text="Set",
-                  command=lambda: (self.set_values(chordvar, incvar),
+                  command=lambda: (self.set_values(xvar, yvar, zvar, chordvar, incvar),
                                    window.destroy(),
                                    do_on_update())
-                  ).grid(column=2, row=4, sticky='nsew')
+                  ).grid(column=2, row=7, sticky='nsew')
 
         window.run()
 
-    def set_values(self, chord: StringVar, inc: StringVar) -> None:
+    def set_values(self, x: StringVar, y: StringVar, z: StringVar, chord: StringVar, inc: StringVar) -> None:
         try:
+            x = float(x.get())
+            y = float(y.get())
+            z = float(z.get())
             chord = float(chord.get())
             inc = float(inc.get())
         except ValueError: return
         if chord <= 0: return
+        self.x.set(x)
+        self.y.set(y)
+        self.z.set(z)
         self.chord.set(chord)
         self.inclination.set(inc)
 
@@ -201,15 +227,24 @@ class SectionItem(Item):
                 CTkFrame.__init__(self, parent, fg_color=parent.cget('fg_color'))
                 self.item = item
 
-                CTkLabel(self, text="chord: "
+                CTkLabel(self, text="position: "
                          ).grid(column=0, row=0)
-                CTkLabel(self, textvariable=item.chord, width=30, anchor='w'
+                CTkLabel(self, textvariable=item.x, width=10, anchor='w'
                          ).grid(column=1, row=0)
+                CTkLabel(self, textvariable=item.y, width=10, anchor='w'
+                         ).grid(column=2, row=0)
+                CTkLabel(self, textvariable=item.z, width=10, anchor='w'
+                         ).grid(column=3, row=0)
+
+                CTkLabel(self, text="chord: "
+                         ).grid(column=0, row=1)
+                CTkLabel(self, textvariable=item.chord, width=30, anchor='w'
+                         ).grid(column=1, row=1)
 
                 CTkLabel(self, text="inclination: "
-                         ).grid(column=2, row=0)
+                         ).grid(column=2, row=1)
                 CTkLabel(self, textvariable=item.inclination, width=30, anchor='w'
-                         ).grid(column=3, row=0)
+                         ).grid(column=3, row=1)
 
                 self.update()
 
