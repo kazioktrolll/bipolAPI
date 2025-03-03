@@ -218,4 +218,4 @@ class FromAvl:
     @classmethod
     def error(cls, message: str) -> None:
         """Handles a Syntax Error in the .avl file."""
-        print(message)  # Temporary
+        print(f'Keyword ignored: {message}')  # Temporary
