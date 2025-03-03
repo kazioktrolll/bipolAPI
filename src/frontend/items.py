@@ -3,6 +3,8 @@ from customtkinter import CTkFrame, CTkLabel, DoubleVar, StringVar, CTkEntry, CT
 from abc import ABC, abstractmethod
 from .parameter_field import HelpTopLevel
 from .popup import Popup
+from ..backend import Vector3
+from ..backend.geo_design import Airfoil, Control
 
 
 class Item(ABC):
@@ -127,3 +129,88 @@ class FlapItem(Item):
                     child.configure(text_color='white')
 
         return FlapDisplay(item=self, parent=parent)
+
+
+class SectionItem(Item):
+    def __init__(self):
+        self.leading_edge_position = Vector3.zero()
+        self.chord = DoubleVar(value=0.0)
+        self.inclination = DoubleVar(value=0.0)
+        self.airfoil = Airfoil.empty()
+        self.control = None
+
+    @property
+    def position(self): return self.leading_edge_position
+
+    def edit(self, do_on_update: Callable[[], None]) -> None:
+        window = Popup(master=None)
+
+        chordvar = StringVar(value=str(self.chord.get()))
+        incvar = StringVar(value=str(self.inclination.get()))
+
+        window.columnconfigure(1, minsize=5)
+
+        CTkLabel(window, text="Specify parameters of the section", font=CTkFont(weight='bold')
+                 ).grid(column=0, row=0, columnspan=3, sticky='nsew', padx=5, pady=5)
+
+        CTkLabel(window, text="chord: "
+                 ).grid(column=0, row=2, sticky="e")
+        CTkEntry(window, textvariable=chordvar
+                 ).grid(column=2, row=2, sticky='nsew')
+
+        CTkLabel(window, text="inclination: "
+                 ).grid(column=0, row=3, sticky="e")
+        CTkEntry(window, textvariable=incvar
+                 ).grid(column=2, row=3, sticky='nsew')
+
+        CTkButton(window, text='?', width=25, height=25,
+                  command=lambda: HelpTopLevel(None, message="Input new parameters of the device.\n"
+                                                             "start, stop: y-coordinate of the "
+                                                             "start and the end of the device. "
+                                                             "Start must be closer to the main axis of the aircraft, "
+                                                             "while stop must be closer to the wing tip.\n"
+                                                             "xc: chord-wise position of the hinge as a percentage "
+                                                             "of the chord. Must be between 0 and 1.",
+                                               max_width=40)
+                  ).grid(column=0, row=4, columnspan=2, sticky='nsew')
+
+        CTkButton(window, text="Set",
+                  command=lambda: (self.set_values(chordvar, incvar),
+                                   window.destroy(),
+                                   do_on_update())
+                  ).grid(column=2, row=4, sticky='nsew')
+
+        window.run()
+
+    def set_values(self, chord: StringVar, inc: StringVar) -> None:
+        try:
+            chord = float(chord.get())
+            inc = float(inc.get())
+        except ValueError: return
+        if chord <= 0: return
+        self.chord.set(chord)
+        self.inclination.set(inc)
+
+    def get_values(self) -> tuple[Vector3, float, float, Airfoil, Control|None]:
+        return self.position, self.chord.get(), self.inclination.get(), self.airfoil, self.control
+
+    def display(self, parent: CTkFrame) -> CTkFrame:
+
+        class SectionDisplay(CTkFrame):
+            def __init__(self, item: SectionItem, parent: CTkFrame):
+                CTkFrame.__init__(self, parent, fg_color=parent.cget('fg_color'))
+                self.item = item
+
+                CTkLabel(self, text="chord: "
+                         ).grid(column=0, row=0)
+                CTkLabel(self, textvariable=item.chord, width=30, anchor='w'
+                         ).grid(column=1, row=0)
+
+                CTkLabel(self, text="inclination: "
+                         ).grid(column=2, row=0)
+                CTkLabel(self, textvariable=item.inclination, width=30, anchor='w'
+                         ).grid(column=3, row=0)
+
+                self.update()
+
+        return SectionDisplay(item=self, parent=parent)
