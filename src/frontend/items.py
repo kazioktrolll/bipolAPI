@@ -5,45 +5,6 @@ from .parameter_field import HelpTopLevel
 from .popup import Popup
 
 
-class FlapDisplay(CTkFrame):
-    def __init__(self, item: 'FlapItem', parent: CTkFrame):
-        CTkFrame.__init__(self, parent, fg_color=parent.cget('fg_color'))
-        self.item = item
-
-        CTkLabel(self, text="start: "
-                 ).grid(column=0, row=0)
-        CTkLabel(self, textvariable=item.start, width=30, anchor='w'
-                 ).grid(column=1, row=0)
-
-        CTkLabel(self, text="end: "
-                 ).grid(column=2, row=0)
-        CTkLabel(self, textvariable=item.end, width=30, anchor='w'
-                 ).grid(column=3, row=0)
-
-        CTkLabel(self, text="xc: "
-                 ).grid(column=4, row=0)
-        CTkLabel(self, textvariable=item.xc, width=10, anchor='w'
-                 ).grid(column=5, row=0)
-
-        self.update()
-
-    def update(self) -> None:
-        if self.item.start.get() == 0 and self.item.end.get() == 0:
-            self.disable()
-            return
-        self.enable()
-
-    def disable(self):
-        for child in self.children.values():
-            if not isinstance(child, CTkLabel): continue
-            child.configure(text_color='gray30')
-
-    def enable(self):
-        for child in self.children.values():
-            if not isinstance(child, CTkLabel): continue
-            child.configure(text_color='white')
-
-
 class Item(ABC):
     @abstractmethod
     def edit(self, display_update: Callable[[], None]) -> None: pass
@@ -55,7 +16,6 @@ class Item(ABC):
 
 class FlapItem(Item):
     def __init__(self):
-        super().__init__()
         self.start = DoubleVar(value=0)
         self.end = DoubleVar(value=0)
         self.xc = DoubleVar(value=0)
@@ -127,4 +87,43 @@ class FlapItem(Item):
         return self.start.get(), self.end.get(), self.xc.get()
 
     def display(self, parent: CTkFrame) -> CTkFrame:
+
+        class FlapDisplay(CTkFrame):
+            def __init__(self, item: 'FlapItem', parent: CTkFrame):
+                CTkFrame.__init__(self, parent, fg_color=parent.cget('fg_color'))
+                self.item = item
+
+                CTkLabel(self, text="start: "
+                         ).grid(column=0, row=0)
+                CTkLabel(self, textvariable=item.start, width=30, anchor='w'
+                         ).grid(column=1, row=0)
+
+                CTkLabel(self, text="end: "
+                         ).grid(column=2, row=0)
+                CTkLabel(self, textvariable=item.end, width=30, anchor='w'
+                         ).grid(column=3, row=0)
+
+                CTkLabel(self, text="xc: "
+                         ).grid(column=4, row=0)
+                CTkLabel(self, textvariable=item.xc, width=10, anchor='w'
+                         ).grid(column=5, row=0)
+
+                self.update()
+
+            def update(self) -> None:
+                if self.item.start.get() == 0 and self.item.end.get() == 0:
+                    self.disable()
+                    return
+                self.enable()
+
+            def disable(self):
+                for child in self.children.values():
+                    if not isinstance(child, CTkLabel): continue
+                    child.configure(text_color='gray30')
+
+            def enable(self):
+                for child in self.children.values():
+                    if not isinstance(child, CTkLabel): continue
+                    child.configure(text_color='white')
+
         return FlapDisplay(item=self, parent=parent)
