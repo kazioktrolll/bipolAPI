@@ -65,6 +65,7 @@ class App:
 
     def save_as(self) -> None:
         """Saves the current geometry as a .gavl file."""
+        self.top_bar.collapse_all()
         path = Path(asksaveasfilename(
             defaultextension='.gavl',
             filetypes=[('GAVL File', ['*.gavl'])],
@@ -72,10 +73,10 @@ class App:
         ))
         with open(path, 'wb') as f:
             pickle.dump(self.geometry, f)   # noqa
-        self.top_bar.collapse_all()
 
     def load(self) -> None:
         """Loads the geometry from a .gavl file."""
+        self.top_bar.collapse_all()
         path = Path(askopenfilename(
             filetypes=[('GAVL File', ['*.gavl']), ('All Files', ['*.*'])]
         ))
@@ -84,7 +85,26 @@ class App:
         from src.scenes import GeoDesignScene
         if isinstance(self.scene, GeoDesignScene):
             self.scene.left_menu.update()
+
+    def export_to_avl(self) -> None:
+        """Exports the current geometry to an .avl file."""
         self.top_bar.collapse_all()
+        path = Path(asksaveasfilename(
+            defaultextension='.avl',
+            filetypes=[('AVL File', ['*.avl'])],
+            title=self.geometry.name
+        ))
+        self.geometry.save_to_avl(case_name=self.geometry.name, path=path)
+
+    def import_from_avl(self) -> None:
+        """Imports the current geometry from an .avl file."""
+        from src.backend.geo_design import GeometryGenerator
+        self.top_bar.collapse_all()
+        path = Path(askopenfilename(
+            defaultextension='.avl',
+            filetypes=[('AVL File', ['*.avl'])]
+        ))
+        self.geometry = GeometryGenerator.from_avl(path)
 
 
 from customtkinter import CTkFrame
@@ -95,8 +115,10 @@ class TopBar(CTkFrame):
         super().__init__(app.root, height=20)
         from src.frontend import TopBarItem
         TopBarItem(self, app.root, 'File', [
-            ('Load', app.load),
             ('Save', app.save_as),
+            ('Load', app.load),
+            ('Export', app.export_to_avl),
+            ('Import', app.import_from_avl)
         ]).grid(column=0, row=0, sticky='nsew')
 
     def collapse_all(self):
