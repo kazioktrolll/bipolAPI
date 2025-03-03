@@ -44,8 +44,6 @@ class LeftMenuItem(CTkFrame, ABC):
         self.pf_frame.grid(row=0, column=0, sticky='nsew')
         self.mechanizations_frame.grid(row=1, column=0, sticky='nsew')
         self.airfoil_chooser.grid(row=2, column=0, padx=10, pady=10, sticky='nsew')
-        CTkButton(self, text="Save to File", command=self.save_to_file
-                  ).grid(row=3, column=0, padx=10, pady=10, sticky='nsew')
 
     @final
     def set_mechanization(self, mechanizations: dict[str, str]) -> None:
@@ -82,17 +80,6 @@ class LeftMenuItem(CTkFrame, ABC):
         if do_with_surface is not None: do_with_surface(surface)
         self.geometry.replace_surface(surface)
         self.parent.do_on_update()
-
-    @final
-    def save_to_file(self):
-        from pathlib import Path
-        from tkinter import filedialog
-        self.update_surface()
-        path = Path(filedialog.asksaveasfilename(confirmoverwrite=True,
-                                                 initialfile=f"{self.geometry.name}.avl",
-                                                 defaultextension='.avl',
-                                                 filetypes=[("AVL file", "*.avl"), ("All files", "*.*")]))
-        self.geometry.save_to_avl(self.geometry.name, path)
 
     @property
     @final
