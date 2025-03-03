@@ -6,7 +6,7 @@ from .items import Item
 
 class ListPreset(CTkFrame):
     def __init__(self, parent, category_name: str, item_class: type[Item], do_on_update: Callable[[], None]) -> None:
-        CTkFrame.__init__(self, parent)
+        super().__init__(parent)
         self.category_name = category_name
         self.item_class = item_class
         self.do_on_update = do_on_update
