@@ -16,7 +16,6 @@ class ListPreset(CTkFrame):
         self.body_frame = CTkFrame(self)
         self.init_display()
 
-
     def init_display(self) -> None:
         self.columnconfigure(0, weight=1)
 
