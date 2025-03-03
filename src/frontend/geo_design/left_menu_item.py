@@ -30,7 +30,7 @@ class LeftMenuItem(CTkFrame, ABC):
         if mechanization: self.set_mechanization(mechanization)
 
         self.init_pfs()
-        self.build()
+        #self.build()
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}: {self.surface.name}"

@@ -5,6 +5,7 @@ from ...backend.geo_design import HorizontalSimpleSurface
 class LeftMenuSimpleSurface(LeftMenuItem):
     def __init__(self, parent, surface: HorizontalSimpleSurface):
         super().__init__(parent, surface)
+        self.build()
 
     def init_pfs(self) -> None:
         # keyword, name, message, assert, initial
