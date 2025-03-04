@@ -28,7 +28,7 @@ class GeometryDisplay(CTkFrame):
         self.drag_origin = (0, 0)
         self.drag_offset = (0, 0)
 
-        self.view_mode = ViewMode.TOP
+        self.view_mode = ViewMode.ISO
 
     @property
     def geometry(self) -> Geometry:
@@ -65,6 +65,9 @@ class GeometryDisplay(CTkFrame):
             case ViewMode.BACK:
                 X = y
                 Y = -z
+            case ViewMode.ISO:
+                X = 3**.5/2 * x - 3**.5/2 * y
+                Y = .5 *  ( -x - y) - z
             case _:
                 raise NotImplementedError
 
@@ -273,3 +276,4 @@ class ViewMode(IntEnum):
     RIGHT = 4
     FRONT = 5
     BACK = 6
+    ISO = 7

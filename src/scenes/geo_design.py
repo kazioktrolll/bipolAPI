@@ -33,6 +33,7 @@ class GeoDesignScene(Scene):
         self.bind("<w>", lambda e: geometry_display.change_view(ViewMode.TOP))
         self.bind("<s>", lambda e: geometry_display.change_view(ViewMode.FRONT))
         self.bind("<d>", lambda e: geometry_display.change_view(ViewMode.RIGHT))
+        self.bind("<a>", lambda e: geometry_display.change_view(ViewMode.ISO))
 
         lm = LeftMenu(self, self.geometry_display.update)
         lm.grid(row=0, column=0, sticky='nsew', padx=5, pady=5)
