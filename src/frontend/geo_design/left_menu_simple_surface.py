@@ -9,16 +9,31 @@ class LeftMenuSimpleSurface(LeftMenuItem):
 
     def init_pfs(self) -> None:
         # keyword, name, message, assert, initial
+        surf = self.surface
+        assert isinstance(surf, HorizontalSimpleSurface)    # for type checker
         pfs_params = [
-            ('x', 'X', 'The X-axis position of the tip of the root section.', lambda x: True, 0),
-            ('z', 'Z', 'The Z-axis position of the tip of the root section.', lambda z: True, 0),
-            ('span', 'Span', "The span of the horizontal tail.\nHas to be positive.", lambda w: w > 0, 4),
-            ('chord', 'MAC', "The mean aerodynamic chord of the surface.\nHas to be positive.", lambda c: c > 0, 1),
-            ('taper', 'Taper Ratio', "The taper ratio of the surface - c_tip / c_root.\nHas to be between 0 and 1.", lambda tr: 0 <= tr <= 1, 1),
+            ('x', 'X', 'The X-axis position of the tip of the root section.',
+             lambda x: True, surf.origin_position.x),
+
+            ('z', 'Z', 'The Z-axis position of the tip of the root section.',
+             lambda z: True, surf.origin_position.z),
+
+            ('span', 'Span', "The span of the horizontal tail.\nHas to be positive.",
+             lambda w: w > 0, surf.span()),
+
+            ('chord', 'MAC', "The mean aerodynamic chord of the surface.\nHas to be positive.",
+             lambda c: c > 0, surf.chord_length),
+
+            ('taper', 'Taper Ratio', "The taper ratio of the surface - c_tip / c_root.\nHas to be between 0 and 1.",
+             lambda tr: 0 <= tr <= 1, surf.taper_ratio),
+
             ('sweep', 'Sweep Angle', "Sweep angle of the wing, in degrees.\n"
                                      "The angle between Y-axis and the 25%MAC line. Positive means wing deflected backwards.\n"
-                                     "Has to be between -90 and 90.", lambda sa: -90 < sa < 90, 0),
-            ('inclination', 'Inclination', "The inclination of the surface, in degrees\n.", lambda i: True, 0)
+                                     "Has to be between -90 and 90.",
+             lambda sa: -90 < sa < 90, surf.sweep_angle),
+
+            ('inclination', 'Inclination', "The inclination of the surface, in degrees\n.",
+             lambda i: True, surf.inclination)
         ]
         for pf_params in pfs_params: super()._init_pf(*pf_params)
         super().init_pfs()

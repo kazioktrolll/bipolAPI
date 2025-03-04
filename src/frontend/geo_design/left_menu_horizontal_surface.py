@@ -23,12 +23,14 @@ class LeftMenuHorizontalSurface(LeftMenuItem):
 
     def init_pfs(self) -> None:
         # keyword, name, message, assert, initial
+        surf = self.surface
+        assert isinstance(surf, HorizontalSurface)
         pfs_params = [
-            ('x', 'X', 'The X-axis position of the tip of the root section.', lambda x: True, 0),
-            ('y', 'Y', 'The Y-axis position of the tip of the root section.', lambda y: True, 0),
-            ('z', 'Z', 'The Z-axis position of the tip of the root section.', lambda z: True, 0),
-            ('chord', 'MAC', "The mean aerodynamic chord of the surface.\nHas to be positive.", lambda c: c > 0, 1),
-            ('y_duplicate', 'Y-symmetric', "", lambda y: y in (0, 1), 1),
+            ('x', 'X', 'The X-axis position of the tip of the root section.', lambda x: True, surf.origin_position.x),
+            ('y', 'Y', 'The Y-axis position of the tip of the root section.', lambda y: True, surf.origin_position.y),
+            ('z', 'Z', 'The Z-axis position of the tip of the root section.', lambda z: True, surf.origin_position.z),
+            ('chord', 'MAC', "The mean aerodynamic chord of the surface.\nHas to be positive.", lambda c: c > 0, surf.chord_length),
+            ('y_duplicate', 'Y-symmetric', "", lambda y: y in (0, 1), int(surf.y_duplicate)),
         ]
         for pf_params in pfs_params: super()._init_pf(*pf_params)
         super().init_pfs()
