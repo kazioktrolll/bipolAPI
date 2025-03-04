@@ -1,0 +1,63 @@
+from ..backend.geo_design import Geometry
+from pathlib import Path
+
+
+avl_path = Path(r"C:\Users\kazio\PycharmProjects\bipolAPI\src\avl\avl.exe")
+local_path = Path(r"C:\Users\kazio\PycharmProjects\bipolAPI\src\calcs")
+
+
+class Interface:
+    def __init__(self, geometry: Geometry) -> None:
+        self.geometry = geometry
+
+    @classmethod
+    def execute_case(cls, geometry: Geometry, alfa: float, beta: float, roll_rate: float, pitch_rate: float, yaw_rate: float) -> str:
+        geometry.save_to_avl(geometry.name, local_path.joinpath(r"local.avl"))
+        runfile = (f"Run case  1: -Test-\n"
+                   f"X = {geometry.ref_pos.x}\n"
+                   f"alpha -> alpha = {alfa}\n"
+                   f"beta -> beta = {beta}\n"
+                   f"pb/2V -> pb/2V = {roll_rate}\n"
+                   f"qc/2V -> qc/2V = {pitch_rate}\n"
+                   f"rb/2V -> rb/2V = {yaw_rate}\n")
+        with open(local_path.joinpath(r"local.run"), "w") as f: f.write(runfile)
+
+        from subprocess import Popen, PIPE
+        avl = Popen([avl_path, str(local_path.joinpath('local.avl'))], stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=True)
+        command = 'OPER\nX\n'
+        dump = avl.communicate(bytes(command, encoding='utf-8'))[0].decode()
+        return dump
+
+    @classmethod
+    def _split_dump(cls, dump: str) -> list[str]:
+        import re
+        dump = re.split(r'=+\r\n', dump)
+        return dump
+
+    @classmethod
+    def loading_issues_from_dump(cls, dump: str) -> str:
+        return cls._split_dump(dump)[2]
+
+    @classmethod
+    def results_from_dump(cls, dump: str) -> list[dict[str, float]]:
+        dump = cls._split_dump(dump)
+        if len(dump) < 6: return []
+        results = dump[4:-1]
+        stripped = []
+        import re
+        for result in results:
+            result = re.split(r'Run case:.*\r\n', result, re.DOTALL)[1]
+            result = re.split(r'-+\r\n', result)[0]
+            stripped.append(str(result))
+        values = []
+        for result in stripped:
+            vals = re.sub(r'\s+=\s+', '=', result)
+            vals = re.sub(r'\r\n', '', vals)
+            vals = vals.split()
+            values.append({})
+            for line in vals:
+                if not '=' in line: continue
+                key, value = line.split('=')
+                values[-1][key] = float(value)
+
+        return values
