@@ -19,7 +19,7 @@ def are_numbers(ls: list[str]):
 
 def valid_naca(naca: str):
     """Checks if a string is a valid 4-digit symmetric NACA code."""
-    return re.fullmatch(r"00\d\d", naca)
+    return re.fullmatch(r"\d\d\d\d", naca)
 
 
 class Airfoil:
