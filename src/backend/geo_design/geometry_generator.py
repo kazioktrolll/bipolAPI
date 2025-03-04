@@ -20,7 +20,7 @@ class GeometryGenerator:
     @classmethod
     def default(cls) -> Geometry:
         wing = HorizontalSimpleSurface(name='Wing', span=8, chord_length=1)
-        h_tail = HorizontalSimpleSurface(name='H Tail', span=1, chord_length=1, origin_position=(4, 0, 1))
+        h_tail = HorizontalSimpleSurface(name='H Tail', span=2, chord_length=1, origin_position=(4, 0, 1))
         v_tail = VerticalSimpleSurface(
             name='V Tail',
             chord_length=.9,

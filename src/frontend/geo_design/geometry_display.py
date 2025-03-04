@@ -38,8 +38,8 @@ class GeometryDisplay(CTkFrame):
 
     def update(self) -> None:
         """Adjust the display to the window size, redraws everything."""
-        self.origin = (self.winfo_width() / 2 + self.drag_offset[0],
-                       self.winfo_height() / 4 + self.drag_offset[1])
+        self.origin = (self.winfo_width() * 4/10 + self.drag_offset[0],
+                       self.winfo_height() * 6/10 + self.drag_offset[1])
         self.reset_camera_button.place(x=10, y=self.winfo_height() - 40)
         self.clear()
         self.draw()
@@ -211,7 +211,7 @@ class GeometryDisplay(CTkFrame):
                 self.canvas.tag_raise('section')
                 self.canvas.tag_raise('control')
                 self.canvas.tag_raise('trailing_edge')
-            case mode if mode in [ViewMode.TOP, ViewMode.BOTTOM]:
+            case mode if mode in [ViewMode.TOP, ViewMode.BOTTOM, ViewMode.ISO]:
                 self.canvas.tag_raise('control')
                 self.canvas.tag_raise('mac25')
                 self.canvas.tag_raise('section')
