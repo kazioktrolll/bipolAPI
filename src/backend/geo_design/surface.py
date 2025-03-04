@@ -259,8 +259,9 @@ class HorizontalSimpleSurface(HorizontalSurface):
 
         self.taper_ratio = taper_ratio
         self.sweep_angle = sweep_angle
+        self.inclination = inclination_angle
 
-        root, tip = HorizontalSimpleSurface.create_geometry(chord_length, span, taper_ratio, sweep_angle, airfoil)
+        root, tip = HorizontalSimpleSurface.create_geometry(chord_length, span, taper_ratio, sweep_angle, inclination_angle, airfoil)
         super().__init__(name=name, chord_length=chord_length, sections=[root, tip], y_duplicate=True,
                          origin_position=origin_position, airfoil=airfoil)
 
@@ -269,6 +270,7 @@ class HorizontalSimpleSurface(HorizontalSurface):
     @classmethod
     def create_geometry(cls, chord_length: float, span: float,
                         taper_ratio: float, sweep_angle: float,
+                        inclination: float,
                         airfoil: Airfoil
                         ) -> tuple[Section, Section]:
         """
@@ -279,6 +281,7 @@ class HorizontalSimpleSurface(HorizontalSurface):
             span (float): The span of the surface.
             taper_ratio (float): The taper ratio of the surface.
             sweep_angle (float): The sweep angle of the surface in degrees.
+            inclination (float): The inclination of the surface, in degrees.
             airfoil (Airfoil): The airfoil of the surface.
 
         Returns:
@@ -292,8 +295,8 @@ class HorizontalSimpleSurface(HorizontalSurface):
         mac025 = lambda y: root_chord * .25 + y * tan(radians(sweep_angle))
         leading_edge_y = lambda y: mac025(y) - chord(y) * .25
 
-        root = Section((0, 0, 0), chord(0), 0, airfoil)
-        tip = Section((leading_edge_y(span / 2), span / 2, 0.0), chord(span / 2), 0, airfoil)
+        root = Section((0, 0, 0), chord(0), inclination, airfoil)
+        tip = Section((leading_edge_y(span / 2), span / 2, 0.0), chord(span / 2), inclination, airfoil)
 
         return root, tip
 
