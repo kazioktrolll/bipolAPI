@@ -1,7 +1,6 @@
 from pathlib import Path
 from typing import Callable
-import pickle
-from tkinter.filedialog import asksaveasfilename, askopenfilename
+from src.backend.geo_design import Geometry
 
 
 class App:
@@ -23,7 +22,6 @@ class App:
     def __init__(self):
         from customtkinter import CTk, set_appearance_mode, set_default_color_theme
         from .scenes import Scene
-        from .backend.geo_design import Geometry
         set_appearance_mode("Dark")
         set_default_color_theme("blue")
         self.file_path: Path | None = None
@@ -63,32 +61,53 @@ class App:
         """Calls the given function with the given arguments after the delay given in milliseconds."""
         self.root.after(ms, func, *args)
 
+    def set_geometry(self, geometry: Geometry) -> None:
+        self.geometry = geometry
+        self.update()
+        from src.scenes import GeoDesignScene
+        if isinstance(self.scene, GeoDesignScene):
+            self.scene.left_menu.update()
+
+    # 'File' menu
+
     def save_as(self) -> None:
         """Saves the current geometry as a .gavl file."""
         self.top_bar.collapse_all()
+        from tkinter.filedialog import asksaveasfilename
         path = Path(asksaveasfilename(
             defaultextension='.gavl',
             filetypes=[('GAVL File', ['*.gavl'])],
             title=self.geometry.name
         ))
+        import pickle
         with open(path, 'wb') as f:
             pickle.dump(self.geometry, f)   # noqa
 
     def load(self) -> None:
         """Loads the geometry from a .gavl file."""
         self.top_bar.collapse_all()
+        from tkinter.filedialog import askopenfilename
         path = Path(askopenfilename(
             filetypes=[('GAVL File', ['*.gavl']), ('All Files', ['*.*'])]
         ))
-        with open(path, 'rb') as f: self.geometry = pickle.load(f)
-        self.update()
-        from src.scenes import GeoDesignScene
-        if isinstance(self.scene, GeoDesignScene):
-            self.scene.left_menu.update()
+        import pickle
+        with open(path, 'rb') as f:
+            self.set_geometry(pickle.load(f))
+
+    def new_empty(self) -> None:
+        self.top_bar.collapse_all()
+        from src.backend.geo_design import GeometryGenerator
+        self.set_geometry(GeometryGenerator.empty())
+
+    def new_default(self) -> None:
+        self.top_bar.collapse_all()
+        from src.backend.geo_design import GeometryGenerator
+        self.set_geometry(GeometryGenerator.default())
 
     def export_to_avl(self) -> None:
         """Exports the current geometry to an .avl file."""
         self.top_bar.collapse_all()
+        from tkinter.filedialog import asksaveasfilename
         path = Path(asksaveasfilename(
             defaultextension='.avl',
             filetypes=[('AVL File', ['*.avl'])],
@@ -99,12 +118,13 @@ class App:
     def import_from_avl(self) -> None:
         """Imports the current geometry from an .avl file."""
         from src.backend.geo_design import GeometryGenerator
+        from tkinter.filedialog import askopenfilename
         self.top_bar.collapse_all()
         path = Path(askopenfilename(
             defaultextension='.avl',
             filetypes=[('AVL File', ['*.avl'])]
         ))
-        self.geometry = GeometryGenerator.from_avl(path)
+        self.set_geometry(GeometryGenerator.from_avl(path))
 
 
 from customtkinter import CTkFrame
@@ -117,6 +137,8 @@ class TopBar(CTkFrame):
         TopBarItem(self, app.root, 'File', [
             ('Save', app.save_as),
             ('Load', app.load),
+            ('New Empty', app.new_empty),
+            ('New Default', app.new_default),
             ('Export', app.export_to_avl),
             ('Import', app.import_from_avl)
         ]).grid(column=0, row=0, sticky='nsew')
