@@ -11,17 +11,21 @@ class Interface:
         self.geometry = geometry
 
     @classmethod
-    def execute_case(cls, geometry: Geometry, alfa: float, beta: float, roll_rate: float, pitch_rate: float, yaw_rate: float) -> str:
+    def get_run_file_contents(cls, geometry: Geometry, alfa: float, beta: float, roll_rate: float, pitch_rate: float, yaw_rate: float) -> str:
+        return (f"Run case  1: -Test-\n"
+                f"X = {geometry.ref_pos.x}\n"
+                f"alpha -> alpha = {alfa}\n"
+                f"beta -> beta = {beta}\n"
+                f"pb/2V -> pb/2V = {roll_rate}\n"
+                f"qc/2V -> qc/2V = {pitch_rate}\n"
+                f"rb/2V -> rb/2V = {yaw_rate}\n")
+
+    @classmethod
+    def execute_case(cls, geometry: Geometry, run_file_contents: str) -> str:
         avl_file = open(local_path.joinpath('local.avl'), 'w')
         run_file = open(local_path.joinpath('local.run'), 'w')
         avl_file.write(geometry.string())
-        run_file.write((f"Run case  1: -Test-\n"
-                        f"X = {geometry.ref_pos.x}\n"
-                        f"alpha -> alpha = {alfa}\n"
-                        f"beta -> beta = {beta}\n"
-                        f"pb/2V -> pb/2V = {roll_rate}\n"
-                        f"qc/2V -> qc/2V = {pitch_rate}\n"
-                        f"rb/2V -> rb/2V = {yaw_rate}\n"))
+        run_file.write(run_file_contents)
         avl_file.close()
         run_file.close()
 
