@@ -6,11 +6,11 @@ Gridable = CTk | CTkFrame
 
 
 class OperInput(CTkFrame):
-    def __init__(self, master: Gridable, name: str, key: str, master_grid: Gridable = None, master_row=0, control_surfaces: list[str] = None):
+    def __init__(self, master: Gridable, name: str, key: str, master_grid = False, master_row=0, control_surfaces: list[str] = None):
         super().__init__(master)
         self.value = DoubleVar(value=0.0)
         self.key = key
-        self.master_grid = master_grid or self
+        self.master_grid = master if master_grid else self
         self.master_row = master_row
         self.bind_options = {
                     'Alpha': 'a',
@@ -70,13 +70,13 @@ class OperInput(CTkFrame):
 
     @classmethod
     def by_template(cls, master:Gridable, template: Literal['a', 'b', 'r', 'p', 'y']|str,
-                    master_grid: Gridable = None, master_row=0,
+                    master_grid = False, master_row=0,
                     control_surfaces: list[str] = None) -> 'OperInput':
         name = {'a':'Alpha', 'b':'Beta', 'r':'Roll Rate', 'p':'Pitch Rate', 'y':'Yaw Rate'}[template]
         return cls(master=master, name=name, key=template, master_grid=master_grid, master_row=master_row, control_surfaces=control_surfaces)
 
     @classmethod
-    def full_set(cls, master: Gridable, master_grid: Gridable = None, control_surfaces: list[str] = None) -> list['OperInput']:
+    def full_set(cls, master: Gridable, master_grid = False, control_surfaces: list[str] = None) -> list['OperInput']:
         if master_grid is None:
             return [cls.by_template(master=master, template=t, control_surfaces=control_surfaces)
                     for t in ['a', 'b', 'r', 'p', 'y']]
