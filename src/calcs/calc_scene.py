@@ -1,15 +1,15 @@
 from ..scenes import Scene
-from ..frontend import ParameterField
+from .frontend import OperInput
 from customtkinter import CTkFrame
 
 
 class CalcScene(Scene):
     def __init__(self, parent, app):
-        self.pfs_frame = None
+        self.ois_frame = None
         self.exec_button = None
         self.results_label = None
         self._app = app
-        self.pfs: dict[str, ParameterField] = {}
+        self.ois: list[OperInput] = []
         super().__init__(parent)
 
     @property
@@ -19,21 +19,9 @@ class CalcScene(Scene):
         return self._app
 
     def build(self) -> None:
-        self.pfs_frame = CTkFrame(self)
-        self.pfs_frame.grid(row=0, column=0, sticky="nsew")
-        # a b r p y c+
-        pfs_data = (
-            ('alfa', 'Alfa', '', lambda a: True, 0),
-            ('beta', 'Beta', '', lambda b: True, 0),
-            ('roll', 'Roll', '', lambda r: True, 0),
-            ('pitch', 'Pitch', '', lambda p: True, 0),
-            ('yaw', 'Yaw', '', lambda y: True, 0),
-        )
-        for i, pf_data in enumerate(pfs_data):
-            pf = ParameterField(self.pfs_frame, name=pf_data[1], help_message=pf_data[2], assert_test=pf_data[3])
-            pf.set(pf_data[4])
-            pf.grid(row=i, column=0, sticky='news')
-            self.pfs[pf_data[0]] = pf
+        self.ois_frame = CTkFrame(self)
+        self.ois_frame.grid(row=0, column=0, sticky="nsew")
+        self.ois = OperInput.full_set(master=self.ois_frame, master_grid=True)
 
         from customtkinter import CTkButton, CTkLabel
         self.exec_button = CTkButton(self, text='Execute', command=self.run_case)
@@ -43,18 +31,13 @@ class CalcScene(Scene):
         self.results_label.grid(row=0, column=2, sticky='news')
         self.run_case()
 
-
     def run_case(self):
         from .avl_communicator import Interface
 
         self.exec_button.configure(state='disabled')
         dump = Interface.execute_case(
             self.app_test.geometry,
-            alfa=self.pfs['alfa'].value,
-            beta=self.pfs['beta'].value,
-            roll_rate=self.pfs['roll'].value,
-            pitch_rate=self.pfs['pitch'].value,
-            yaw_rate=self.pfs['yaw'].value,
+            f"Run case  1: AutoCase\nX_cg = {self.app_test.geometry.ref_pos.x}\n" + '\n'.join(oi.run_file_string() for oi in self.ois) + '\n'
         )
         vals = Interface.results_from_dump(dump)[0]
         results_string = '\n'.join([': '.join([k, str(v)]) for k, v in vals.items()])
