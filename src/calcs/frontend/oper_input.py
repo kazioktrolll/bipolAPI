@@ -17,18 +17,18 @@ class OperInput(CTkFrame):
         self.master_grid = master if master_grid else self
         self.master_row = master_row if master_grid else 0
 
-        self.bind_options = {opt.avl: opt for opt in NameKeeper.full_set()}
+        self.bind_options = NameKeeper.full_set()
         if key in NameKeeper.builtins():
             self.name = NameKeeper(builtin=key)
         else:
             self.name = NameKeeper(name=name, dx=key)
         if control_surfaces:
-            self.bind_options |= {f'd{i}': NameKeeper(name=surf_name, dx=f'd{i}') for i, surf_name in enumerate(control_surfaces)}
-        if self.name.avl in self.bind_options.keys():
-            del self.bind_options[self.name.avl]
+            self.bind_options.extend([NameKeeper(name=surf_name, dx=f'd{i}') for i, surf_name in enumerate(control_surfaces)])
+        if self.name.avl in self.bind_options.avl:
+            self.bind_options.remove(self.name)
 
         self.name_label = CTkLabel(self.master_grid, text=self.name.display)
-        self.bind_menu = CTkOptionMenu(self.master_grid, width=80, values=[opt.display for opt in self.bind_options.values()])
+        self.bind_menu = CTkOptionMenu(self.master_grid, width=80, values=[display for display in self.bind_options.display])
         self.value_label = CTkLabel(self.master_grid, textvariable=self.value)
         self.entry = CTkEntry(self.master_grid)
         self.set_button = CTkButton(self.master_grid, text="Set", width=30, command=self.set_value)
@@ -80,36 +80,36 @@ class OperInput(CTkFrame):
     def command_string(self) -> str:
         if not self.bound:
             return f"{self.name.avl} {self.name.avl} {self.value.get()}"
-        bound = self.bind_options[self.bind_menu.get()]
+        bound = self.bind_options.find_by(display=self.bind_menu.get())
         return f"{self.name.avl} {bound.avl} {self.value.get()}"
 
     def run_file_string(self) -> str:
         if not self.bound:
             return f"{self.name.run_file} -> {self.name.run_file} = {self.value.get()}"
-        bound = self.bind_options[self.bind_menu.get()]
+        bound = self.bind_options.find_by(display=self.bind_menu.get())
         return f"{self.name.run_file} -> {bound.run_file} = {self.value.get()}"
 
 
 class NameKeeper:
     def __init__(self, builtin: Literal['a', 'b', 'r', 'p', 'y']|str=None, name:str = None, dx:str = None):
-        self.letter = builtin
-        self.name = name
-        self.dx = dx
+        self._letter = builtin
+        self._name = name
+        self._dx = dx
 
     @property
     def avl(self) -> str:
-        if self.dx: return self.dx
-        return str(self.letter)
+        if self._dx: return self._dx
+        return str(self._letter)
 
     @property
     def display(self):
-        if self.name: return self.name
-        return {'a':'Alpha', 'b':'Beta', 'r':'Roll Rate', 'p':'Pitch Rate', 'y':'Yaw Rate'}[self.letter]
+        if self._name: return self._name
+        return {'a':'Alpha', 'b':'Beta', 'r':'Roll Rate', 'p':'Pitch Rate', 'y':'Yaw Rate'}[self._letter]
 
     @property
     def run_file(self):
-        if self.name: return self.name.capitalize()
-        return {'a':'alpha', 'b':'beta', 'r':'pb/2V', 'p':'qc/2V', 'y':'rb/2V'}[self.letter]
+        if self._name: return self._name.capitalize()
+        return {'a':'alpha', 'b':'beta', 'r':'pb/2V', 'p':'qc/2V', 'y':'rb/2V'}[self._letter]
 
     @classmethod
     def builtins(cls):
@@ -117,4 +117,57 @@ class NameKeeper:
 
     @classmethod
     def full_set(cls):
-        return [cls(builtin=l) for l in cls.builtins()]
+        return NameKeeperList([cls(builtin=l) for l in cls.builtins()])
+
+
+class NameKeeperList:
+    def __init__(self, items: list[NameKeeper]):
+        self._items = items
+
+    def __getitem__(self, item):
+        return self._items[item]
+
+    def pop(self, index):
+        return self._items.pop(index)
+
+    def remove(self, item: NameKeeper):
+        self.pop(self.find(item=item))
+
+    def extend(self, new_items: list[NameKeeper]):
+        self._items.extend(new_items)
+
+    @property
+    def avl(self):
+        return [item.avl for item in self._items]
+
+    @property
+    def run_file(self):
+        return [item.run_file for item in self._items]
+
+    @property
+    def display(self):
+        return [item.display for item in self._items]
+
+    def find(self, item: NameKeeper):
+        if item:
+            for i, my_item in enumerate(self._items):
+                if item.avl == my_item.avl:
+                    return i
+
+    def find_by(self, avl:str = None, display: str =None, run_name:str=None):
+        if avl:
+            for item in self._items:
+                if avl == item.avl:
+                    return item
+
+        if display:
+            for item in self._items:
+                if display == item.display:
+                    return item
+
+        if run_name:
+            for item in self._items:
+                if run_name == item.run_file:
+                    return item
+
+        raise ValueError("No parameter given!")
