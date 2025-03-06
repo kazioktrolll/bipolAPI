@@ -81,7 +81,8 @@ class Geometry:
 
     def string(self) -> str:
         """Returns the current geometry as a .avl type string."""
-        _r = (f"0.0 | Mach\n"
+        _r = (f"{self.name} +  | Case Name\n"
+              f"0.0 | Mach\n"
               f"0 0 0 | iYsym iZsym Zsym\n"
               f"{self.surface_area} {self.chord_length} {self.span_length} | Sref Cref Bref\n"
               f"{self.ref_pos.avl_string} | Xref Yref Zref\n"
@@ -96,6 +97,6 @@ class Geometry:
     def save_to_avl(self, case_name: str, path: Path) -> TextIO:
         """Saves the current geometry to a file using .avl format."""
         file = open(path, 'w')
-        contents = case_name + " | Case Name\n" + self.string()
+        contents = self.string()
         file.write(contents)
         return file
