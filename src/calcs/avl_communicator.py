@@ -12,20 +12,26 @@ class Interface:
 
     @classmethod
     def execute_case(cls, geometry: Geometry, alfa: float, beta: float, roll_rate: float, pitch_rate: float, yaw_rate: float) -> str:
-        geometry.save_to_avl(geometry.name, local_path.joinpath(r"local.avl"))
-        runfile = (f"Run case  1: -Test-\n"
-                   f"X = {geometry.ref_pos.x}\n"
-                   f"alpha -> alpha = {alfa}\n"
-                   f"beta -> beta = {beta}\n"
-                   f"pb/2V -> pb/2V = {roll_rate}\n"
-                   f"qc/2V -> qc/2V = {pitch_rate}\n"
-                   f"rb/2V -> rb/2V = {yaw_rate}\n")
-        with open(local_path.joinpath(r"local.run"), "w") as f: f.write(runfile)
+        avl_file = open(local_path.joinpath('local.avl'), 'w')
+        run_file = open(local_path.joinpath('local.run'), 'w')
+        avl_file.write(geometry.string())
+        run_file.write((f"Run case  1: -Test-\n"
+                        f"X = {geometry.ref_pos.x}\n"
+                        f"alpha -> alpha = {alfa}\n"
+                        f"beta -> beta = {beta}\n"
+                        f"pb/2V -> pb/2V = {roll_rate}\n"
+                        f"qc/2V -> qc/2V = {pitch_rate}\n"
+                        f"rb/2V -> rb/2V = {yaw_rate}\n"))
+        avl_file.close()
+        run_file.close()
 
         from subprocess import Popen, PIPE
         avl = Popen([avl_path, str(local_path.joinpath('local.avl'))], stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=True)
         command = 'OPER\nX\n'
         dump = avl.communicate(bytes(command, encoding='utf-8'))[0].decode()
+        from os import remove
+        remove(local_path.joinpath('local.avl'))
+        remove(local_path.joinpath('local.run'))
         return dump
 
     @classmethod
