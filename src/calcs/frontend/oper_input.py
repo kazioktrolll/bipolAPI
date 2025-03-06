@@ -69,11 +69,19 @@ class OperInput(CTkFrame):
         super().grid(**kwargs)
 
     @classmethod
-    def by_template(cls, master:CTk|CTkFrame, template: Literal['a', 'b', 'r', 'p', 'y'],
+    def by_template(cls, master:Gridable, template: Literal['a', 'b', 'r', 'p', 'y']|str,
                     master_grid: Gridable = None, master_row=0,
                     control_surfaces: list[str] = None) -> 'OperInput':
         name = {'a':'Alpha', 'b':'Beta', 'r':'Roll Rate', 'p':'Pitch Rate', 'y':'Yaw Rate'}[template]
         return cls(master=master, name=name, key=template, master_grid=master_grid, master_row=master_row, control_surfaces=control_surfaces)
+
+    @classmethod
+    def full_set(cls, master: Gridable, master_grid: Gridable = None, control_surfaces: list[str] = None) -> list['OperInput']:
+        if master_grid is None:
+            return [cls.by_template(master=master, template=t, control_surfaces=control_surfaces)
+                    for t in ['a', 'b', 'r', 'p', 'y']]
+        return [cls.by_template(master=master, template=t, master_grid=master_grid, master_row=i, control_surfaces=control_surfaces)
+                for i, t in enumerate(['a', 'b', 'r', 'p', 'y'])]
 
     def command_string(self) -> str:
         if not self.bound: return f"{self.key} {self.key} {self.value.get()}"
