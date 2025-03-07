@@ -1,5 +1,5 @@
 from ..scenes import Scene
-from .frontend import OperInput
+from .frontend import OperInputPanel
 from customtkinter import CTkFrame
 
 
@@ -9,7 +9,7 @@ class CalcScene(Scene):
         self.exec_button = None
         self.results_label = None
         self._app = app
-        self.ois: list[OperInput] = []
+        self.oip = None
         super().__init__(parent)
 
     @property
@@ -19,9 +19,8 @@ class CalcScene(Scene):
         return self._app
 
     def build(self) -> None:
-        self.ois_frame = CTkFrame(self)
-        self.ois_frame.grid(row=0, column=0, sticky="nsew")
-        self.ois = OperInput.full_set(master=self.ois_frame, master_grid=True)
+        self.oip = OperInputPanel(self, ['Ailerons'])
+        self.oip.grid(row=0, column=0, sticky="nsew")
 
         from customtkinter import CTkButton, CTkLabel
         self.exec_button = CTkButton(self, text='Execute', command=self.run_case)
@@ -37,7 +36,7 @@ class CalcScene(Scene):
         self.exec_button.configure(state='disabled')
         dump = Interface.execute_case(
             self.app_test.geometry,
-            f"Run case  1: AutoCase\nX_cg = {self.app_test.geometry.ref_pos.x}\n" + '\n'.join(oi.run_file_string() for oi in self.ois) + '\n'
+            f"Run case  1: AutoCase\nX_cg = {self.app_test.geometry.ref_pos.x}\n" + self.oip.run_file_string()
         )
         vals = Interface.results_from_dump(dump)[0]
         results_string = '\n'.join([': '.join([k, str(v)]) for k, v in vals.items()])

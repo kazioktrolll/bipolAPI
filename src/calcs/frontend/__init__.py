@@ -1,1 +1,1 @@
-from .oper_input import OperInput
+from .oper_input import OperInputPanel

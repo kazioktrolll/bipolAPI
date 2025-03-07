@@ -8,7 +8,7 @@ Gridable = CTk | CTkFrame
 class OperInput(CTkFrame):
     def __init__(self, master: Gridable,
                  key: str, name: str = None,
-                 master_grid = False, master_row=None,
+                 master_grid = False, master_row:int=None,
                  control_surfaces: list[str] = None):
 
         super().__init__(master)
@@ -23,12 +23,14 @@ class OperInput(CTkFrame):
         else:
             self.name = NameKeeper(name=name, dx=key)
         if control_surfaces:
-            self.bind_options.extend([NameKeeper(name=surf_name, dx=f'd{i}') for i, surf_name in enumerate(control_surfaces)])
+            self.bind_options.extend([NameKeeper(name=surf_name, dx=f'd{i}')
+                                      for i, surf_name in enumerate(control_surfaces)])
         if self.name.avl in self.bind_options.avl:
             self.bind_options.remove(self.name)
 
         self.name_label = CTkLabel(self.master_grid, text=self.name.display)
-        self.bind_menu = CTkOptionMenu(self.master_grid, width=80, values=[display for display in self.bind_options.display])
+        self.bind_menu = CTkOptionMenu(self.master_grid, width=80,
+                                       values=[display for display in self.bind_options.display])
         self.value_label = CTkLabel(self.master_grid, textvariable=self.value)
         self.entry = CTkEntry(self.master_grid)
         self.set_button = CTkButton(self.master_grid, text="Set", width=30, command=self.set_value)
@@ -171,3 +173,19 @@ class NameKeeperList:
                     return item
 
         raise ValueError("No parameter given!")
+
+
+class OperInputPanel(CTkFrame):
+    def __init__(self, parent: Gridable, control_surfaces: list[str] = None):
+        super().__init__(parent)
+        self.control_surfaces = control_surfaces
+        self.ois = OperInput.full_set(master=self, master_grid=True, control_surfaces=control_surfaces)
+        for i, control in enumerate(control_surfaces):
+            self._add_oi(f'd{i+1}', control)
+
+    def _add_oi(self, key:str, name:str):
+        oi = OperInput(self, key, name, True, len(self.ois), control_surfaces=self.control_surfaces)
+        self.ois.append(oi)
+
+    def run_file_string(self) -> str:
+        return "\n".join([oi.run_file_string() for oi in self.ois]) + "\n"
