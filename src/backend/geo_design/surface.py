@@ -15,7 +15,8 @@ class Surface(ABC):
         y_duplicate (bool): Whether the lifting surface should be mirrored about Y-axis.
         origin_position (Vector3): Position of the leading edge of the root chord.
         airfoil (Airfoil): The airfoil of the surface.
-        sections (list[Section]): The sections of the surface. Is always sorted along the surface's major axis, ascending.
+        sections (list[Section]): The sections of the surface.
+          Is always sorted along the surface's major axis, ascending.
     """
     @to_re_docstring
     def __init__(self,
@@ -103,7 +104,8 @@ class Surface(ABC):
 
         # Calculate leading edge position as prev.x + dma * dx
         dma = (ma - self.major_axis(prev_sec)) / (self.major_axis(next_sec) - self.major_axis(prev_sec))
-        xle = prev_sec.leading_edge_position.x + dma * (next_sec.leading_edge_position.x - prev_sec.leading_edge_position.x)
+        xle = (prev_sec.leading_edge_position.x + dma *
+               (next_sec.leading_edge_position.x - prev_sec.leading_edge_position.x))
         mina = self.minor_axis(prev_sec) + dma * (self.minor_axis(next_sec) - self.minor_axis(prev_sec))
         chord = prev_sec.chord + dma * (next_sec.chord - prev_sec.chord)
         inc = prev_sec.inclination + dma * (next_sec.inclination - prev_sec.inclination)
@@ -227,9 +229,11 @@ class HorizontalSurface(Surface):
         """Returns the section at given ``y``, if exists, else returns ``None``."""
         return super().get_section_at(ma=y)
 
-    def get_sections_between(self, y_start: float, y_end: float, include_start: bool = True, include_end: bool = False ) -> list[Section]:
+    def get_sections_between(self, y_start: float, y_end: float,
+                             include_start: bool = True, include_end: bool = False ) -> list[Section]:
         """Returns a list of sections between ``y_start`` and ``y_end``."""
-        return super().get_sections_between(ma_start=y_start, ma_end=y_end, include_start=include_start, include_end=include_end)
+        return super().get_sections_between(ma_start=y_start, ma_end=y_end,
+                                            include_start=include_start, include_end=include_end)
 
 
 class HorizontalSimpleSurface(HorizontalSurface):
@@ -250,7 +254,8 @@ class HorizontalSimpleSurface(HorizontalSurface):
             span (float): The span of the surface.
             chord_length (float): The mean aerodynamic chord length of the surface.
             origin_position (AnyVector3): Position of the leading edge of the root chord.
-            inclination_angle (float): The inclination of the surface, in degrees. Zero means horizontal, positive means leading edge up.
+            inclination_angle (float): The inclination of the surface, in degrees.
+              Zero means horizontal, positive means leading edge up.
             airfoil (Airfoil): The airfoil of the surface.
             taper_ratio (float): The taper ratio of the surface.
             sweep_angle (float): The sweep angle of the surface in degrees.
@@ -261,7 +266,8 @@ class HorizontalSimpleSurface(HorizontalSurface):
         self.sweep_angle = sweep_angle
         self.inclination = inclination_angle
 
-        root, tip = HorizontalSimpleSurface.create_geometry(chord_length, span, taper_ratio, sweep_angle, inclination_angle, airfoil)
+        root, tip = HorizontalSimpleSurface.create_geometry(chord_length, span, taper_ratio, sweep_angle,
+                                                            inclination_angle, airfoil)
         super().__init__(name=name, chord_length=chord_length, sections=[root, tip], y_duplicate=True,
                          origin_position=origin_position, airfoil=airfoil)
 
@@ -296,7 +302,8 @@ class HorizontalSimpleSurface(HorizontalSurface):
         leading_edge_y = lambda y: mac025(y) - chord(y) * .25
 
         root = Section((0, 0, 0), chord(0), inclination, airfoil)
-        tip = Section((leading_edge_y(span / 2), span / 2, 0.0), chord(span / 2), inclination, airfoil)
+        tip = Section((leading_edge_y(span / 2), span / 2, 0.0), chord(span / 2),
+                      inclination, airfoil)
 
         return root, tip
 
@@ -319,7 +326,8 @@ class HorizontalSimpleSurface(HorizontalSurface):
         for key, value in kwargs.items():
             try: mech_type = {"ailerons": Aileron, "flaps": Flap, "elevators":Elevator}[key]
             except KeyError: raise ValueError(f"Unknown mechanism type: {key}")
-            # To add a control surface in AVL, you add a control surface to a section, and it is valid up to the next section.
+            # To add a control surface in AVL, you add a control surface to a section,
+            # and it is valid up to the next section.
             for start, end, hinge_x in value:
                 # Ensure there is a ``Section`` at 'y' == 'start' and 'end'.
                 if not self.has_section_at(start): self.add_section_gentle(start)
@@ -396,9 +404,11 @@ class VerticalSimpleSurface(Surface):
         """Returns the section at given ``z``, if exists, else returns ``None``."""
         return super().get_section_at(ma=z)
 
-    def get_sections_between(self, z_start: float, z_end: float, include_start: bool = True, include_end: bool = False) -> list[Section]:
+    def get_sections_between(self, z_start: float, z_end: float,
+                             include_start: bool = True, include_end: bool = False) -> list[Section]:
         """Returns a list of sections between ``z_start`` and ``z_end``."""
-        return super().get_sections_between(ma_start=z_start, ma_end=z_end, include_start=include_start, include_end=include_end)
+        return super().get_sections_between(ma_start=z_start, ma_end=z_end,
+                                            include_start=include_start, include_end=include_end)
 
 
 class SurfaceCreator:
@@ -415,9 +425,12 @@ class SurfaceCreator:
         dy = sections[-1].y - sections[0].y
         sections.sort(key=lambda section: section.z)
         dz = sections[-1].z - sections[0].z
-        """Decides which Surface class is appropriate based on input parameters, creates and returns an instance accordingly."""
+        """Decides which Surface class is appropriate based on input parameters,
+        creates and returns an instance accordingly."""
         if dy >= dz:
-            return HorizontalSurface(name=name, chord_length=chord_length, sections=sections, y_duplicate=y_duplicate, origin_position=origin_position, airfoil=airfoil)
+            return HorizontalSurface(name=name, chord_length=chord_length, sections=sections,
+                                     y_duplicate=y_duplicate, origin_position=origin_position, airfoil=airfoil)
         else:
-            return VerticalSimpleSurface(name=name, chord_length=chord_length, sections=sections, y_duplicate=y_duplicate, origin_position=origin_position, airfoil=airfoil)
+            return VerticalSimpleSurface(name=name, chord_length=chord_length, sections=sections,
+                                         y_duplicate=y_duplicate, origin_position=origin_position, airfoil=airfoil)
 
