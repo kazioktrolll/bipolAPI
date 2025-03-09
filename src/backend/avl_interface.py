@@ -1,12 +1,12 @@
-from ..backend.geo_design import Geometry
+from .geo_design import Geometry
 from pathlib import Path
 
 
 avl_path = Path(r"C:\Users\kazio\PycharmProjects\bipolAPI\src\avl\avl.exe")
-local_path = Path(r"C:\Users\kazio\PycharmProjects\bipolAPI\src\calcs")
+local_path = Path(r"C:\Users\kazio\PycharmProjects\bipolAPI\src\temp_files_dir")
 
 
-class Interface:
+class AVLInterface:
     def __init__(self, geometry: Geometry) -> None:
         self.geometry = geometry
 

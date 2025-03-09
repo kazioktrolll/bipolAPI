@@ -5,3 +5,4 @@ from .help_top_level import HelpTopLevel
 from .geo_design import *
 from .popup import Popup
 from .top_bar import TopBarItem
+from .oper_input import OperInputPanel

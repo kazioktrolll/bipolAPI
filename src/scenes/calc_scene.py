@@ -1,5 +1,5 @@
 from ..scenes import Scene
-from .frontend import OperInputPanel
+from ..frontend import OperInputPanel
 
 
 class CalcScene(Scene):
@@ -13,7 +13,7 @@ class CalcScene(Scene):
 
     @property
     def app_test(self):
-        from .app import App
+        from ..calcs.app import App
         assert isinstance(self._app, App)
         return self._app
 
@@ -30,14 +30,14 @@ class CalcScene(Scene):
         self.run_case()
 
     def run_case(self):
-        from .avl_communicator import Interface
+        from ..backend import AVLInterface
 
         self.exec_button.configure(state='disabled')
-        dump = Interface.execute_case(
+        dump = AVLInterface.execute_case(
             self.app_test.geometry,
             f"Run case  1: AutoCase\nX_cg = {self.app_test.geometry.ref_pos.x}\n" + self.oip.run_file_string()
         )
-        vals = Interface.results_from_dump(dump)[0]
+        vals = AVLInterface.results_from_dump(dump)[0]
         results_string = '\n'.join([': '.join([k, str(v)]) for k, v in vals.items()])
         self.results_label.configure(text=results_string)
         self.exec_button.configure(state='normal')

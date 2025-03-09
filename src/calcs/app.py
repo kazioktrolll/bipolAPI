@@ -6,7 +6,7 @@ class App:
         self.geometry = geometry
         from customtkinter import CTk
         self.root = CTk()
-        from .calc_scene import CalcScene
+        from ..scenes.calc_scene import CalcScene
         CalcScene(self, self).pack()
 
     def run(self) -> None:
