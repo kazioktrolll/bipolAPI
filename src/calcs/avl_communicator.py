@@ -11,16 +11,6 @@ class Interface:
         self.geometry = geometry
 
     @classmethod
-    def get_run_file_contents(cls, geometry: Geometry, alfa: float, beta: float, roll_rate: float, pitch_rate: float, yaw_rate: float) -> str:
-        return (f"Run case  1: -Test-\n"
-                f"X = {geometry.ref_pos.x}\n"
-                f"alpha -> alpha = {alfa}\n"
-                f"beta -> beta = {beta}\n"
-                f"pb/2V -> pb/2V = {roll_rate}\n"
-                f"qc/2V -> qc/2V = {pitch_rate}\n"
-                f"rb/2V -> rb/2V = {yaw_rate}\n")
-
-    @classmethod
     def execute_case(cls, geometry: Geometry, run_file_contents: str) -> str:
         avl_file = open(local_path.joinpath('local.avl'), 'w')
         run_file = open(local_path.joinpath('local.run'), 'w')
@@ -33,7 +23,7 @@ class Interface:
         avl = Popen([avl_path, str(local_path.joinpath('local.avl'))], stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=True)
         command = 'OPER\nX\n'
         dump = avl.communicate(bytes(command, encoding='utf-8'),
-                               1)[0].decode()
+                               timeout=1)[0].decode()
         return dump
 
     @classmethod
