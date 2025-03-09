@@ -32,10 +32,8 @@ class Interface:
         from subprocess import Popen, PIPE
         avl = Popen([avl_path, str(local_path.joinpath('local.avl'))], stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=True)
         command = 'OPER\nX\n'
-        dump = avl.communicate(bytes(command, encoding='utf-8'))[0].decode()
-        from os import remove
-        remove(local_path.joinpath('local.avl'))
-        remove(local_path.joinpath('local.run'))
+        dump = avl.communicate(bytes(command, encoding='utf-8'),
+                               1)[0].decode()
         return dump
 
     @classmethod
