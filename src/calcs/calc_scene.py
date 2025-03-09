@@ -1,6 +1,5 @@
 from ..scenes import Scene
 from .frontend import OperInputPanel
-from customtkinter import CTkFrame
 
 
 class CalcScene(Scene):
@@ -19,7 +18,7 @@ class CalcScene(Scene):
         return self._app
 
     def build(self) -> None:
-        self.oip = OperInputPanel(self, ['Ailerons'])
+        self.oip = OperInputPanel(self, ['flap', 'aileron', 'elevator'])
         self.oip.grid(row=0, column=0, sticky="nsew")
 
         from customtkinter import CTkButton, CTkLabel
