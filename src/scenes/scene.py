@@ -1,4 +1,5 @@
 from customtkinter import CTkFrame
+from typing import final
 from ..app import App
 
 
@@ -29,9 +30,11 @@ class Scene(CTkFrame):
         """
         if type(self) is not Scene: raise NotImplementedError
 
+    @final
     def update(self) -> None:
         for tu in self.to_update:
             tu.update()
 
+    @final
     def bind(self, *args, **kwargs):
         self.app.root.bind(*args, **kwargs)
