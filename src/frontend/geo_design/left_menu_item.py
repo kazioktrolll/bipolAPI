@@ -16,9 +16,6 @@ class LeftMenuItem(CTkFrame, ABC):
         self.initialized = False
         self.surface = surface
 
-        self.button = CTkButton(parent.buttons_frame, text=self.name, command=lambda: parent.show_item(self))
-        self.button.invoke()
-
         self.pf_frame = CTkFrame(self, fg_color=self.cget('fg_color'))
         self.pf_frame.columnconfigure(0, weight=1)
 
@@ -56,7 +53,6 @@ class LeftMenuItem(CTkFrame, ABC):
         """Should define all needed pfs and init them using super()._init_pf(**kwargs), then call super().init_pfs()."""
         for pf in self.pfs.values(): pf.name_label.configure(width=100)
         self.initialized = True
-
 
     @final
     def _init_pf(self, keyword: str, name: str, message: str, assert_test: Callable[[float], bool], initial_value: float) -> None:
