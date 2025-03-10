@@ -1,5 +1,4 @@
 from customtkinter import CTkFrame
-from ...frontend import OperInputPanel
 
 
 class CalcDisplay(CTkFrame):
@@ -19,6 +18,7 @@ class CalcDisplay(CTkFrame):
         return self.master.app.geometry
 
     def build(self):
+        from ...frontend import OperInputPanel
         self.oip = OperInputPanel(self, ['flap', 'aileron', 'elevator'])
         self.oip.grid(row=0, column=0, sticky="nsew")
 

@@ -1,26 +1,21 @@
 from .scene import Scene
+from .geo_design import GeoDesignScene
+from .calc_scene import CalcScene
 from customtkinter import CTkButton
 
 
 class InitialScene(Scene):
     def build(self) -> None:
-        self.rowconfigure(0, weight=1)
-        self.rowconfigure(1, weight=0)
-        self.rowconfigure(2, weight=1)
-        self.columnconfigure(0, weight=1)
-        self.columnconfigure(1, weight=0)
-        self.columnconfigure(2, weight=1)
+        self.rowconfigure(0, weight=0, minsize=10)
+        self.rowconfigure(1, weight=1)
+        self.rowconfigure(2, weight=0, minsize=10)
+        self.columnconfigure(0, weight=0, minsize=10)
+        self.columnconfigure(1, weight=1)
+        self.columnconfigure(2, weight=0, minsize=10)
+        self.columnconfigure(3, weight=1)
+        self.columnconfigure(4, weight=0, minsize=10)
 
-        CTkButton(self, text='Load Geometry File', command=self.open_file).grid(row=1, column=1)
-
-    def open_file(self):
-        from tkinter import filedialog
-        from pathlib import Path
-        path = filedialog.askopenfilename(
-            title="Select File",
-            initialdir=r"C:\Users\kazio\OneDrive\Pulpit\BIPOL",
-            filetypes=(("AVL Files", "*.avl"),)
-        )
-        self.app.geo_path = Path(path)
-        from .oper import OperScene
-        self.app.set_scene(OperScene(self.app, ['a', 'b', 'c']))
+        CTkButton(self, text="Geometry\nDesign", command=lambda: self.app.set_scene(GeoDesignScene(self.app))
+                  ).grid(row=1, column=1, sticky="nsew")
+        CTkButton(self, text="Calculations", command=lambda: self.app.set_scene(CalcScene(self.app))
+                  ).grid(row=1, column=3, sticky="nsew")
