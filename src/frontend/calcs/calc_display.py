@@ -20,7 +20,9 @@ class CalcDisplay(CTkFrame):
 
     def build(self):
         from ...frontend import OperInputPanel
-        self.oip = OperInputPanel(self, ['flap', 'aileron', 'elevator'])
+        controls = self.geometry.get_controls()
+        controls_names = [c.name for c in controls]
+        self.oip = OperInputPanel(self, controls_names)
         self.oip.grid(row=0, column=0, sticky="nsew")
 
         from customtkinter import CTkButton, CTkLabel
