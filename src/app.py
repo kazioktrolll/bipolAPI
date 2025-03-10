@@ -64,9 +64,9 @@ class App:
     def set_geometry(self, geometry: Geometry) -> None:
         self.geometry = geometry
         self.update()
-        from src.scenes import GeoDesignScene
-        if isinstance(self.scene, GeoDesignScene):
-            self.scene.left_menu.update()
+        from src.scenes import GeoDesignScene, CalcScene
+        if isinstance(self.scene, GeoDesignScene): self.scene.left_menu.update()
+        if isinstance(self.scene, CalcScene): self.scene.display.update()
 
     # 'File' menu
 
@@ -142,6 +142,11 @@ class TopBar(CTkFrame):
             ('Export', app.export_to_avl),
             ('Import', app.import_from_avl)
         ]).grid(column=0, row=0, sticky='nsew')
+        from .scenes import GeoDesignScene, CalcScene
+        TopBarItem(self, app.root, 'Workspace', [
+            ('GeoDesign', lambda: app.set_scene(GeoDesignScene(app))),
+            ('Calculations', lambda: app.set_scene(CalcScene(app))),
+        ]).grid(column=1, row=0, sticky='nsew')
 
     def collapse_all(self):
         for child in self.children.values():

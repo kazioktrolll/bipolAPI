@@ -8,6 +8,7 @@ class CalcDisplay(CTkFrame):
         self.exec_button = None
         self.results_label = None
         self.oip = None
+        self.build()
 
     @property
     def geometry(self):
@@ -29,6 +30,9 @@ class CalcDisplay(CTkFrame):
         self.columnconfigure(1, minsize=10)
         self.results_label.grid(row=0, column=2, sticky='news')
         self.run_case()
+
+    def update(self):
+        self.build()
 
     def run_case(self):
         from ...backend import AVLInterface

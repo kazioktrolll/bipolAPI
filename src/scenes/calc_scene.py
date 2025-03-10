@@ -13,4 +13,3 @@ class CalcScene(Scene):
 
         self.display = CalcDisplay(self)
         self.display.grid(row=0, column=0)
-        self.display.build()
