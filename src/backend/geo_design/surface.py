@@ -1,4 +1,4 @@
-from .section import Section, Flap, Aileron, Elevator
+from .section import Section, Flap, Aileron, Elevator, Control
 from .airfoil import Airfoil
 from ..to_re_docstring_decorator import to_re_docstring
 from ..vector3 import Vector3, AnyVector3
@@ -167,6 +167,13 @@ class Surface(ABC):
         for sec in self.sections:
             _r += sec.string()
         return _r
+
+    def get_controls(self) -> list[Control]:
+        controls = []
+        for sec in self.sections:
+            if sec.control and sec.control not in controls:
+                controls.append(sec.control)
+        return controls
 
 
 class HorizontalSurface(Surface):

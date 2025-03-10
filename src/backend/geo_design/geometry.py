@@ -100,3 +100,11 @@ class Geometry:
         contents = self.string()
         file.write(contents)
         return file
+
+    def get_controls(self):
+        from .section import Control
+        controls: list[Control] = []
+        for surf in self.surfaces.values():
+            ctrls = surf.get_controls()
+            controls += [c for c in ctrls if c not in controls]
+        return controls
