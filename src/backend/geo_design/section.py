@@ -37,6 +37,9 @@ class Section:
         self.airfoil = airfoil or Airfoil.empty()
         self.control = control
 
+    def __repr__(self) -> str:
+        return f"Section at: {self.leading_edge_position.tuple()} x {self.chord}, control: {self.control.__repr__()}"
+
     def mirror(self) -> 'Section':
         """Returns a copy of self, mirrored about Y-axis."""
         lep = self.leading_edge_position.scale((1, -1, 1))
@@ -89,8 +92,7 @@ class Section:
 class Control:
     """Class representing a control surface attached to a section."""
     def __init__(self, name: str, x_hinge: float, SgnDup: bool,
-                 gain: float = 1, xyz_h_vec: AnyVector3 = Vector3.zero(),
-                 color: str = 'green') -> None:
+                 gain: float = 1, color: str = 'green') -> None:
         """
         Parameters:
             name (str): The name of the control surface.
@@ -98,7 +100,6 @@ class Control:
             SgnDup (bool): The sign of the sign of the hinge.
                 ``True`` for symmetric deflection, ``False`` for antisymmetric defection.
             gain (float): The gain of the control surface. Defaults to 1.
-            xyz_h_vec (AnyVector3): The xyz position of the hinge. Defaults to (0, 0, 0).
             color (str): The color of the control surface. Defaults to 'green'.
         """
         assert -1 < x_hinge < 1
@@ -107,20 +108,27 @@ class Control:
         self.x_hinge = x_hinge
         self.SgnDup = SgnDup
         self.gain = gain
-        self.xyz_h_vec = Vector3(*xyz_h_vec)
         self.color = color
+
+    def __repr__(self) -> str:
+        return self.name
 
     def copy(self: T) -> T:
         """Returns a copy of this control surface."""
-        return Control(self.name, self.x_hinge, self.SgnDup, self.gain, self.xyz_h_vec.copy())
+        return self.__class__(**self.__dict__)
 
     def string(self) -> str:
         """Returns the current geometry as a .avl type string."""
         return ("CONTROL\n"
-                f"{self.name} {self.gain} {self.x_hinge} {self.xyz_h_vec.avl_string} {"+1" if self.SgnDup else "-1"}\n")
+                f"{self.name} {self.gain} {self.x_hinge} 0. 0. 0. {"+1" if self.SgnDup else "-1"}\n")
 
 
-class Flap(Control):
+class PreDefControl(Control):
+    def copy(self: T) -> T:
+        return self.__class__(self.x_hinge)
+
+
+class Flap(PreDefControl):
     def __init__(self, x_hinge: float):
         """
         Parameters:
@@ -130,7 +138,7 @@ class Flap(Control):
         super().__init__(name='flap', x_hinge=x_hinge, SgnDup=True, color='yellow')
 
 
-class Aileron(Control):
+class Aileron(PreDefControl):
     def __init__(self, x_hinge: float):
         """
         Parameters:
@@ -140,7 +148,7 @@ class Aileron(Control):
         super().__init__(name='aileron', x_hinge=x_hinge, SgnDup=False)
 
 
-class Elevator(Control):
+class Elevator(PreDefControl):
     def __init__(self, x_hinge: float):
         """
         Parameters:
