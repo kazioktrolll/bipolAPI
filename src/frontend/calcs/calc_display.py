@@ -1,4 +1,5 @@
 from customtkinter import CTkFrame
+from .results_display import ResultsDisplay
 
 
 class CalcDisplay(CTkFrame):
@@ -6,7 +7,7 @@ class CalcDisplay(CTkFrame):
         super().__init__(parent)
         self.ois_frame = None
         self.exec_button = None
-        self.results_label = None
+        self.results_display = None
         self.oip = None
         self.build()
 
@@ -28,13 +29,14 @@ class CalcDisplay(CTkFrame):
         from customtkinter import CTkButton, CTkLabel
         self.exec_button = CTkButton(self, text='Execute', command=self.run_case)
         self.exec_button.grid(row=1, column=0, sticky='news')
-        self.results_label = CTkLabel(self)
+        self.results_display = ResultsDisplay(self)
         self.columnconfigure(1, minsize=10)
-        self.results_label.grid(row=0, column=2, sticky='news')
+        self.results_display.grid(row=0, column=2, columnspan=2, sticky='news')
         self.run_case()
 
     def update(self):
         self.build()
+        self.results_display.update()
 
     def run_case(self):
         from ...backend import AVLInterface
@@ -45,6 +47,5 @@ class CalcDisplay(CTkFrame):
             f"Run case  1: AutoCase\nX_cg = {self.geometry.ref_pos.x}\n" + self.oip.run_file_string()
         )
         vals = AVLInterface.results_from_dump(dump)[0]
-        results_string = '\n'.join([': '.join([k, str(v)]) for k, v in vals.items()])
-        self.results_label.configure(text=results_string)
+        self.results_display.set_results(vals)
         self.exec_button.configure(state='normal')
