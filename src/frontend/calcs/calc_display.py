@@ -26,12 +26,13 @@ class CalcDisplay(CTkFrame):
         self.oip = OperInputPanel(self, controls_names)
         self.oip.grid(row=0, column=0, sticky="nsew")
 
-        from customtkinter import CTkButton, CTkLabel
+        from customtkinter import CTkButton
         self.exec_button = CTkButton(self, text='Execute', command=self.run_case)
+        self.rowconfigure(2, weight=1)
         self.exec_button.grid(row=1, column=0, sticky='news')
         self.results_display = ResultsDisplay(self)
         self.columnconfigure(1, minsize=10)
-        self.results_display.grid(row=0, column=2, columnspan=2, sticky='news')
+        self.results_display.grid(row=0, column=2, rowspan=2, sticky='news')
         self.run_case()
 
     def update(self):
