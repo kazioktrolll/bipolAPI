@@ -6,3 +6,4 @@ from .geo_design import *
 from .calcs import *
 from .popup import Popup
 from .top_bar import TopBarItem
+from .strip_manager import ColumnManager, RowManager
