@@ -25,19 +25,9 @@ class OperInput(RowManager):
         super().__init__(grid, master_row)
         self.value = DoubleVar(value=0.0)
 
-        self.base_names = {
-            'Alpha': ('A', 'alpha'),
-            'Beta': ('B', 'beta'),
-            'Roll Rate': ('R', 'pb/2V'),
-            'Pitch Rate': ('P', 'qc/2V'),
-            'Yaw Rate': ('Y', 'rb/2V')
-        } | {ctrl: (f'd{i}', ctrl) for i, ctrl in enumerate(control_surfaces)}
-        self.bindable_names = {
-            'CL': ('c', 'CL'),
-            'CY': ('s', 'CY'),
-            'Roll Moment': ('rm', 'Cl roll mom'),
-            'Pitch Moment': ('pm', 'Cm pitchmom'),
-            'Yaw Moment': ('ym', 'Cn yaw mom')}
+        self.base_names = OperInput.base_names | {ctrl: (f'd{i}', ctrl) for i, ctrl in enumerate(control_surfaces)}
+        self.bindable_names = self.base_names | OperInput.bindable_names
+        del self.bindable_names[name]
 
         if name not in self.base_names.keys(): raise ValueError("Invalid name")
         self.display_name = name
