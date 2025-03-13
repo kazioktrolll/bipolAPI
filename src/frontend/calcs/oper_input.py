@@ -1,4 +1,5 @@
-from customtkinter import CTkFrame, CTkLabel, CTkButton, CTkEntry, CTkOptionMenu, CTk, DoubleVar
+from customtkinter import CTkFrame, CTkLabel, CTkButton, CTkEntry, CTkOptionMenu, CTk, DoubleVar, CTkSegmentedButton
+from abc import ABC, abstractmethod
 from ..strip_manager import RowManager
 
 
@@ -121,14 +122,10 @@ class OperSeriesInput(RowManager):
         self.name_label = CTkLabel(self.grid, text=self.display_name, anchor='e')
         self.bind_menu = CTkOptionMenu(self.grid, width=120, values=list(self.bindable_names.keys()))
         self.series_config = SeriesConfig(self.grid)
-        self.set_button = CTkButton(self.grid, text="Set", width=30, command=self.set_value)
         self.bind_button = CTkButton(self.grid, text="Bind", width=20, command=self.bind_switch)
 
         self.bound = False
         self.build()
-
-    def set_value(self):
-        self.series_config.set_value()
 
     def get_value(self): return self.series_config.get_value()
 
@@ -137,6 +134,7 @@ class OperSeriesInput(RowManager):
         self.update()
 
     def update(self):
+        self.series_config.update()
         if not self.bound: self.bind_menu.grid_forget()
         else: self.bind_menu.grid(column=1, row=self.master_index)
 
@@ -146,7 +144,6 @@ class OperSeriesInput(RowManager):
         self.stack([
             self.bind_menu,
             self.series_config,
-            self.set_button,
             self.bind_button
         ])
         self.update()
@@ -155,13 +152,17 @@ class OperSeriesInput(RowManager):
 class OperSeriesInputPanel(CTkFrame):
     def __init__(self, parent: Gridable, control_surfaces: list[str] = None):
         super().__init__(parent)
+        sb = CTkSegmentedButton(self, values=['Single', 'Series'], command=self.toggle_series)
+        sb.set('Single')
+        sb.grid(row=0, column=2, sticky='w')
+        self.load_from_file_button = CTkButton(self, text='Add File', width=1)
         self.ois: list[OperSeriesInput] = [
-            OperSeriesInput(grid=self, name='Alpha', master_row=0, control_surfaces=control_surfaces)
+            OperSeriesInput(grid=self, name='Alpha', master_row=1, control_surfaces=control_surfaces)
         ]
         for i, name in enumerate(self.ois[0].base_names.keys()):
             if i == 0: continue
             self.ois.append(
-                OperSeriesInput(grid=self, name=name, master_row=i, control_surfaces=control_surfaces)
+                OperSeriesInput(grid=self, name=name, master_row=i+1, control_surfaces=control_surfaces)
             )
 
     def get_values(self) -> list[list[float]]:
@@ -176,63 +177,136 @@ class OperSeriesInputPanel(CTkFrame):
             if type(val) == float: _r.append([val]*len(lists[0]))
         return _r
 
+    def toggle_series(self, mode: str):
+        match mode:
+            case 'Single':
+                target = False
+                self.load_from_file_button.grid_forget()
+            case 'Series':
+                target = True
+                self.load_from_file_button.grid(row=0, column=1, sticky='ew')
+            case _: raise ValueError("Invalid mode")
+        for oi in self.ois:
+            oi.series_config.series_enabled = target
+            oi.update()
+
+
+class ConfigItem(CTkFrame, ABC):
+    def __init__(self, parent: Gridable):
+        super().__init__(parent, fg_color='transparent')
+        self.value_label = CTkLabel(self, text='0', width=120, anchor='e')
+        self.set_button = CTkButton(self, text='Set', width=40, command=self.set_value)
+
+    @abstractmethod
+    def build(self) -> None: ...
+
+    @abstractmethod
+    def set_value(self) -> None: ...
+
+    @abstractmethod
+    def get_values(self) -> float | list[float]: ...
+
+
+class ConstantConfig(ConfigItem):
+    def __init__(self, parent: Gridable):
+        super().__init__(parent)
+        self.value = 0.0
+        self.entry = CTkEntry(self, width=120)
+        self.build()
+
+    def build(self) -> None:
+        self.value_label.grid(column=0, row=0)
+        self.entry.grid(column=1, row=0)
+        self.set_button.grid(column=2, row=0)
+
+    def set_value(self) -> None:
+        val = self.entry.get()
+        self.entry.delete(0, 'end')
+        try: val = float(val)
+        except ValueError: return
+        self.value = val
+        self.value_label.configure(text=str(round(val, 3)))
+
+    def get_values(self): return self.value
+
+
+class RangeConfig(ConfigItem):
+    def __init__(self, parent: Gridable):
+        super().__init__(parent)
+        self.values = []
+        self.entries = [EntryWithInstructions(self, t, width=40) for t in ['from', 'step', 'to']]
+        self.build()
+
+    def build(self):
+        self.value_label.grid(column=0, row=0)
+        for i, e in enumerate(self.entries): e.grid(column=i+1, row=0)
+        self.set_button.grid(column=4, row=0)
+
+    def set_value(self) -> None:
+        f, s, t = map(float, [e.get() for e in self.entries])
+        for e in self.entries:
+            e.delete(0, 'end')
+            e.fill()
+        self.focus_set()
+        self.value_label.configure(text=f'{round(f, 3)} : {round(s, 3)} : {round(t, 3)}')
+        self.values.clear()
+        while f <= t:
+            self.values.append(f)
+            f += s
+
+    def get_values(self) -> float | list[float]: return self.values
+
+
+class FileConfig(ConfigItem):
+    def __init__(self, parent: Gridable):
+        super().__init__(parent)
+        self.placeholder = CTkLabel(self, text='---', width=120, anchor='e')
+        self.build()
+
+    def build(self):
+        self.value_label.grid(column=0, row=0)
+        self.placeholder.grid(column=1, row=0)
+        self.set_button.grid(column=2, row=0)
+
+    def set_value(self) -> None: pass
+
+    def get_values(self) -> float | list[float]: return -69
+
 
 class SeriesConfig(CTkFrame):
     def __init__(self, parent: Gridable):
         super().__init__(parent)
         self.mode_menu = CTkOptionMenu(self, values=['Constant', 'Range', 'From File'], command=self.switch_mode)
-        self.mode = 'Constant'
-        self.value_label = CTkLabel(self, text='0', width=40, anchor='e')
-        self.constant_entry = None
-        self.range_entry = None
-        self.from_file_entry = None
+        self.constant_entry = ConstantConfig(self)
+        self.range_entry = RangeConfig(self)
+        self.from_file_entry = FileConfig(self)
         self.active_entry = None
+        self.series_enabled = False
         self.build()
 
+    @property
+    def mode(self):
+        return self.mode_menu.get()
+
     def build(self):
-        self.mode_menu.grid(column=0, row=0)
-        self.value_label.grid(column=1, row=0)
-        self.constant_entry = CTkEntry(self, width=120)
-        self.range_entry = CTkFrame(self, fg_color='transparent')
-        for i, t in zip([0, 1, 2], ['from', 'step', 'to']):
-            EntryWithInstructions(self.range_entry, t, width=40).grid(column=i, row=0)
-        self.from_file_entry = CTkLabel(self, text='PLACEHOLDER', width=120)
         self.update()
 
     def update(self):
+        if self.series_enabled:
+            self.mode_menu.grid(column=0, row=0)
+        else:
+            self.mode_menu.grid_forget()
         self.switch_mode()
 
     def switch_mode(self, _=None):
-        curr_active = {'Constant': self.constant_entry, 'Range': self.range_entry, 'From File': self.from_file_entry}[self.mode_menu.get()]
+        curr_active = {'Constant': self.constant_entry, 'Range': self.range_entry, 'From File': self.from_file_entry}[self.mode]
         if curr_active is self.active_entry: return
         if self.active_entry is not None:
             self.active_entry.grid_forget()
         self.active_entry = curr_active
-        self.active_entry.grid(column=2, row=0)
+        self.active_entry.grid(column=1, row=0)
 
-    def set_value(self):
-        self.mode = self.mode_menu.get()
-        match self.mode:
-            case 'Constant': self.value_label.configure(text=f"{self.constant_entry.get()}")
-            case 'Range': self.value_label.configure(
-                text=f"{self.range_entry.children['!entrywithinstructions'].get()}:"
-                     f"{self.range_entry.children['!entrywithinstructions2'].get()}:"
-                     f"{self.range_entry.children['!entrywithinstructions3'].get()}")
-            case 'From File': self.from_file_entry.configure(text=f"{self.from_file_entry.cget('text')}")
-
-    def get_value(self) -> float | list[float]:
-        val = self.value_label.cget('text')
-        match self.mode:
-            case 'Constant': return float(val)
-            case 'Range':
-                f, s, t = map(float, val.split(':'))
-                val = []
-                while f <= t:
-                    val.append(f)
-                    f += s
-                return val
-            case 'From File': return -69
-            case _: return -69.69
+    def get_value(self) -> float | list[float]: return self.active_entry.get_values()
 
 
 class EntryWithInstructions(CTkEntry):
