@@ -4,7 +4,9 @@ from customtkinter import CTkFrame, CTkSegmentedButton, CTkLabel, CTkEntry
 class ResultsDisplay(CTkFrame):
     def __init__(self, parent):
         super().__init__(parent, fg_color=parent.cget('fg_color'))
-        self.results: dict[str, float] = {}
+        self.results: list[dict[str, float]] = [{}]
+        self.page = 0
+        self.page_button = CTkSegmentedButton(self, command=self.switch_page)
         self.mode_button = CTkSegmentedButton(self, values=['Simple', 'Full'], command=self.switch_mode)
         self.simple_label = TextBox(self)
         self.full_label = TextBox(self)
@@ -12,13 +14,20 @@ class ResultsDisplay(CTkFrame):
         self.mode_button.set('Simple')
         self.build()
 
+    @property
+    def active_results(self):
+        return self.results[self.page]
+
     def build(self):
+        self.set_results([{}])
+
         self.rowconfigure(0, weight=0)
         self.rowconfigure(1, weight=1)
         self.columnconfigure(0, weight=0)
 
-        self.mode_button.grid(row=0, column=0, sticky='nsew')
-        self.current_label.grid(row=1, column=0, sticky='nsew')
+        self.page_button.grid(row=0, column=0, sticky='nsew')
+        self.mode_button.grid(row=1, column=0, sticky='nsew')
+        self.current_label.grid(row=2, column=0, sticky='nsew')
         self.update()
 
     def update(self):
@@ -36,13 +45,15 @@ class ResultsDisplay(CTkFrame):
             'CDtot',
             'CDind'
         ] + [c.name for c in self.control_surfaces()]
-        simple_results = {k:v for k, v in self.results.items() if k in simple_keys}
+        simple_results = {k:v for k, v in self.active_results.items() if k in simple_keys}
         self.simple_label.set_data(simple_results)
-        self.full_label.set_data(self.results)
+        self.full_label.set_data(self.active_results)
 
         self.simple_label.place(x=1e4, y=8576)
         self.full_label.place(x=1e4, y=5592)
-        self.current_label.grid(row=1, column=0, sticky='nsew')
+        self.current_label.grid(row=2, column=0, sticky='nsew')
+
+
 
     def switch_mode(self, mode: str):
         match mode:
@@ -50,9 +61,16 @@ class ResultsDisplay(CTkFrame):
             case 'Full': self.current_label = self.full_label
         self.update()
 
-    def set_results(self, results: dict[str, float]):
+    def set_results(self, results: list[dict[str, float]]):
         self.results = results
-        self.build()
+        pages = list(range(len(results)))
+        self.page_button.configure(values=list(map(str, pages)))
+        self.page_button.set('0')
+        self.update()
+
+    def switch_page(self, page: str):
+        self.page = int(page)
+        self.update()
 
     def control_surfaces(self):
         from .calc_display import CalcDisplay

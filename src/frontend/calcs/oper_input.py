@@ -148,6 +148,12 @@ class OperSeriesInput(RowManager):
         ])
         self.update()
 
+    def run_file_names(self) -> str:
+        if not self.bound:
+            return f"{self.run_file_name} -> {self.run_file_name}"
+        bound_run_file_name = self.bindable_names[self.bind_menu.get()][1]
+        return f"{self.run_file_name} -> {bound_run_file_name}"
+
 
 class OperSeriesInputPanel(CTkFrame):
     def __init__(self, parent: Gridable, control_surfaces: list[str] = None):
@@ -189,6 +195,11 @@ class OperSeriesInputPanel(CTkFrame):
         for oi in self.ois:
             oi.series_config.series_enabled = target
             oi.update()
+
+    def get_run_file_data(self) -> dict[str, list[float]]:
+        names = [oi.run_file_names() for oi in self.ois]
+        values = self.get_values()
+        return dict(zip(names, values))
 
 
 class ConfigItem(CTkFrame, ABC):

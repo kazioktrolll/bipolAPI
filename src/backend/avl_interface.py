@@ -11,6 +11,17 @@ class AVLInterface:
         self.geometry = geometry
 
     @classmethod
+    def create_run_file_contents(cls, geometry: Geometry, run_file_data: dict[str, list[float]]) -> str:
+        no_of_runs = len(list(run_file_data.values())[0])
+        _r = ''
+        for i in range(no_of_runs):
+            _r += (f"Run case  {i+1}: AutoGenCase{i}\n"
+                  f"X_cg = {geometry.ref_pos.x}\n")
+            _r += '\n'.join([f"{names} = {value[i]}" for names, value in run_file_data.items()])
+            _r += '\n\n'
+        return _r
+
+    @classmethod
     def execute_case(cls, geometry: Geometry, run_file_contents: str) -> str:
         avl_file = open(local_path.joinpath('local.avl'), 'w')
         run_file = open(local_path.joinpath('local.run'), 'w')
@@ -21,7 +32,7 @@ class AVLInterface:
 
         from subprocess import Popen, PIPE
         avl = Popen([avl_path, str(local_path.joinpath('local.avl'))], stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=True)
-        command = 'OPER\nX\n'
+        command = 'OPER\nXX\n'
         dump = avl.communicate(bytes(command, encoding='utf-8'),
                                timeout=1)[0].decode()
         return dump
@@ -37,10 +48,16 @@ class AVLInterface:
         return cls._split_dump(dump)[2]
 
     @classmethod
+    def chop_results(cls, dump: str) -> list[str]:
+        import re
+        dump = re.split(r'-{61,}', dump)
+        return [block for block in dump if 'Vortex Lattice Output' in block]
+
+    @classmethod
     def results_from_dump(cls, dump: str) -> list[dict[str, float]]:
         dump = cls._split_dump(dump)
         if len(dump) < 6: return []
-        results = dump[4:-1]
+        results = cls.chop_results(dump[4])
         stripped = []
         import re
         for result in results:

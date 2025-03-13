@@ -4,11 +4,12 @@ from .results_display import ResultsDisplay
 
 class CalcDisplay(CTkFrame):
     def __init__(self, parent):
+        from .oper_input import OperSeriesInputPanel
         super().__init__(parent)
         self.ois_frame = None
         self.exec_button = None
         self.results_display = None
-        self.oip = None
+        self.oip: OperSeriesInputPanel | None = None
         self.build()
 
     @property
@@ -43,10 +44,8 @@ class CalcDisplay(CTkFrame):
         from ...backend import AVLInterface
 
         self.exec_button.configure(state='disabled')
-        dump = AVLInterface.execute_case(
-            self.geometry,
-            f"Run case  1: AutoCase\nX_cg = {self.geometry.ref_pos.x}\n" + self.oip.run_file_string()
-        )
-        vals = AVLInterface.results_from_dump(dump)[0]
+        contents = AVLInterface.create_run_file_contents(self.geometry, self.oip.get_run_file_data())
+        dump = AVLInterface.execute_case(self.geometry, contents)
+        vals = AVLInterface.results_from_dump(dump)
         self.results_display.set_results(vals)
         self.exec_button.configure(state='normal')
