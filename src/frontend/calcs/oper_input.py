@@ -127,7 +127,10 @@ class OperSeriesInput(RowManager):
         self.bound = False
         self.build()
 
-    def set_value(self): ...
+    def set_value(self):
+        self.series_config.set_value()
+
+    def get_value(self): return self.series_config.get_value()
 
     def bind_switch(self):
         self.bound = not self.bound
@@ -161,12 +164,25 @@ class OperSeriesInputPanel(CTkFrame):
                 OperSeriesInput(grid=self, name=name, master_row=i, control_surfaces=control_surfaces)
             )
 
+    def get_values(self) -> list[list[float]]:
+        vals = [item.get_value() for item in self.ois]
+        lists = [val for val in vals if type(val) == list]
+        if len(lists) == 0: return [[val] for val in vals]
+        for lst in lists:
+            if len(lst) != len(lists[0]): raise ValueError("Invalid length")
+        _r = []
+        for val in vals:
+            if type(val) == list: _r.append(val)
+            if type(val) == float: _r.append([val]*len(lists[0]))
+        return _r
+
 
 class SeriesConfig(CTkFrame):
     def __init__(self, parent: Gridable):
         super().__init__(parent)
         self.mode_menu = CTkOptionMenu(self, values=['Constant', 'Range', 'From File'], command=self.switch_mode)
-        self.value_label = CTkLabel(self)
+        self.mode = 'Constant'
+        self.value_label = CTkLabel(self, text='0', width=40, anchor='e')
         self.constant_entry = None
         self.range_entry = None
         self.from_file_entry = None
@@ -193,6 +209,30 @@ class SeriesConfig(CTkFrame):
             self.active_entry.grid_forget()
         self.active_entry = curr_active
         self.active_entry.grid(column=2, row=0)
+
+    def set_value(self):
+        self.mode = self.mode_menu.get()
+        match self.mode:
+            case 'Constant': self.value_label.configure(text=f"{self.constant_entry.get()}")
+            case 'Range': self.value_label.configure(
+                text=f"{self.range_entry.children['!entrywithinstructions'].get()}:"
+                     f"{self.range_entry.children['!entrywithinstructions2'].get()}:"
+                     f"{self.range_entry.children['!entrywithinstructions3'].get()}")
+            case 'From File': self.from_file_entry.configure(text=f"{self.from_file_entry.cget('text')}")
+
+    def get_value(self) -> float | list[float]:
+        val = self.value_label.cget('text')
+        match self.mode:
+            case 'Constant': return float(val)
+            case 'Range':
+                f, s, t = map(float, val.split(':'))
+                val = []
+                while f <= t:
+                    val.append(f)
+                    f += s
+                return val
+            case 'From File': return -69
+            case _: return -69.69
 
 
 class EntryWithInstructions(CTkEntry):
