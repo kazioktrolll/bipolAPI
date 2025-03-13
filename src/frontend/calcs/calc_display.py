@@ -20,10 +20,10 @@ class CalcDisplay(CTkFrame):
         return self.master.app.geometry
 
     def build(self):
-        from ...frontend import OperInputPanel
+        from .oper_input import OperSeriesInputPanel
         controls = self.geometry.get_controls()
         controls_names = [c.name for c in controls]
-        self.oip = OperInputPanel(self, controls_names)
+        self.oip = OperSeriesInputPanel(self, controls_names)
         self.oip.grid(row=0, column=0, sticky="nsew")
 
         from customtkinter import CTkButton
@@ -33,7 +33,7 @@ class CalcDisplay(CTkFrame):
         self.results_display = ResultsDisplay(self)
         self.columnconfigure(1, minsize=10)
         self.results_display.grid(row=0, column=2, rowspan=2, sticky='news')
-        self.run_case()
+        #self.run_case()
 
     def update(self):
         self.build()
