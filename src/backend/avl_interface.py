@@ -11,6 +11,14 @@ class AVLInterface:
         self.geometry = geometry
 
     @classmethod
+    def write_to_avl_file(cls, contents: str) -> None:
+        with open(local_path.joinpath('local.avl'), 'w') as avl_file: avl_file.write(contents)
+
+    @classmethod
+    def write_to_run_file(cls, contents: str) -> None:
+        with open(local_path.joinpath('local.run'), 'w') as run_file: run_file.write(contents)
+
+    @classmethod
     def create_run_file_contents(cls, geometry: Geometry, run_file_data: dict[str, list[float]]) -> str:
         no_of_runs = len(list(run_file_data.values())[0])
         _r = ''
@@ -22,17 +30,24 @@ class AVLInterface:
         return _r
 
     @classmethod
-    def execute_case(cls, geometry: Geometry, run_file_contents: str) -> str:
-        avl_file = open(local_path.joinpath('local.avl'), 'w')
-        run_file = open(local_path.joinpath('local.run'), 'w')
-        avl_file.write(geometry.string())
-        run_file.write(run_file_contents)
-        avl_file.close()
-        run_file.close()
+    def create_st_command(cls, nof_cases: int) -> str:
+        _r = 'OPER\n'
+        for i in range(1, nof_cases+1):
+            _r += f'{i}\nX\nst\n'
+            _r += rf'C:\Users\kazio\PycharmProjects\bipolAPI\src\temp_files_dir\st_files\{i}.txt'
+            _r += '\n'
+        return _r
 
+    @classmethod
+    def execute_case(cls, geometry: Geometry, run_file_contents: str) -> str:
+        cls.write_to_avl_file(geometry.string())
+        cls.write_to_run_file(run_file_contents)
+        return cls.execute(command = 'OPER\nXX\n')
+
+    @classmethod
+    def execute(cls, command: str) -> str:
         from subprocess import Popen, PIPE
         avl = Popen([avl_path, str(local_path.joinpath('local.avl'))], stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=True)
-        command = 'OPER\nXX\n'
         dump = avl.communicate(bytes(command, encoding='utf-8'),
                                timeout=1)[0].decode()
         return dump
