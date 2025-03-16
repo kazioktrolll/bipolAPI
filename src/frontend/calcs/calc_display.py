@@ -41,17 +41,10 @@ class CalcDisplay(CTkFrame):
         self.results_display.update()
 
     def run_case(self):
-        from ...backend import AVLInterface, ResultsParser
+        from ...backend import AVLInterface
 
         self.exec_button.configure(state='disabled')
         data = self.oip.get_run_file_data()
-        nof_cases = len(list(data.values())[0])
-        contents = AVLInterface.create_run_file_contents(self.geometry, data)
-        AVLInterface.write_to_run_file(contents)
-        AVLInterface.write_to_avl_file(self.geometry.string())
-        AVLInterface.execute(AVLInterface.create_st_command(nof_cases))
-        vals = ResultsParser.all_sts_to_data()
-        ResultsParser.clear_st_files()
-        force_vals = [val[0] for val in vals]
-        self.results_display.set_results(force_vals)
+        vals = AVLInterface.run_series(self.geometry, data)
+        self.results_display.set_results(vals)
         self.exec_button.configure(state='normal')

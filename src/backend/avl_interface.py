@@ -54,6 +54,17 @@ class AVLInterface:
                                timeout=1)[0].decode()
         return dump
 
+    @classmethod
+    def run_series(cls, geometry: Geometry, data: dict[str, list[float]]) -> list[list[dict[str, float]]]:
+        nof_cases = len(list(data.values())[0])
+        contents = AVLInterface.create_run_file_contents(geometry, data)
+        AVLInterface.write_to_run_file(contents)
+        AVLInterface.write_to_avl_file(geometry.string())
+        AVLInterface.execute(AVLInterface.create_st_command(nof_cases))
+        vals = ResultsParser.all_sts_to_data()
+        ResultsParser.clear_st_files()
+        return vals
+
 
 class ResultsParser:
     @classmethod
@@ -61,10 +72,6 @@ class ResultsParser:
         import re
         dump = re.split(r'=+\r\n', dump)
         return dump
-
-    @classmethod
-    def vals_from_st_file(cls, file_contents: str) -> dict[str, float]:
-        file_contents = re.split(r'Run case:.*\r\n', file_contents, re.DOTALL)[0]
 
     @classmethod
     def loading_issues_from_dump(cls, dump: str) -> str:

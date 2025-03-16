@@ -4,11 +4,12 @@ from customtkinter import CTkFrame, CTkSegmentedButton, CTkLabel, CTkEntry
 class ResultsDisplay(CTkFrame):
     def __init__(self, parent):
         super().__init__(parent, fg_color=parent.cget('fg_color'))
-        self.results: list[dict[str, float]] = [{}]
+        self.results: list[list[dict[str, float]]] = [[{}, {}]]
         self.page = 0
         self.page_button = CTkSegmentedButton(self, command=self.switch_page)
-        self.mode_button = CTkSegmentedButton(self, values=['Simple', 'Full'], command=self.switch_mode)
+        self.mode_button = CTkSegmentedButton(self, values=['Simple', 'Stability', 'Full'], command=self.switch_mode)
         self.simple_label = TextBox(self)
+        self.stability_label = TextBox(self)
         self.full_label = TextBox(self)
         self.current_label = self.simple_label
         self.mode_button.set('Simple')
@@ -19,7 +20,7 @@ class ResultsDisplay(CTkFrame):
         return self.results[self.page]
 
     def build(self):
-        self.set_results([{}])
+        self.set_results([[{}, {}]])
 
         self.rowconfigure(0, weight=0)
         self.rowconfigure(1, weight=1)
@@ -45,23 +46,24 @@ class ResultsDisplay(CTkFrame):
             'CDtot',
             'CDind'
         ] + [c.name for c in self.control_surfaces()]
-        simple_results = {k:v for k, v in self.active_results.items() if k in simple_keys}
+        simple_results = {k:v for k, v in self.active_results[0].items() if k in simple_keys}
         self.simple_label.set_data(simple_results)
-        self.full_label.set_data(self.active_results)
+        self.stability_label.set_data(self.active_results[1])
+        self.full_label.set_data(self.active_results[0])
 
         self.simple_label.place(x=1e4, y=8576)
+        self.stability_label.place(x=1e4, y=9366)
         self.full_label.place(x=1e4, y=5592)
         self.current_label.grid(row=2, column=0, sticky='nsew')
-
-
 
     def switch_mode(self, mode: str):
         match mode:
             case 'Simple': self.current_label = self.simple_label
+            case 'Stability': self.current_label = self.stability_label
             case 'Full': self.current_label = self.full_label
         self.update()
 
-    def set_results(self, results: list[dict[str, float]]):
+    def set_results(self, results: list[list[dict[str, float]]]):
         self.results = results
         pages = list(range(len(results)))
         self.page_button.configure(values=list(map(str, pages)))
