@@ -1,4 +1,4 @@
-from customtkinter import CTkFrame, CTkSegmentedButton, CTkLabel, CTkEntry
+from customtkinter import CTkFrame, CTkSegmentedButton, CTkLabel, CTkEntry, CTkButton
 
 
 class ResultsDisplay(CTkFrame):
@@ -8,6 +8,7 @@ class ResultsDisplay(CTkFrame):
         self.page = 0
         self.page_button = CTkSegmentedButton(self, command=self.switch_page)
         self.mode_button = CTkSegmentedButton(self, values=['Simple', 'Stability', 'Full'], command=self.switch_mode)
+        self.csv_button = CTkButton(self, text='Save', command=self.save_to_csv)
         self.simple_label = TextBox(self)
         self.stability_label = TextBox(self)
         self.full_label = TextBox(self)
@@ -26,9 +27,10 @@ class ResultsDisplay(CTkFrame):
         self.rowconfigure(1, weight=1)
         self.columnconfigure(0, weight=0)
 
-        self.page_button.grid(row=0, column=0, sticky='nsew')
+        self.page_button.grid(row=0, column=0, columnspan=2, sticky='nsew')
         self.mode_button.grid(row=1, column=0, sticky='nsew')
-        self.current_label.grid(row=2, column=0, sticky='nsew')
+        self.csv_button.grid(row=1, column=1, sticky='nsew')
+        self.current_label.grid(row=2, column=0, columnspan=2, sticky='nsew')
         self.update()
 
     def update(self):
@@ -78,6 +80,28 @@ class ResultsDisplay(CTkFrame):
         from .calc_display import CalcDisplay
         assert isinstance(self.master, CalcDisplay)
         return self.master.geometry.get_controls()
+
+    def save_to_csv(self):
+        from pathlib import Path
+        from tkinter.filedialog import asksaveasfilename
+        path = Path(asksaveasfilename(
+            defaultextension='.csv',
+            filetypes=[('CSV File', ['*.csv']), ('All files', ['*.*'])],
+            title='Gavl_results',
+            confirmoverwrite=True
+        ))
+        to_save = ''
+        for key in (self.active_results[0] | self.active_results[1]).keys():
+            to_save += f'{key},'
+        to_save = to_save[:-1]
+        to_save += '\n'
+        for i in range(len(self.results)):
+            for val in (self.results[i][0] | self.results[i][1]).values():
+                to_save += f'{val},'
+            to_save = to_save[:-1]
+            to_save += '\n'
+        to_save = to_save[:-1]
+        with open(path, 'w') as f: f.write(to_save)
 
 
 class TextBox(CTkFrame):
