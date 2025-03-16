@@ -8,7 +8,7 @@ class CalcDisplay(CTkFrame):
         super().__init__(parent)
         self.ois_frame = None
         self.exec_button = None
-        self.results_display = None
+        self.results_display: ResultsDisplay | None = None
         self.oip: OperSeriesInputPanel | None = None
         self.build()
 
@@ -41,11 +41,17 @@ class CalcDisplay(CTkFrame):
         self.results_display.update()
 
     def run_case(self):
-        from ...backend import AVLInterface
+        from ...backend import AVLInterface, ResultsParser
 
         self.exec_button.configure(state='disabled')
-        contents = AVLInterface.create_run_file_contents(self.geometry, self.oip.get_run_file_data())
-        dump = AVLInterface.execute_case(self.geometry, contents)
-        vals = AVLInterface.results_from_dump(dump)
-        self.results_display.set_results(vals)
+        data = self.oip.get_run_file_data()
+        nof_cases = len(list(data.values())[0])
+        contents = AVLInterface.create_run_file_contents(self.geometry, data)
+        AVLInterface.write_to_run_file(contents)
+        AVLInterface.write_to_avl_file(self.geometry.string())
+        AVLInterface.execute(AVLInterface.create_st_command(nof_cases))
+        vals = ResultsParser.all_sts_to_data()
+        ResultsParser.clear_st_files()
+        force_vals = [val[0] for val in vals]
+        self.results_display.set_results(force_vals)
         self.exec_button.configure(state='normal')
