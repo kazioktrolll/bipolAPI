@@ -91,6 +91,16 @@ class Airfoil:
         return af
 
     @classmethod
+    def from_points(cls, points:list[tuple[float, float]], name: str, active_range=(0.0, 1.0)) -> 'Airfoil':
+        """Creates an Airfoil object from a list of points."""
+        positive = [(x, y) for x, y in points if y >= 0]
+        negative = [(x, y) for x, y in points if y <  0]
+        positive.sort(key=lambda p: -p[0])
+        negative.sort(key=lambda p: p[0])
+        points = positive + negative
+        return Airfoil(name, points=points, naca=None, active_range=active_range)
+
+    @classmethod
     def from_naca(cls, naca: str, active_range=(0.0, 1.0)) -> 'Airfoil':
         """Creates an Airfoil object from NACA code."""
         if not valid_naca(naca): raise ValueError("Wrong NACA code")
