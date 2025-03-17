@@ -89,7 +89,7 @@ class Geometry:
               f"0.0 | CDp\n")
 
         for surf in self.surfaces.values():
-            _r += "#----------------\n"
+            _r += "\n#----------------\n\n"
             _r += surf.string()
 
         return _r
