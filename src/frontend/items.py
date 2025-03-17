@@ -131,6 +131,9 @@ class FlapItem(Item):
         return FlapDisplay(item=self, parent=parent)
 
 
+from ..backend.geo_design import Section
+
+
 class SectionItem(Item):
     def __init__(self):
         self.x = DoubleVar(value=0)
@@ -140,6 +143,18 @@ class SectionItem(Item):
         self.inclination = DoubleVar(value=0.0)
         self.airfoil = Airfoil.empty()
         self.control = None
+
+    @classmethod
+    def from_section(cls, section: Section):
+        _r = SectionItem()
+        _r.x.set(section.x)
+        _r.y.set(section.y)
+        _r.z.set(section.z)
+        _r.chord.set(section.chord)
+        _r.inclination.set(section.inclination)
+        _r.airfoil = section.airfoil
+        _r.control = section.control
+        return _r
 
     @property
     def position(self): return Vector3(self.x.get(), self.y.get(), self.z.get())
@@ -160,17 +175,17 @@ class SectionItem(Item):
 
         CTkLabel(window, text="x: "
                  ).grid(column=0, row=2, sticky="e")
-        CTkEntry(window, textvariable=chordvar
+        CTkEntry(window, textvariable=xvar
                  ).grid(column=2, row=2, sticky='nsew')
 
         CTkLabel(window, text="y: "
                  ).grid(column=0, row=3, sticky="e")
-        CTkEntry(window, textvariable=chordvar
+        CTkEntry(window, textvariable=yvar
                  ).grid(column=2, row=3, sticky='nsew')
 
         CTkLabel(window, text="z: "
                  ).grid(column=0, row=4, sticky="e")
-        CTkEntry(window, textvariable=chordvar
+        CTkEntry(window, textvariable=zvar
                  ).grid(column=2, row=4, sticky='nsew')
 
         CTkLabel(window, text="chord: "

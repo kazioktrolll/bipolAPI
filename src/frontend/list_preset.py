@@ -31,12 +31,14 @@ class ListPreset(CTkFrame):
         self.body_frame.grid(column=0, row=1, sticky="sew", padx=5, pady=5)
         self.body_frame.columnconfigure(0, weight=1)
 
-    def add_position(self) -> None:
+    def add_position(self, item: Item = None) -> None:
+        needs_init = item is None
         position = CTkFrame(self.body_frame, fg_color=self.body_frame.cget('fg_color'))
         position.grid(column=0, row=len(self.body_frame.children)-1, sticky="nsew")
         position.columnconfigure(0, weight=1)
 
-        item = self.item_class()
+
+        item = item or self.item_class()
         self.items.append(item)
 
         edit_item = lambda: item.edit(lambda: (display.update(), self.do_on_update())) # noqa
@@ -50,7 +52,7 @@ class ListPreset(CTkFrame):
                   command=lambda: (position.destroy(), self.items.remove(item), self.do_on_update())
                   ).grid(column=2, row=0, sticky="e", padx=5, pady=5)
 
-        edit_item()
+        if needs_init: edit_item()
 
     def get_values(self) -> list[tuple]:
         return [item.get_values() for item in self.items]

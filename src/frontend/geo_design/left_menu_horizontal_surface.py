@@ -8,6 +8,7 @@ class LeftMenuHorizontalSurface(LeftMenuItem):
     def __init__(self, parent, surface: HorizontalSurface):
         super().__init__(parent, surface)
         self.sections_list = ListPreset(self, 'Sections', SectionItem, self.update_surface)
+        for sect in self.surface.sections: self.sections_list.add_position(SectionItem.from_section(sect))
         self.build()
 
     def build(self) -> None:
