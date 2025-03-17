@@ -34,7 +34,7 @@ class CalcDisplay(CTkFrame):
         self.results_display = ResultsDisplay(self)
         self.columnconfigure(1, minsize=10)
         self.results_display.grid(row=0, column=2, rowspan=2, sticky='news')
-        #self.run_case()
+        self.run_case()
 
     def update(self):
         self.build()

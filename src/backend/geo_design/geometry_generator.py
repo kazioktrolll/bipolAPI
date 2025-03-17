@@ -19,9 +19,9 @@ class GeometryGenerator:
 
     @classmethod
     def default(cls) -> Geometry:
-        wing = HorizontalSimpleSurface(name='Wing', span=8, chord_length=1)
+        wing = HorizontalSimpleSurface(name='Wing', span=8, chord_length=1, airfoil=Airfoil.from_naca('2415'))
         wing.set_mechanization(ailerons=[(3, 4, .8)], flaps=[(2.3, 2.8, .6)])
-        h_tail = HorizontalSimpleSurface(name='H Tail', span=2, chord_length=1, origin_position=(4, 0, 1))
+        h_tail = HorizontalSimpleSurface(name='H Tail', span=2, chord_length=1, origin_position=(4, 0, 1), airfoil=Airfoil.from_naca('0012'))
         h_tail.set_mechanization(elevators=[(0, 1, .8)])
         v_tail = VerticalSimpleSurface(
             name='V Tail',
@@ -31,7 +31,8 @@ class GeometryGenerator:
                 Section((.2,0,.5), .9, 0),
             ],
             origin_position=(3.8, 0, .5),
-            y_duplicate=False
+            y_duplicate=False,
+            airfoil=Airfoil.from_naca('0012')
         )
         g = Geometry(
             name="default",
