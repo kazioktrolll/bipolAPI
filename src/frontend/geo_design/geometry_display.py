@@ -181,6 +181,7 @@ class GeometryDisplay(CTkFrame):
             # Draw control surface, if exists
             if prev_sec.control is None or curr_sec.control is None: continue
             if type(prev_sec.control) is not type(curr_sec.control): continue
+            if prev_sec.control.name != curr_sec.control.name: continue
 
             color = prev_sec.control.color
             x_hinge = prev_sec.control.x_hinge
