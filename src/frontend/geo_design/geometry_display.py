@@ -81,10 +81,11 @@ class GeometryDisplay(CTkFrame):
 
     def draw(self) -> None:
         """Draws geometry's surfaces and center of mass."""
-        self.draw_grid()
+        if self.view_mode is not ViewMode.ISO: self.draw_grid()
         for surface in self.geometry.surfaces.values():
             self.display_wing(surface)
         self.display_CG(*self.geometry.ref_pos)
+        self.draw_axis()
 
     def draw_grid(self) -> None:
         """Draws a grid to give a sense of scale."""
@@ -111,6 +112,11 @@ class GeometryDisplay(CTkFrame):
         draw_grid_simple(1*meter, 2, color="gray87")
         draw_grid_simple(5*meter, 4, color="gray87")
         draw_grid_simple(10*meter, 4, color="gray80")
+
+    def draw_axis(self) -> None:
+        self.canvas.create_line(self.project(0, 0, 0), self.project(30/self.scale, 0, 0), arrow='last', fill='red', width=3)
+        self.canvas.create_line(self.project(0, 0, 0), self.project(0, 30/self.scale, 0), arrow='last', fill='green', width=3)
+        self.canvas.create_line(self.project(0, 0, 0), self.project(0, 0, 30/self.scale), arrow='last', fill='blue', width=3)
 
     def display_CG(self, x: float, y: float, z: float) -> None:
         """Displays a center-of-mass marker at given coordinates."""
