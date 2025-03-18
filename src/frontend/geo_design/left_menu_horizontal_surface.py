@@ -1,7 +1,7 @@
 from .left_menu_item import LeftMenuItem
 from ..list_preset import ListPreset
 from ..items import SectionItem
-from ...backend.geo_design import HorizontalSurface
+from ...backend.geo_design import HorizontalSurface, Section
 
 
 class LeftMenuHorizontalSurface(LeftMenuItem):
@@ -36,5 +36,21 @@ class LeftMenuHorizontalSurface(LeftMenuItem):
         for pf_params in pfs_params: super()._init_pf(*pf_params)
         super().init_pfs()
 
+    def get_sections(self) -> list[Section]:
+        sections = []
+        for tup in self.sections_list.get_values():
+            pos, chord, inc, airfoil, control = tup
+            sections.append(Section(leading_edge_position=pos, chord=chord, inclination=inc, airfoil=airfoil, control=control))
+        return sections
+
     def update_surface(self, _=None) -> None:
+        surface_getter = lambda: HorizontalSurface(
+            name=self.surface.name,
+            chord_length=self.pfs['chord'].value,
+            sections=self.get_sections(),
+            y_duplicate=bool(self.pfs['y_duplicate'].value),
+            origin_position=(self.pfs['x'].value, self.pfs['y'].value, self.pfs['z'].value),
+            airfoil=self.get_sections()[0].airfoil      # TODO airfoil as a surface property.
+        )
+        super()._update_surface(surface_getter)
         pass
