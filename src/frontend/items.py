@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from .parameter_field import HelpTopLevel
 from .popup import Popup
 from ..backend import Vector3
-from ..backend.geo_design import Airfoil, Control
+from ..backend.geo_design import Airfoil, Control, Section
 
 
 class Item(ABC):
@@ -129,9 +129,6 @@ class FlapItem(Item):
                     child.configure(text_color='white')
 
         return FlapDisplay(item=self, parent=parent)
-
-
-from ..backend.geo_design import Section
 
 
 class SectionItem(Item):
