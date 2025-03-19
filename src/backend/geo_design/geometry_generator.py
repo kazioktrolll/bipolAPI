@@ -193,10 +193,12 @@ class FromAvl:
                 case 'NACA':
                     section_data['airfoil'] = Airfoil.from_naca(naca=b[1])
                 case 'AIRFOIL':
+                    if '#' in b[0]: name = b[0].split('#')[1]
+                    else: name = 'UnknownAirfoil'
                     lines = b[1:]
                     points_str = [line.split() for line in lines]
                     points_float = [(float(x), float(y)) for x, y in points_str]
-                    section_data['airfoil'] = Airfoil.from_points(name='None', points=points_float)
+                    section_data['airfoil'] = Airfoil.from_points(name=name, points=points_float)
                 case 'AFILE':
                     section_data['airfoil'] = Airfoil.from_file(path=b[1])
                 case 'CONTROL':
