@@ -25,7 +25,7 @@ class AirfoilChooser(CTkFrame):
 
         CTkButton(self, text="Load from File", command=self.load_from_file
                   ).grid(row=0, column=2, sticky="nse", padx=5, pady=5)
-        CTkButton(self, text="Symmetric NACA", command=self.load_naca
+        CTkButton(self, text="NACA", command=self.load_naca
                   ).grid(row=2, column=2, sticky="nse", padx=5, pady=5)
 
     def load_naca(self):
@@ -59,3 +59,12 @@ class AirfoilChooser(CTkFrame):
             return
         self.file_label.configure(text=self.airfoil.name)
         self.naca_label.configure(text="")
+
+    def set(self, airfoil: Airfoil):
+        self.airfoil = airfoil
+        if airfoil.naca:
+            self.naca_label.configure(text=f"NACA {airfoil.name}")
+            self.file_label.configure(text="")
+        else:
+            self.naca_label.configure(text="")
+            self.file_label.configure(text=self.airfoil.name)

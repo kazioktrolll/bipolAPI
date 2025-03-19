@@ -23,6 +23,7 @@ class LeftMenuItem(CTkFrame, ABC):
         self.mechanizations_frame = CTkFrame(self, fg_color=self.cget('fg_color'))
         self.mechanizations_frame.columnconfigure(0, weight=1)
         self.airfoil_chooser = AirfoilChooser(self)
+        self.airfoil_chooser.set(surface.airfoil)
 
         if mechanization: self.set_mechanization(mechanization)
 
