@@ -138,7 +138,6 @@ class SectionItem(Item):
         self.z = DoubleVar(value=0)
         self.chord = DoubleVar(value=0.0)
         self.inclination = DoubleVar(value=0.0)
-        self.airfoil = Airfoil.empty()
         self.control = None
 
     @classmethod
@@ -229,8 +228,8 @@ class SectionItem(Item):
         self.chord.set(chord)
         self.inclination.set(inc)
 
-    def get_values(self) -> tuple[Vector3, float, float, Airfoil, Control|None]:
-        return self.position, self.chord.get(), self.inclination.get(), self.airfoil, self.control
+    def get_values(self) -> tuple[Vector3, float, float, Control|None]:
+        return self.position, self.chord.get(), self.inclination.get(), self.control
 
     def display(self, parent: CTkFrame) -> CTkFrame:
 

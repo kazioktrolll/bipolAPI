@@ -9,6 +9,7 @@ class LeftMenuHorizontalSurface(LeftMenuItem):
     def __init__(self, parent, surface: HorizontalSurface):
         super().__init__(parent, surface)
         self.sections_list = SectionsListPreset(self, self.surface.sections)
+        self.airfoil_chooser.set(self.surface.airfoil)
         self.build()
 
     def build(self) -> None:
@@ -39,8 +40,8 @@ class LeftMenuHorizontalSurface(LeftMenuItem):
     def get_sections(self) -> list[Section]:
         sections = []
         for tup in self.sections_list.get_values():
-            pos, chord, inc, airfoil, control = tup
-            sections.append(Section(leading_edge_position=pos, chord=chord, inclination=inc, airfoil=airfoil, control=control))
+            pos, chord, inc, control = tup
+            sections.append(Section(leading_edge_position=pos, chord=chord, inclination=inc, airfoil=self.airfoil_chooser.airfoil, control=control))
         return sections
 
     def update_surface(self, _=None) -> None:
@@ -50,7 +51,7 @@ class LeftMenuHorizontalSurface(LeftMenuItem):
             sections=self.get_sections(),
             y_duplicate=bool(self.pfs['y_duplicate'].value),
             origin_position=(self.pfs['x'].value, self.pfs['y'].value, self.pfs['z'].value),
-            airfoil=self.get_sections()[0].airfoil      # TODO airfoil as a surface property.
+            airfoil=self.airfoil_chooser.airfoil
         )
         super()._update_surface(surface_getter)
         pass
