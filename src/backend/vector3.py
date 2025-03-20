@@ -50,6 +50,7 @@ class Vector3:
         return self.__add__(other * -1)
 
     def scale(self, other: AnyVector3) -> 'Vector3':
+        """Returns a copy of self scaled by the vector so that new.x = self.x * scale.x etc."""
         other = Vector3(*other)
         return Vector3(self.x * other.x, self.y * other.y, self.z * other.z)
 

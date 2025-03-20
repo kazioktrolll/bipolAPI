@@ -168,6 +168,7 @@ class Surface(ABC):
         return _r
 
     def get_controls(self) -> list[Control]:
+        """Returns the control surfaces of the surface in the order in which they will appear in the .avl file."""
         controls = []
         for sec in self.sections:
             if sec.control and sec.control not in controls:
@@ -345,6 +346,7 @@ class HorizontalSimpleSurface(HorizontalSurface):
                     section.control = mech_type(x_hinge=hinge_x)
 
     def get_symmetric(self) -> 'HorizontalSimpleSurface':
+        """Returns a new instance of HorizontalSimpleSurface reflected about the y-axis."""
         surf = super().get_symmetric()
         assert isinstance(surf, HorizontalSimpleSurface)
         surf.mechanization = {k: (-s, -e, xc) for k, (s, e, xc) in surf.mechanization}
@@ -427,6 +429,7 @@ class SurfaceCreator:
                        origin_position: AnyVector3,
                        airfoil: Airfoil = None
                        ) -> HorizontalSurface | VerticalSimpleSurface:
+        """Returns a HorizontalSurface or VerticalSurface based on input geometry."""
         sections.sort(key=lambda section: section.y)
         dy = sections[-1].y - sections[0].y
         sections.sort(key=lambda section: section.z)

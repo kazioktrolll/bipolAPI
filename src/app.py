@@ -113,7 +113,7 @@ class App:
             filetypes=[('AVL File', ['*.avl'])],
             title=self.geometry.name
         ))
-        self.geometry.save_to_avl(case_name=self.geometry.name, path=path)
+        self.geometry.save_to_avl(path=path)
 
     def import_from_avl(self) -> None:
         """Imports the current geometry from an .avl file."""

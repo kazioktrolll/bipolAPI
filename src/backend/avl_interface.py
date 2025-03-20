@@ -14,14 +14,17 @@ class AVLInterface:
 
     @classmethod
     def write_to_avl_file(cls, contents: str) -> None:
+        """Writes the input contents to a designated .avl file used for running cases."""
         with open(local_path.joinpath('local.avl'), 'w') as avl_file: avl_file.write(contents)
 
     @classmethod
     def write_to_run_file(cls, contents: str) -> None:
+        """Writes the input contents to a designated .run file used for running cases."""
         with open(local_path.joinpath('local.run'), 'w') as run_file: run_file.write(contents)
 
     @classmethod
     def create_run_file_contents(cls, geometry: Geometry, run_file_data: dict[str, list[float]]) -> str:
+        """Returns a string containing the input data transformed into a .run format."""
         no_of_runs = len(list(run_file_data.values())[0])
         _r = ''
         for i in range(no_of_runs):
@@ -33,18 +36,13 @@ class AVLInterface:
 
     @classmethod
     def create_st_command(cls, nof_cases: int) -> str:
+        """Creates a command string for running a given number of cases, each run 'ST' and saved to file."""
         _r = 'OPER\n'
         for i in range(1, nof_cases+1):
             _r += f'{i}\nX\nst\n'
             _r += rf'C:\Users\kazio\PycharmProjects\bipolAPI\src\temp_files_dir\st_files\{i}'
             _r += '\n'
         return _r
-
-    @classmethod
-    def execute_case(cls, geometry: Geometry, run_file_contents: str) -> str:
-        cls.write_to_avl_file(geometry.string())
-        cls.write_to_run_file(run_file_contents)
-        return cls.execute(command = 'OPER\nXX\n')
 
     @classmethod
     def execute(cls, command: str) -> str:
@@ -56,6 +54,12 @@ class AVLInterface:
 
     @classmethod
     def run_series(cls, geometry: Geometry, data: dict[str, list[float]]) -> list[list[dict[str, float]]]:
+        """
+        Runs all cases using 'ST' and returns the results.
+
+        Return:
+            [[{name-value} for intro, forces, ST] for each case]
+        """
         nof_cases = len(list(data.values())[0])
         contents = AVLInterface.create_run_file_contents(geometry, data)
         AVLInterface.write_to_run_file(contents)
@@ -69,22 +73,24 @@ class AVLInterface:
 class ResultsParser:
     @classmethod
     def _split_dump(cls, dump: str) -> list[str]:
-        import re
+        """Splits the dump string on === lines."""
         dump = re.split(r'=+\r\n', dump)
         return dump
 
     @classmethod
     def loading_issues_from_dump(cls, dump: str) -> str:
+        """Returns the issue part of the dump."""
         return cls._split_dump(dump)[2]
 
     @classmethod
     def chop_results(cls, dump: str) -> list[str]:
-        import re
+        """Returns the relevant part from the input 'forces' string."""
         dump = re.split(r'-{61,}', dump)
         return [block for block in dump if 'Vortex Lattice Output' in block]
 
     @classmethod
     def forces_to_dict(cls, forces_str: str) -> dict[str, float]:
+        """Takes the chopped 'forces' string and converts it to a name-value dict."""
         vals = re.sub(r'\s+=\s+', '=', forces_str)
         vals = re.sub(r'\r\n', '', vals)
         vals = vals.split()
@@ -97,6 +103,7 @@ class ResultsParser:
 
     @classmethod
     def st_file_to_dict(cls, st_str: str) -> dict[str, float]:
+        """Takes the raw contents of the 'ST' file and converts it to a name-value dict."""
         st_str = re.sub(r'\s+=\s+', '=', st_str)
         st_str = re.sub(r'\n', '', st_str)
         st_str = re.sub(r'Clb Cnr / Clr Cnb', 'Clb_Cnr/Clr_Cnb', st_str)
@@ -110,6 +117,7 @@ class ResultsParser:
 
     @classmethod
     def split_st_dict(cls, st_dict: dict[str, float]) -> list[dict[str, float]]:
+        """Splits the 'ST_file' dict into 'intro', 'forces' and 'ST' """
         breakpoints = ['Alpha', 'CLa']
         result = []
         current_dict = {}
@@ -127,6 +135,7 @@ class ResultsParser:
 
     @classmethod
     def all_sts_to_data(cls) -> list[list[dict[str, float]]]:
+        """Converts every file in the 'ST' directory and converts it to a dict."""
         files = [f.name for f in st_path.iterdir() if f.is_file()]
         _r = []
         for file in files:
@@ -138,21 +147,6 @@ class ResultsParser:
 
     @classmethod
     def clear_st_files(cls) -> None:
+        """Deletes all files in 'ST' directory."""
         for file in st_path.iterdir():
             st_path.joinpath(file).unlink()
-
-    @classmethod
-    def results_from_dump(cls, dump: str) -> list[dict[str, float]]:
-        dump = cls._split_dump(dump)
-        if len(dump) < 6: return []
-        results = cls.chop_results(dump[4])
-        stripped = []
-        import re
-        for result in results:
-            result = re.split(r'Run case:.*\r\n', result, re.DOTALL)[1]
-            result = re.split(r'-+\r\n', result)[0]
-            stripped.append(str(result))
-        values = list(map(cls.forces_to_dict, stripped))
-        return values
-
-

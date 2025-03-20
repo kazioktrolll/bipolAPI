@@ -124,6 +124,7 @@ class Control:
 
 
 class PreDefControl(Control):
+    """An interface for pre-defined types of control surfaces."""
     def copy(self: T) -> T:
         return self.__class__(self.x_hinge)
 

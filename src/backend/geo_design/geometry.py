@@ -1,4 +1,4 @@
-from typing import Optional, TextIO
+from typing import TextIO
 from pathlib import Path
 from .surface import Surface
 from ..vector3 import Vector3, AnyVector3
@@ -70,7 +70,7 @@ class Geometry:
 
         return _r
 
-    def save_to_avl(self, case_name: str, path: Path) -> TextIO:
+    def save_to_avl(self, path: Path) -> TextIO:
         """Saves the current geometry to a file using .avl format."""
         contents = self.string()
         file = open(path, 'w')
@@ -78,6 +78,7 @@ class Geometry:
         return file
 
     def get_controls(self):
+        """Returns the control surfaces of the aircraft in the order in which they will appear in .avl file."""
         from .section import Control
         controls: list[Control] = []
         for surf in self.surfaces.values():
