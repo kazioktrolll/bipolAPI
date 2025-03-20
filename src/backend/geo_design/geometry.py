@@ -55,30 +55,6 @@ class Geometry:
         if surface.name not in self.surfaces.keys(): raise AttributeError("No surface named {}.".format(surface.name))
         self.surfaces[surface.name] = surface
 
-    @property
-    def wing(self) -> Optional[Surface]:
-        """The wing of the aircraft. Returns 'None' if the aircraft has no defined wing."""
-        try:
-            return self.surfaces["Wing"]
-        except KeyError:
-            return None
-
-    @property
-    def h_tail(self) -> Optional[Surface]:
-        """The horizontal tail of the aircraft. Returns 'None' if the aircraft has no defined horizontal tail."""
-        try:
-            return self.surfaces["H_tail"]
-        except KeyError:
-            return None
-
-    @property
-    def v_tail(self) -> Optional[Surface]:
-        """The vertical tail of the aircraft. Returns 'None' if the aircraft has no defined vertical tail."""
-        try:
-            return self.surfaces["V_tail"]
-        except KeyError:
-            return None
-
     def string(self) -> str:
         """Returns the current geometry as a .avl type string."""
         _r = (f"{self.name} +  | Case Name\n"
@@ -96,8 +72,8 @@ class Geometry:
 
     def save_to_avl(self, case_name: str, path: Path) -> TextIO:
         """Saves the current geometry to a file using .avl format."""
-        file = open(path, 'w')
         contents = self.string()
+        file = open(path, 'w')
         file.write(contents)
         return file
 

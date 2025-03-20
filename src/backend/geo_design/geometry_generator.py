@@ -76,8 +76,14 @@ class FromAvl:
         current_block = None
         blocks = []
 
+        def line_is_keyword(l, kws) -> bool:
+            for kw in kws:
+                if kw in l: return True
+            return False
+
+
         for line in lines:
-            if line in keywords:
+            if line_is_keyword(line, keywords):
                 if current_block is not None: blocks.append(current_block)
                 current_block = [line]
                 continue
@@ -188,18 +194,19 @@ class FromAvl:
             'control': None
         }
 
-        for b in cls.split_into_blocks(block, ('NACA', 'AIRFOIL', 'AFILE', 'CONTROL', 'DESIGN')):
+        blocks = cls.split_into_blocks(block, ('NACA', 'AIRFOIL', 'AFILE', 'CONTROL', 'DESIGN'))
+        for b in blocks:
             match b[0]:
-                case 'NACA':
+                case c if 'NACA' in c:
                     section_data['airfoil'] = Airfoil.from_naca(naca=b[1])
-                case 'AIRFOIL':
+                case c if 'AIRFOIL' in c:
                     if '#' in b[0]: name = b[0].split('#')[1]
                     else: name = 'UnknownAirfoil'
                     lines = b[1:]
                     points_str = [line.split() for line in lines]
                     points_float = [(float(x), float(y)) for x, y in points_str]
                     section_data['airfoil'] = Airfoil.from_points(name=name, points=points_float)
-                case 'AFILE':
+                case c if 'AFILE' in c:
                     section_data['airfoil'] = Airfoil.from_file(path=b[1])
                 case 'CONTROL':
                     section_data['control'] = cls.handle_control_level(b[1:])
