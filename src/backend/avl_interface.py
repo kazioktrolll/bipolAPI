@@ -117,7 +117,7 @@ class ResultsParser:
 
     @classmethod
     def split_st_dict(cls, st_dict: dict[str, float]) -> list[dict[str, float]]:
-        """Splits the 'ST_file' dict into 'intro', 'forces' and 'ST' """
+        """Splits the 'ST_file' dict into 'forces' and 'ST' """
         breakpoints = ['Alpha', 'CLa']
         result = []
         current_dict = {}
@@ -142,6 +142,7 @@ class ResultsParser:
             with open(st_path.joinpath(file)) as f: data = f.read()
             data = cls.st_file_to_dict(data)
             data = cls.split_st_dict(data)
+            data[1] = cls.sort_st_dict(data[1])
             _r.append(data)
         return _r
 
@@ -150,3 +151,18 @@ class ResultsParser:
         """Deletes all files in 'ST' directory."""
         for file in st_path.iterdir():
             st_path.joinpath(file).unlink()
+
+    @classmethod
+    def sort_st_dict(cls, st_dict: dict[str, float], join=True) -> dict[str, dict[str, float]] | dict[str, float]:
+        """Sorts the dict so that relevant values are next to each other."""
+        Xnp = st_dict.pop('Xnp')
+        ClbCnr = st_dict.pop('Clb_Cnr/Clr_Cnb')
+        dicts: dict[str, dict[str, float]] = {}
+        for k, v in st_dict.items():
+            category = k[-2:] if k[-2] == 'd' else k[-1:]
+            if category not in dicts: dicts[category] = {}
+            dicts[category][k] = v
+
+        dicts['misc'] = {'Xnp': Xnp, 'Clb_Cnr/Clr_Cnb': ClbCnr}
+        if join: return {k: v for d in dicts.values() for k, v in d.items()}
+        return dicts
