@@ -6,22 +6,21 @@ from .items import Item
 
 class ListPreset(CTkFrame):
     def __init__(self, parent, category_name: str, item_class: type[Item], do_on_update: Callable[[], None]) -> None:
-        super().__init__(parent)
+        super().__init__(parent, border_width=3, border_color='gray40')
         self.category_name = category_name
         self.item_class = item_class
         self.do_on_update = do_on_update
         self.items: list[Item] = []
         self.item_frames: list[ItemFrame] = []
 
-        self.header_frame = CTkFrame(self)
+        self.header_frame = CTkFrame(self, fg_color='transparent')
         self.body_frame = CTkFrame(self)
         self.init_display()
 
     def init_display(self) -> None:
         self.columnconfigure(0, weight=1)
 
-        self.header_frame.configure(fg_color=self.cget('fg_color'))
-        self.header_frame.grid(column=0, row=0, sticky="new")
+        self.header_frame.grid(column=0, row=0, padx=5, pady=5, sticky="new")
         self.header_frame.columnconfigure(1, weight=1)
         CTkLabel(self.header_frame, text=self.category_name).grid(column=0, row=0, sticky="w", padx=5, pady=5)
         CTkButton(self.header_frame, text='+', fg_color='green', hover_color='dark green', width=25, height=25,
@@ -53,7 +52,7 @@ class ListPreset(CTkFrame):
 
 class ItemFrame(CTkFrame):
     def __init__(self, parent, item:Item, edit_item: Callable[[], None]) -> None:
-        super().__init__(parent)
+        super().__init__(parent, border_width=2, border_color='gray30')
         self.item = item
         self.locked = False
         self.columnconfigure(0, weight=1)
