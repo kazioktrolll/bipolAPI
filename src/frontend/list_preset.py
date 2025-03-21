@@ -33,7 +33,6 @@ class ListPreset(CTkFrame):
         self.body_frame.columnconfigure(0, weight=1)
 
     def update_items(self) -> None:
-
         for item_frame in self.item_frames: item_frame.update()
 
     def add_position(self, item: Item = None) -> None:
@@ -42,7 +41,7 @@ class ListPreset(CTkFrame):
         self.items.append(item)
 
         edit_item = lambda: item.edit(lambda: (display.update(), self.do_on_update())) # noqa
-        position = ItemFrame(self, item, edit_item)
+        position = ItemFrame(self.body_frame, item, edit_item)
         self.item_frames.append(position)
         position.grid(column=0, row=len(self.body_frame.children)-1, sticky="nsew")
 
