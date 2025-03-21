@@ -71,25 +71,25 @@ class FromAvl:
         return lines
 
     @classmethod
-    def split_into_blocks(cls, lines: list[str], keywords: tuple[str, ...]) -> list[list[str]]:
+    def split_into_blocks(cls, lines: list[str], keywords: tuple[str, ...]) -> list[tuple[str, list[str]]]:
         """Splits lines into blocks, each block starting with one of the given keywords."""
         current_block = None
         blocks = []
 
-        def line_is_keyword(l, kws) -> bool:
-            for kw in kws:
-                if kw in l: return True
-            return False
-
+        def keyword_in_line(l) -> str | None:
+            for kw in keywords:
+                if kw[:4] in l: return kw
+            return None
 
         for line in lines:
-            if line_is_keyword(line, keywords):
+            keyword = keyword_in_line(line)
+            if keyword is not None:
                 if current_block is not None: blocks.append(current_block)
-                current_block = [line]
-                continue
-            if current_block is not None: current_block.append(line)
-        else:
-            if current_block is not None: blocks.append(current_block)
+                current_block = (keyword, [line])
+            else:
+                if current_block is None: continue
+                current_block[1].append(line)
+        if current_block is not None: blocks.append(current_block)
         return blocks
 
     @classmethod
@@ -118,9 +118,9 @@ class FromAvl:
         }
 
         blocks = cls.split_into_blocks(lines, ('SURFACE', 'BODY'))
-        for block in blocks:
-            if block[0] == 'SURFACE': geometry_data['surfaces'].append(cls.handle_surface_level(block[1:]))
-            if block[0] == 'BODY': cls.error('GAVL does not support BODY. The block is being skipped.')
+        for keyword, lines in blocks:
+            if keyword == 'SURFACE': geometry_data['surfaces'].append(cls.handle_surface_level(lines[1:]))
+            if keyword == 'BODY': cls.error('GAVL does not support BODY. The block is being skipped.')
 
         return Geometry(**geometry_data)
 
@@ -156,28 +156,28 @@ class FromAvl:
         blocks = cls.split_into_blocks(block, keywords)
         scale = (1,1,1)
         angle = 0
-        for b in blocks:
-            match b[0]:
+        for keyword, lines in blocks:
+            match keyword:
                 case kw if kw in ('COMPONENT', 'INDEX'):
                     cls.error(f"{kw}")
                 case 'YDUPLICATE':
-                    if float(b[1]) == 0.0:
+                    if float(lines[1]) == 0.0:
                         surface_data['y_duplicate'] = True
                     else:
                         cls.error(f"YDUPLICATE cannot be non-zero!")  # TODO: fix?
                 case 'SCALE':
-                    scale = tuple(map(float, b[1].split()))
+                    scale = tuple(map(float, lines[1].split()))
                 case 'TRANSLATE':
-                    vals = map(float, b[1].split())
+                    vals = map(float, lines[1].split())
                     surface_data['origin_position'] = Vector3(*vals)
                 case 'ANGLE':
-                    angle = float(b[1])
-                case kw if kw in ('NOWAKE', 'NOALBE', 'NOLOAD'):
+                    angle = float(lines[1])
+                case kw if kw in ('NOWA', 'NOAL', 'NOLO'):
                     cls.error(f"{kw}")
                 case 'CDCL':
                     cls.error("CDCL")
                 case 'SECTION':
-                    surface_data['sections'].append(cls.handle_section_level(b[1:], scale, angle))
+                    surface_data['sections'].append(cls.handle_section_level(lines[1:], scale, angle))
 
         surface_data['airfoil'] = surface_data['sections'][0].airfoil
         return SurfaceCreator.UnknownSurface(**surface_data)
@@ -195,21 +195,21 @@ class FromAvl:
         }
 
         blocks = cls.split_into_blocks(block, ('NACA', 'AIRFOIL', 'AFILE', 'CONTROL', 'DESIGN'))
-        for b in blocks:
-            match b[0]:
-                case c if 'NACA' in c:
-                    section_data['airfoil'] = Airfoil.from_naca(naca=b[1])
-                case c if 'AIRFOIL' in c:
-                    if '#' in b[0]: name = b[0].split('#')[1]
+        for keyword, lines in blocks:
+            match keyword:
+                case 'NACA':
+                    section_data['airfoil'] = Airfoil.from_naca(naca=lines[1])
+                case 'AIRFOIL':
+                    if '#' in lines[0]: name = lines[0].split('#')[1]
                     else: name = 'UnknownAirfoil'
-                    lines = b[1:]
+                    lines = lines[1:]
                     points_str = [line.split() for line in lines]
                     points_float = [(float(x), float(y)) for x, y in points_str]
                     section_data['airfoil'] = Airfoil.from_points(name=name, points=points_float)
-                case c if 'AFILE' in c:
-                    section_data['airfoil'] = Airfoil.from_file(path=b[1])
+                case 'AFILE':
+                    section_data['airfoil'] = Airfoil.from_file(path=lines[1])
                 case 'CONTROL':
-                    section_data['control'] = cls.handle_control_level(b[1:])
+                    section_data['control'] = cls.handle_control_level(lines[1:])
                 case 'DESIGN':
                     cls.error("DESIGN")
         return Section(**section_data)
