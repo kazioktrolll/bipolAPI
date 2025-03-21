@@ -70,11 +70,11 @@ class App:
 
     # 'File' menu
 
-    def save_as(self) -> None:
+    def save_as(self, path:str|Path=None) -> None:
         """Saves the current geometry as a .gavl file."""
         self.top_bar.collapse_all()
         from tkinter.filedialog import asksaveasfilename
-        path = Path(asksaveasfilename(
+        path = path or Path(asksaveasfilename(
             defaultextension='.gavl',
             filetypes=[('GAVL File', ['*.gavl'])],
             title=self.geometry.name
@@ -83,11 +83,11 @@ class App:
         with open(path, 'wb') as f:
             pickle.dump(self.geometry, f)   # noqa
 
-    def load(self) -> None:
+    def load(self, path:str|Path=None) -> None:
         """Loads the geometry from a .gavl file."""
         self.top_bar.collapse_all()
         from tkinter.filedialog import askopenfilename
-        path = Path(askopenfilename(
+        path = path or Path(askopenfilename(
             filetypes=[('GAVL File', ['*.gavl']), ('All Files', ['*.*'])]
         ))
         import pickle
@@ -104,23 +104,23 @@ class App:
         from src.backend.geo_design import GeometryGenerator
         self.set_geometry(GeometryGenerator.default())
 
-    def export_to_avl(self) -> None:
+    def export_to_avl(self, path:str|Path=None) -> None:
         """Exports the current geometry to an .avl file."""
         self.top_bar.collapse_all()
         from tkinter.filedialog import asksaveasfilename
-        path = Path(asksaveasfilename(
+        path = path or Path(asksaveasfilename(
             defaultextension='.avl',
             filetypes=[('AVL File', ['*.avl'])],
             title=self.geometry.name
         ))
         self.geometry.save_to_avl(path=path)
 
-    def import_from_avl(self) -> None:
+    def import_from_avl(self, path:str|Path=None) -> None:
         """Imports the current geometry from an .avl file."""
         from src.backend.geo_design import GeometryGenerator
         from tkinter.filedialog import askopenfilename
         self.top_bar.collapse_all()
-        path = Path(askopenfilename(
+        path = path or Path(askopenfilename(
             defaultextension='.avl',
             filetypes=[('AVL File', ['*.avl'])]
         ))
