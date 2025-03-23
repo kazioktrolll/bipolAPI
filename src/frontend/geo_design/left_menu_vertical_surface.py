@@ -38,7 +38,6 @@ class LeftMenuVerticalSurface(LeftMenuItem):
     def update_surface(self, _=None) -> None:
         surface_generator = lambda: VerticalSimpleSurface(
             name=self.name,
-            chord_length=(self.pfs['root_chord'].value + self.pfs['tip_chord'].value)/2,
             sections = [
                 Section(
                     leading_edge_position=(0, 0, 0),
@@ -66,7 +65,6 @@ class LeftMenuVerticalSurface(LeftMenuItem):
     def default(cls, parent, name: str) -> 'LeftMenuVerticalSurface':
         surface = VerticalSimpleSurface(
             name=name,
-            chord_length=1,
             sections = [
                 Section(
                     leading_edge_position=(0, 0, 0),

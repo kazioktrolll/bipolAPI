@@ -31,7 +31,6 @@ class LeftMenuHorizontalSurface(LeftMenuItem):
             ('x', 'X', 'The X-axis position of the tip of the root section.', lambda x: True, surf.origin_position.x),
             ('y', 'Y', 'The Y-axis position of the tip of the root section.', lambda y: True, surf.origin_position.y),
             ('z', 'Z', 'The Z-axis position of the tip of the root section.', lambda z: True, surf.origin_position.z),
-            ('chord', 'MAC', "The mean aerodynamic chord of the surface.\nHas to be positive.", lambda c: c > 0, surf.chord_length),
             ('y_duplicate', 'Y-symmetric', "", lambda y: y in (0, 1), int(surf.y_duplicate)),
         ]
         for pf_params in pfs_params: super()._init_pf(*pf_params)
@@ -47,7 +46,6 @@ class LeftMenuHorizontalSurface(LeftMenuItem):
     def update_surface(self, _=None) -> None:
         surface_getter = lambda: HorizontalSurface(
             name=self.surface.name,
-            chord_length=self.pfs['chord'].value,
             sections=self.get_sections(),
             y_duplicate=bool(self.pfs['y_duplicate'].value),
             origin_position=(self.pfs['x'].value, self.pfs['y'].value, self.pfs['z'].value),

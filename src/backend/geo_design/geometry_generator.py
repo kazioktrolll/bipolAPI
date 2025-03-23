@@ -25,7 +25,6 @@ class GeometryGenerator:
         h_tail.set_mechanization(elevators=[(0, 1, .8)])
         v_tail = VerticalSimpleSurface(
             name='V Tail',
-            chord_length=.9,
             sections=[
                 Section((0,0,0), 1.1, 0),
                 Section((.2,0,.5), .9, 0),
@@ -36,10 +35,10 @@ class GeometryGenerator:
         )
         g = Geometry(
             name="default",
-            chord_length=wing.chord_length,
+            chord_length=wing.mac(),
             span_length=wing.span(),
             surfaces=[wing, h_tail, v_tail],
-            surface_area=wing.chord_length * wing.span(),
+            surface_area=wing.mac() * wing.span(),
         )
         return g
 
@@ -129,7 +128,6 @@ class FromAvl:
         """Returns a Surface based on .avl description lines."""
         surface_data: dict[str, Any] = {
             'name': None,
-            'chord_length': None,
             'sections': [],
             'y_duplicate': False,
             'origin_position': None,

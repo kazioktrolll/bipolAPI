@@ -22,7 +22,7 @@ class LeftMenuSimpleSurface(LeftMenuItem):
              lambda w: w > 0, surf.span()),
 
             ('chord', 'MAC', "The mean aerodynamic chord of the surface.\nHas to be positive.",
-             lambda c: c > 0, surf.chord_length),
+             lambda c: c > 0, surf.mac()),
 
             ('taper', 'Taper Ratio', "The taper ratio of the surface - c_tip / c_root.\nHas to be between 0 and 1.",
              lambda tr: 0 <= tr <= 1, surf.taper_ratio),
