@@ -33,6 +33,9 @@ class AVLInterface:
                   f"X_cg = {geometry.ref_pos.x}\n")
             _r += '\n'.join([f"{names} = {value[i]}" for names, value in run_file_data.items()])
             _r += '\n\n'
+
+        _r += ('grav.acc. = 9.80665 m/s^2\n'
+              'density = 1.2250122659906943 kg/m^3\n')
         return _r
 
     @classmethod
@@ -69,7 +72,7 @@ class AVLInterface:
             [[{name-value} for intro, forces, ST] for each case]
         """
         nof_cases = len(list(data.values())[0])
-        contents = AVLInterface.create_run_file_contents(geometry, data)
+        contents = cls.create_run_file_contents(geometry, data)
         temp_dir, files = cls.create_temp_files(nof_cases)
         cls.write_to_run_file(contents)
         cls.write_to_avl_file(geometry.string())
