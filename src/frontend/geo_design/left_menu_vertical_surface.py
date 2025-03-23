@@ -35,6 +35,8 @@ class LeftMenuVerticalSurface(LeftMenuItem):
         for pf_params in pfs_params: super()._init_pf(*pf_params)
         super().init_pfs()
 
+    def init_mechanization(self): ...
+
     def update_surface(self, _=None) -> None:
         surface_generator = lambda: VerticalSimpleSurface(
             name=self.name,

@@ -1,4 +1,7 @@
+from tkinter import StringVar
+
 from .left_menu_item import LeftMenuItem
+from .. import ListPreset, FlapItem
 from ...backend.geo_design import HorizontalSimpleSurface
 
 
@@ -37,6 +40,17 @@ class LeftMenuSimpleSurface(LeftMenuItem):
         ]
         for pf_params in pfs_params: super()._init_pf(*pf_params)
         super().init_pfs()
+
+    def init_mechanization(self):
+        assert isinstance(self.surface, HorizontalSimpleSurface)
+        if not self.surface.mechanization: return
+        for key, list_of_ranges in self.surface.mechanization.items():
+            list_preset = ListPreset(self.mechanizations_frame, key, FlapItem, self.update_surface)
+            self.mechanizations[key] = list_preset
+            for start, stop, xc in list_of_ranges:
+                item = FlapItem()
+                item.set_values(StringVar(value=f'{start}'), StringVar(value=f'{stop}'), StringVar(value=f'{xc}'))
+                list_preset.add_position(item)
 
     def update_surface(self, _=None) -> None:
         surface_generator = lambda: HorizontalSimpleSurface(

@@ -43,6 +43,9 @@ class Surface(ABC):
         self.sections = sections
         self.sort_sections()
 
+    def __repr__(self) -> str:
+        return self.name
+
     @abstractmethod
     def major_axis(self, section: Section) -> float:
         """Returns the position of the section along the major axis of the surface."""
@@ -277,7 +280,7 @@ class HorizontalSimpleSurface(HorizontalSurface):
         super().__init__(name=name, sections=[root, tip], y_duplicate=True,
                          origin_position=origin_position, airfoil=airfoil)
 
-        self.mechanization = {}
+        self.mechanization: dict[str, list[tuple[float, float, float]]] = {}
 
     @classmethod
     def create_geometry(cls, chord_length: float, span: float,
@@ -328,6 +331,7 @@ class HorizontalSimpleSurface(HorizontalSurface):
             and **flaps** for ``y`` = <2.1 : 2.9> ``hinge`` 0.6 x/c.
         """
         if self.mechanization: raise ValueError("The surface {} already has mechanization!".format(self.name))
+        self.mechanization = kwargs
 
         for key, value in kwargs.items():
             try: mech_type = {"ailerons": Aileron, "flaps": Flap, "elevators":Elevator}[key]
@@ -348,7 +352,10 @@ class HorizontalSimpleSurface(HorizontalSurface):
         """Returns a new instance of HorizontalSimpleSurface reflected about the y-axis."""
         surf = super().get_symmetric()
         assert isinstance(surf, HorizontalSimpleSurface)
-        surf.mechanization = {k: (-s, -e, xc) for k, (s, e, xc) in surf.mechanization}
+        sym_controls = {}
+        for k, list_of_ranges in surf.mechanization.items():
+            sym_controls[k] = [(-s, -e, xc) for s, e, xc in list_of_ranges]
+        surf.mechanization = sym_controls
         return surf
 
 

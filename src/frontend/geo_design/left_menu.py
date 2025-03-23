@@ -1,4 +1,4 @@
-from customtkinter import CTkFrame, ThemeManager, CTkSegmentedButton
+from customtkinter import CTkFrame, CTkSegmentedButton
 from typing import Callable
 
 from .left_menu_item import LeftMenuItem

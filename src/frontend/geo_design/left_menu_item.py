@@ -1,16 +1,15 @@
-from customtkinter import CTkFrame, CTkButton
+from customtkinter import CTkFrame
 from typing import Callable, final
 from abc import ABC, abstractmethod
 
 from .airfoil_chooser import AirfoilChooser
 from ..parameter_field import ParameterField
 from ..list_preset import ListPreset
-from ..items import FlapItem
 from ...backend.geo_design import Surface, Geometry
 
 
 class LeftMenuItem(CTkFrame, ABC):
-    def __init__(self, parent, surface: Surface, mechanization: dict[str, str] = None):
+    def __init__(self, parent, surface: Surface):
         super().__init__(parent)
         self.pfs: dict[str, ParameterField] = {}
         self.initialized = False
@@ -25,13 +24,11 @@ class LeftMenuItem(CTkFrame, ABC):
         self.airfoil_chooser = AirfoilChooser(self)
         self.airfoil_chooser.set(surface.airfoil)
 
-        if mechanization: self.set_mechanization(mechanization)
-
         self.init_pfs()
-        #self.build()
+        self.init_mechanization()
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}: {self.surface.name}"
+        return self.surface.name
 
     def build(self) -> None:
         for i, mech in enumerate(self.mechanizations.values()):
@@ -43,11 +40,8 @@ class LeftMenuItem(CTkFrame, ABC):
         self.mechanizations_frame.grid(row=1, column=0, sticky='nsew')
         self.airfoil_chooser.grid(row=2, column=0, padx=10, pady=10, sticky='nsew')
 
-    @final
-    def set_mechanization(self, mechanizations: dict[str, str]) -> None:
-        """Should call self.build() after use to update display."""
-        for key, name in mechanizations.items():
-            self.mechanizations[key] = ListPreset(self.mechanizations_frame, name, FlapItem, lambda: self.update_surface())
+    @abstractmethod
+    def init_mechanization(self): ...
 
     @abstractmethod
     def init_pfs(self) -> None:
