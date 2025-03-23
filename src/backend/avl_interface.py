@@ -1,5 +1,6 @@
 from .geo_design import Geometry
 from pathlib import Path
+from tempfile import TemporaryDirectory
 import re
 
 
@@ -35,12 +36,12 @@ class AVLInterface:
         return _r
 
     @classmethod
-    def create_st_command(cls, nof_cases: int) -> str:
+    def create_st_command(cls, paths: list[Path]) -> str:
         """Creates a command string for running a given number of cases, each run 'ST' and saved to file."""
         _r = 'OPER\n'
-        for i in range(1, nof_cases+1):
-            _r += f'{i}\nX\nst\n'
-            _r += rf'C:\Users\kazio\PycharmProjects\bipolAPI\src\temp_files_dir\st_files\{i}'
+        for i, path in enumerate(paths):
+            _r += f'{i+1}\nX\nst\n'
+            _r += str(path.absolute())
             _r += '\n'
         return _r
 
@@ -53,6 +54,13 @@ class AVLInterface:
         return dump
 
     @classmethod
+    def create_temp_files(cls, nof_cases: int) -> tuple[TemporaryDirectory, list[Path]]:
+        temp_dir = TemporaryDirectory(prefix='gavl_')
+        dir_path = Path(temp_dir.name)
+        files = [dir_path.joinpath(f'{i+1}') for i in range(nof_cases)]
+        return temp_dir, files
+
+    @classmethod
     def run_series(cls, geometry: Geometry, data: dict[str, list[float]]) -> list[list[dict[str, float]]]:
         """
         Runs all cases using 'ST' and returns the results.
@@ -62,11 +70,13 @@ class AVLInterface:
         """
         nof_cases = len(list(data.values())[0])
         contents = AVLInterface.create_run_file_contents(geometry, data)
-        AVLInterface.write_to_run_file(contents)
-        AVLInterface.write_to_avl_file(geometry.string())
-        AVLInterface.execute(AVLInterface.create_st_command(nof_cases))
-        vals = ResultsParser.all_sts_to_data()
-        ResultsParser.clear_st_files()
+        temp_dir, files = cls.create_temp_files(nof_cases)
+        cls.write_to_run_file(contents)
+        cls.write_to_avl_file(geometry.string())
+        command = cls.create_st_command(files)
+        cls.execute(command)
+        vals = ResultsParser.all_sts_to_data(files)
+        temp_dir.cleanup()
         return vals
 
 
@@ -134,12 +144,11 @@ class ResultsParser:
         return result[1:]
 
     @classmethod
-    def all_sts_to_data(cls) -> list[list[dict[str, float]]]:
+    def all_sts_to_data(cls, paths: list[Path]) -> list[list[dict[str, float]]]:
         """Converts every file in the 'ST' directory and converts it to a dict."""
-        files = [f.name for f in st_path.iterdir() if f.is_file()]
         _r = []
-        for file in files:
-            with open(st_path.joinpath(file)) as f: data = f.read()
+        for path in paths:
+            with open(path) as f: data = f.read()
             data = cls.st_file_to_dict(data)
             data = cls.split_st_dict(data)
             data[1] = cls.sort_st_dict(data[1])
@@ -147,16 +156,11 @@ class ResultsParser:
         return _r
 
     @classmethod
-    def clear_st_files(cls) -> None:
-        """Deletes all files in 'ST' directory."""
-        for file in st_path.iterdir():
-            st_path.joinpath(file).unlink()
-
-    @classmethod
     def sort_st_dict(cls, st_dict: dict[str, float], join=True) -> dict[str, dict[str, float]] | dict[str, float]:
         """Sorts the dict so that relevant values are next to each other."""
         Xnp = st_dict.pop('Xnp')
-        ClbCnr = st_dict.pop('Clb_Cnr/Clr_Cnb')
+        try: ClbCnr = st_dict.pop('Clb_Cnr/Clr_Cnb')
+        except KeyError: ClbCnr = 0
         dicts: dict[str, dict[str, float]] = {}
         for k, v in st_dict.items():
             category = k[-2:] if k[-2] == 'd' else k[-1:]
