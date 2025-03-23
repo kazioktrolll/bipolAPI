@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 from typing import Callable
 from src.backend.geo_design import Geometry
@@ -30,6 +31,8 @@ class App:
         self.geometry: Geometry = Geometry(name='Plane', chord_length=1, span_length=8)  # Placeholder
         self.root.bind('<Configure>', self.update)
         self.top_bar = TopBar(self)
+
+        self.root.protocol("WM_DELETE_WINDOW", self.exit)
         self.build()
 
     def build(self) -> None:
@@ -48,6 +51,10 @@ class App:
         """Runs the app."""
         self.after(0, self.root.state, 'zoomed')
         self.root.mainloop()
+
+    def exit(self) -> None:
+        self.root.destroy()
+        sys.exit(0)
 
     def set_scene(self, scene) -> None:
         """Sets the Scene instance as the new currently displayed scene."""
