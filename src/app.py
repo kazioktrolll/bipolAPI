@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 from typing import Callable
-from src.backend.geo_design import Geometry
+from src.backend.geo_design import Geometry, GeometryGenerator
 
 
 class App:
@@ -12,23 +12,16 @@ class App:
         root (CTk): The root of the application display.
         scene (Scene): The scene currently displayed.
         geometry (Geometry): The geometry of the currently loaded plane.
-        geo_path (Path): The path to the .avl geometry file.
-        mass_path (Path): The path to the .mass file.
-        run_path (Path): The path to the .run file.
     """
-    geo_path: Path
-    mass_path: Path
-    run_path: Path
 
     def __init__(self):
         from customtkinter import CTk, set_appearance_mode, set_default_color_theme
         from .scenes import Scene
         set_appearance_mode("Dark")
         set_default_color_theme("blue")
-        self.file_path: Path | None = None
         self.root = CTk()
         self.scene = Scene(self)  # Placeholder
-        self.geometry: Geometry = Geometry(name='Plane', chord_length=1, span_length=8)  # Placeholder
+        self.geometry = GeometryGenerator.default()
         self.root.bind('<Configure>', self.update)
         self.top_bar = TopBar(self)
 
