@@ -60,7 +60,6 @@ class LeftMenuVerticalSurface(LeftMenuItem):
             airfoil=self.airfoil_chooser.airfoil,
             y_duplicate=False
         )
-        mechs = {name: lp.get_values() for name, lp in self.mechanizations.items()}
         super()._update_surface(surface_generator)
 
     @classmethod

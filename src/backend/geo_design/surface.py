@@ -334,6 +334,7 @@ class HorizontalSimpleSurface(HorizontalSurface):
         self.mechanization = kwargs
 
         for key, value in kwargs.items():
+            key = key.lower()
             try: mech_type = {"ailerons": Aileron, "flaps": Flap, "elevators":Elevator}[key]
             except KeyError: raise ValueError(f"Unknown mechanism type: {key}")
             # To add a control surface in AVL, you add a control surface to a section,

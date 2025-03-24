@@ -3,8 +3,8 @@ from typing import Callable, final
 from abc import ABC, abstractmethod
 
 from .airfoil_chooser import AirfoilChooser
+from .mechanization_chooser import MechanizationChooser
 from ..parameter_field import ParameterField
-from ..list_preset import ListPreset
 from ...backend.geo_design import Surface, Geometry
 
 
@@ -15,12 +15,10 @@ class LeftMenuItem(CTkFrame, ABC):
         self.initialized = False
         self.surface = surface
 
-        self.pf_frame = CTkFrame(self, fg_color=self.cget('fg_color'))
+        self.pf_frame = CTkFrame(self, fg_color='transparent')
         self.pf_frame.columnconfigure(0, weight=1)
 
-        self.mechanizations: dict[str, ListPreset] = {}
-        self.mechanizations_frame = CTkFrame(self, fg_color=self.cget('fg_color'))
-        self.mechanizations_frame.columnconfigure(0, weight=1)
+        self.mechanizations = MechanizationChooser(self, self.update_surface)
         self.airfoil_chooser = AirfoilChooser(self)
         self.airfoil_chooser.set(surface.airfoil)
 
@@ -31,14 +29,11 @@ class LeftMenuItem(CTkFrame, ABC):
         return self.surface.name
 
     def build(self) -> None:
-        for i, mech in enumerate(self.mechanizations.values()):
-            mech.grid(row=i, column=0, padx=10, pady=10, sticky='nsew')
-
         self.columnconfigure(0, weight=1)
 
         self.pf_frame.grid(row=0, column=0, sticky='nsew')
-        self.mechanizations_frame.grid(row=1, column=0, sticky='nsew')
-        self.airfoil_chooser.grid(row=2, column=0, padx=10, pady=10, sticky='nsew')
+        self.airfoil_chooser.grid(row=1, column=0, padx=10, pady=10, sticky='nsew')
+        self.mechanizations.grid(row=2, column=0, sticky='nsew')
 
     @abstractmethod
     def init_mechanization(self): ...

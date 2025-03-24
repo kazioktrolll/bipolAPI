@@ -4,21 +4,24 @@ from customtkinter import CTkFrame, CTkLabel, CTkButton
 from .items import Item
 
 
-class ListPreset(CTkFrame):
+class ListPreset:
     def __init__(self, parent, category_name: str, item_class: type[Item], do_on_update: Callable[[], None]) -> None:
-        super().__init__(parent, border_width=3, border_color='gray40')
         self.category_name = category_name
         self.item_class = item_class
         self.do_on_update = do_on_update
         self.items: list[Item] = []
         self.item_frames: list[ItemFrame] = []
 
-        self.header_frame = CTkFrame(self, fg_color='transparent')
-        self.body_frame = CTkFrame(self)
-        self.init_display()
+        self.main_frame = CTkFrame(None)
+        self.header_frame = CTkFrame(None)
+        self.body_frame = CTkFrame(None)
+        self.init_display(parent)
 
-    def init_display(self) -> None:
-        self.columnconfigure(0, weight=1)
+    def init_display(self, parent) -> None:
+        self.main_frame = CTkFrame(parent, border_width=3, border_color='gray40')
+        self.header_frame = CTkFrame(self.main_frame, fg_color='transparent')
+        self.body_frame = CTkFrame(self.main_frame)
+        self.main_frame.columnconfigure(0, weight=1)
 
         self.header_frame.grid(column=0, row=0, padx=5, pady=5, sticky="new")
         self.header_frame.columnconfigure(1, weight=1)
@@ -30,6 +33,18 @@ class ListPreset(CTkFrame):
         self.body_frame.configure(height=0)
         self.body_frame.grid(column=0, row=1, sticky="sew", padx=5, pady=5)
         self.body_frame.columnconfigure(0, weight=1)
+        self.redo_item_frames()
+
+    def redo_item_frames(self):
+        self.item_frames.clear()
+        for i, item in enumerate(self.items):
+            edit_item = lambda: item.edit(self.do_on_update)
+            position = ItemFrame(self, self.body_frame, item, edit_item)
+            self.item_frames.append(position)
+            position.grid(column=0, row=len(self.body_frame.children) - 1, sticky="nsew")
+
+    def grid(self, **kwargs) -> None:
+        self.main_frame.grid(**kwargs)
 
     def update_items(self) -> None:
         for item_frame in self.item_frames: item_frame.update()
@@ -39,8 +54,8 @@ class ListPreset(CTkFrame):
         item = item or self.item_class()
         self.items.append(item)
 
-        edit_item = lambda: item.edit(lambda: (display.update(), self.do_on_update())) # noqa
-        position = ItemFrame(self.body_frame, item, edit_item)
+        edit_item = lambda: item.edit(self.do_on_update)
+        position = ItemFrame(self, self.body_frame, item, edit_item)
         self.item_frames.append(position)
         position.grid(column=0, row=len(self.body_frame.children)-1, sticky="nsew")
 
@@ -51,8 +66,8 @@ class ListPreset(CTkFrame):
 
 
 class ItemFrame(CTkFrame):
-    def __init__(self, parent, item:Item, edit_item: Callable[[], None]) -> None:
-        super().__init__(parent, border_width=2, border_color='gray30')
+    def __init__(self, parent: ListPreset, frame: CTkFrame, item:Item, edit_item: Callable[[], None]) -> None:
+        super().__init__(frame, border_width=2, border_color='gray30')
         self.item = item
         self.locked = False
         self.columnconfigure(0, weight=1)
