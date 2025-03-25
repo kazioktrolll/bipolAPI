@@ -1,16 +1,17 @@
 from customtkinter import CTkFrame, CTkSegmentedButton, CTkLabel, CTkEntry, CTkButton
+from ...backend.geo_design import Control
 
 
 class ResultsDisplay(CTkFrame):
-    def __init__(self, parent):
+    def __init__(self, parent, controls: list[Control]):
         super().__init__(parent, fg_color=parent.cget('fg_color'))
         self.results: list[list[dict[str, float]]] = [[{}, {}]]
         self.page = 0
         self.page_button = CTkSegmentedButton(self, command=self.switch_page)
         self.mode_button = CTkSegmentedButton(self, values=['Simple', 'Stability', 'Full'], command=self.switch_mode)
-        self.csv_button = CTkButton(self, text='Save', command=self.save_to_csv)
+        self.csv_button = CTkButton(self, text='Save to .csv', command=self.save_to_csv)
         self.simple_label = TextBox(self)
-        self.stability_label = STDisplay(self)
+        self.stability_label = STDisplay(self, controls)
         self.full_label = TextBox(self)
         self.current_label = self.simple_label
         self.mode_button.set('Simple')
@@ -25,7 +26,8 @@ class ResultsDisplay(CTkFrame):
 
         self.rowconfigure(0, weight=0)
         self.rowconfigure(1, weight=1)
-        self.columnconfigure(0, weight=0)
+        self.columnconfigure(0, weight=1)
+        self.columnconfigure(1, weight=0)
 
         self.page_button.grid(row=0, column=0, columnspan=2, sticky='nsew')
         self.mode_button.grid(row=1, column=0, sticky='nsew')
@@ -56,7 +58,7 @@ class ResultsDisplay(CTkFrame):
         self.simple_label.place(x=1e4, y=8576)
         self.stability_label.place(x=1e4, y=9366)
         self.full_label.place(x=1e4, y=5592)
-        self.current_label.grid(row=2, column=0, sticky='nsew')
+        self.current_label.grid(row=2, column=0, columnspan=2, sticky='nsew')
 
     def switch_mode(self, mode: str):
         match mode:
@@ -105,19 +107,22 @@ class ResultsDisplay(CTkFrame):
 
 
 class TextBox(CTkFrame):
-    def __init__(self, parent):
-        super().__init__(parent, fg_color='transparent')
+    def __init__(self, parent, name:str=None):
+        super().__init__(parent, fg_color='transparent', border_color='gray30', border_width=2)
+        self.is_named = name is not None
+        self.name_label = CTkLabel(self, text=name or '', anchor='w')
         self.dict = {}
         self.build()
 
     def build(self):
+        if self.is_named: self.name_label.grid(row=0, column=0, sticky='nsew', padx=5, pady=5)
         for i, (key, value) in enumerate(self.dict.items()):
-            CTkLabel(self, text=key, anchor="w").grid(row=i, column=0, padx=5, sticky="w")
+            CTkLabel(self, text=key, anchor="e").grid(row=i+1, column=0, padx=5, pady=2, sticky="e")
 
             entry = CTkEntry(self, width=100, border_width=0, fg_color='transparent')
             entry.insert(0, str(value))
             entry.configure(state="readonly")  # Make text selectable but not editable
-            entry.grid(row=i, column=1, padx=5, sticky="w")
+            entry.grid(row=i+1, column=1, padx=5, pady=2, sticky="w")
 
     def set(self, data: dict[str, float]):
         self.dict = data
@@ -125,8 +130,9 @@ class TextBox(CTkFrame):
 
 
 class STDisplay(CTkFrame):
-    def __init__(self, parent):
+    def __init__(self, parent, controls: list[Control]):
         super().__init__(parent, fg_color='transparent')
+        self.controls = list(dict.fromkeys([c.name for c in controls]))
         self.dict: dict[str, float] = {}
 
     def get_split_dict(self) -> list[dict[str, float]]:
@@ -136,23 +142,29 @@ class STDisplay(CTkFrame):
             blocks[-1][k] = v
         Xnp = blocks[-1].pop('Xnp')
         Clb = blocks[-1].pop('Clb_Cnr/Clr_Cnb')
-        blocks.append({'Xnp': Xnp, 'Clb_Cnr/Clr_Cnb': Clb})
+        blocks.append({'Xnp': Xnp, 'ClbCnr/ClrCnb': Clb})
         return blocks
 
     def display_blocks(self, blocks: list[dict[str, float]]):
         assert len(blocks) >= 5 # There should be 5 basic (alfa, beta, roll, pitch, yaw) and potentially more from control surfaces
         # Grid the basic ones
-        for r, c in {'a':(0,0), 'b':(0,1), 'p':(1, 0), 'q':(1, 1), 'r':(1,2)}.values():
-            tb = TextBox(self)
+        for name, pos in {'Alpha':(0,0), 'Beta':(0,1), 'Roll Rate':(1, 0), 'Pitch Rate':(1, 1), 'Yaw Rate':(1,2)}.items():
+            tb = TextBox(self, name)
+            tb.columnconfigure(0, minsize=70)
             tb.set(blocks.pop(0))
-            tb.grid(row=r, column=c, padx=5, pady=10, sticky="w")
+            r, c = pos
+            tb.grid(row=r, column=c, padx=5, pady=5, sticky="nsew")
         # Now grid the additional ones in rows 3 wide
+        if not blocks: return
         for i, block in enumerate(blocks):
-            tb = TextBox(self)
+            try: name = self.controls[i].capitalize() + 's'
+            except IndexError: name = None
+            tb = TextBox(self, name)
+            tb.columnconfigure(0, minsize=70)
             tb.set(block)
             r = 2 + i//3
             c = i%3
-            tb.grid(row=r, column=c, padx=5, pady=10, sticky="w")
+            tb.grid(row=r, column=c, padx=5, pady=5, sticky="nsew")
 
     def set(self, data: dict[str, float]) -> None:
         self.dict = data
