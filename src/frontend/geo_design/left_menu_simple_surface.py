@@ -1,7 +1,7 @@
 from customtkinter import StringVar
 from .left_menu_item import LeftMenuItem
-from .mechanization_chooser import MechanizationChooser, ListPresetItem
-from .. import ListPreset, FlapItem
+from .mechanization_chooser import ListPresetItem
+from .. import FlapItem
 from ...backend.geo_design import HorizontalSimpleSurface
 
 

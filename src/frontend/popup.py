@@ -19,4 +19,4 @@ class Popup(CTkToplevel):
             x = self.winfo_pointerx()
             y = self.winfo_pointery()
             self.geometry(f"{w}x{h}+{x}+{y}")
-        self.after(100, position)   # noqa Type-checking is confused with this method
+        self.after(50, position)    # noqa

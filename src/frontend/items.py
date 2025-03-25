@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from .parameter_field import HelpTopLevel
 from .popup import Popup
 from ..backend import Vector3
-from ..backend.geo_design import Airfoil, Control, Section
+from ..backend.geo_design import Control, Section
 
 
 class Item(ABC):

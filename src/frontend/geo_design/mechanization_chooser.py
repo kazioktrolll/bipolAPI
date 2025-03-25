@@ -33,6 +33,7 @@ class MechanizationChooser(ListPreset):
             self.create_new(val)
 
         CTkButton(window, text='Confirm', command=confirm).grid(column=0, row=2, columnspan=2, sticky='nsew', padx=10, pady=10)
+        window.run()
 
     def create_new(self, item_type: str):
         item = ListPresetItem(item_type, self.do_on_update)
