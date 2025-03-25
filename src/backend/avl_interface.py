@@ -4,24 +4,10 @@ from tempfile import TemporaryDirectory
 import re
 
 
-avl_path = Path(r"C:\Users\kazio\PycharmProjects\bipolAPI\src\avl\avl.exe")
-local_path = Path(r"C:\Users\kazio\PycharmProjects\bipolAPI\src\temp_files_dir")
+avl_exe_path = Path(r"C:\Users\kazio\PycharmProjects\bipolAPI\src\avl\avl.exe")
 
 
 class AVLInterface:
-    def __init__(self, geometry: Geometry) -> None:
-        self.geometry = geometry
-
-    @classmethod
-    def write_to_avl_file(cls, contents: str) -> None:
-        """Writes the input contents to a designated .avl file used for running cases."""
-        with open(local_path.joinpath('local.avl'), 'w') as avl_file: avl_file.write(contents)
-
-    @classmethod
-    def write_to_run_file(cls, contents: str) -> None:
-        """Writes the input contents to a designated .run file used for running cases."""
-        with open(local_path.joinpath('local.run'), 'w') as run_file: run_file.write(contents)
-
     @classmethod
     def create_run_file_contents(cls, geometry: Geometry, run_file_data: dict[str, list[float]]) -> str:
         """Returns a string containing the input data transformed into a .run format."""
@@ -48,19 +34,19 @@ class AVLInterface:
         return _r
 
     @classmethod
-    def execute(cls, command: str) -> str:
+    def execute(cls, command: str, avl_file_path) -> str:
         from subprocess import Popen, PIPE
-        avl = Popen([avl_path, str(local_path.joinpath('local.avl'))], stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=True)
+        avl = Popen([avl_exe_path, str(avl_file_path)], stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=True)
         dump = avl.communicate(bytes(command, encoding='utf-8'),
                                timeout=1)[0].decode()
         return dump
 
     @classmethod
-    def create_temp_files(cls, nof_cases: int) -> tuple[TemporaryDirectory, list[Path]]:
-        temp_dir = TemporaryDirectory(prefix='gavl_')
-        dir_path = Path(temp_dir.name)
-        files = [dir_path.joinpath(f'{i+1}') for i in range(nof_cases)]
-        return temp_dir, files
+    def create_temp_files(cls, temp_dir: Path, nof_cases: int) -> list[Path]:
+        path = temp_dir.joinpath('st_files')
+        path.mkdir()
+        files = [path.joinpath(f'{i+1}') for i in range(nof_cases)]
+        return files
 
     @classmethod
     def run_series(cls, geometry: Geometry, data: dict[str, list[float]]) -> list[list[dict[str, float]]]:
@@ -72,12 +58,21 @@ class AVLInterface:
         """
         nof_cases = len(list(data.values())[0])
         contents = cls.create_run_file_contents(geometry, data)
-        temp_dir, files = cls.create_temp_files(nof_cases)
-        cls.write_to_run_file(contents)
-        cls.write_to_avl_file(geometry.string())
+        temp_dir = TemporaryDirectory(prefix='gavl_')
+        temp_dir_path = Path(temp_dir.name)
+
+        files = cls.create_temp_files(temp_dir_path, nof_cases)
+
+        avl_file_path = temp_dir_path.joinpath('plane.avl')
+        run_file_path = temp_dir_path.joinpath('plane.run')
+        with open(avl_file_path, 'w') as avl_file: avl_file.write(geometry.string())
+        with open(run_file_path, 'w') as run_file: run_file.write(contents)
+
         command = cls.create_st_command(files)
-        cls.execute(command)
+        cls.execute(command, avl_file_path)
+
         vals = ResultsParser.all_sts_to_data(files)
+
         temp_dir.cleanup()
         return vals
 
