@@ -6,7 +6,6 @@ import re
 
 avl_path = Path(r"C:\Users\kazio\PycharmProjects\bipolAPI\src\avl\avl.exe")
 local_path = Path(r"C:\Users\kazio\PycharmProjects\bipolAPI\src\temp_files_dir")
-st_path = local_path.joinpath("st_files")
 
 
 class AVLInterface:
@@ -154,9 +153,32 @@ class ResultsParser:
             with open(path) as f: data = f.read()
             data = cls.st_file_to_dict(data)
             data = cls.split_st_dict(data)
+            data[0] = cls.sort_forces_dict(data[0])
             data[1] = cls.sort_st_dict(data[1])
             _r.append(data)
         return _r
+
+    @classmethod
+    def sort_forces_dict(cls, forces_dict: dict[str, float], join=True) -> dict[str, float] | list[dict[str, float]]:
+        sorted_keys = (
+            ('Alpha', 'Beta', 'Mach'),
+            ('pb/2V', 'qc/2V', 'rb/2V'),
+            ("p'b/2V", "r'b/2V"),
+            ('CXtot', 'CYtot', 'CZtot'),
+            ('Cltot', 'Cmtot', 'Cntot'),
+            ("Cl'tot", "Cn'tot"),
+            ('CLtot', 'CDtot', 'CDvis', 'CLff', 'CYff'),
+            ('CDind', 'CDff', 'e')
+        )
+
+        sorted_dicts = []
+        for group in sorted_keys:
+            sorted_dicts.append({})
+            for key in group: sorted_dicts[-1][key] = forces_dict.pop(key)
+        sorted_dicts.append(forces_dict)
+
+        if join: return {k: v for d in sorted_dicts for k, v in d.items()}
+        return sorted_dicts
 
     @classmethod
     def sort_st_dict(cls, st_dict: dict[str, float], join=True) -> dict[str, dict[str, float]] | dict[str, float]:
