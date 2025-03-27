@@ -1,6 +1,7 @@
 from customtkinter import CTkFrame, CTkLabel, CTkButton, CTkEntry, CTkOptionMenu, CTk, CTkSegmentedButton
 from abc import ABC, abstractmethod
 from ..strip_manager import RowManager
+from ..entry_with_instructions import EntryWithInstructions
 
 
 Gridable = CTk | CTkFrame
@@ -234,25 +235,3 @@ class SeriesConfig(CTkFrame):
         self.active_entry.grid(column=1, row=0)
 
     def get_value(self) -> float | list[float]: return self.active_entry.get_values()
-
-
-class EntryWithInstructions(CTkEntry):
-    def __init__(self, parent: Gridable, instructions: str, **kwargs):
-        super().__init__(parent, **kwargs)
-        self.instructions = instructions
-        self.fill()
-        self.bind("<FocusOut>", self.fill)
-        self.bind("<FocusIn>", self.clear)
-
-    def clear(self, _=None):
-        try:
-            float(self.get())
-            return
-        except ValueError:
-            self.delete(0, 'end')
-            self.configure(text_color=CTkEntry(None).cget('text_color'))
-
-    def fill(self, _=None):
-        if self.get() != '': return
-        self.insert(0, self.instructions)
-        self.configure(text_color='gray40')
