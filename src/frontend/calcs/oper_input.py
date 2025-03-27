@@ -271,17 +271,17 @@ class RangeConfig(ConfigItem):
 class FileConfig(ConfigItem):
     def __init__(self, parent: Gridable):
         super().__init__(parent)
-        self.placeholder = CTkLabel(self, text='---', width=120, anchor='e')
+        self.choose_file_button = CTkButton(self, text='Choose File', width=160)
+        self.values: list[float] = []
         self.build()
 
     def build(self):
         self.value_label.grid(column=0, row=0)
-        self.placeholder.grid(column=1, row=0)
-        self.set_button.grid(column=2, row=0)
+        self.choose_file_button.grid(column=1, row=0, columnspan=2, sticky='ew')
 
     def set_value(self) -> None: pass
 
-    def get_values(self) -> float | list[float]: return -69
+    def get_values(self) -> float | list[float]: return self.values
 
 
 class SeriesConfig(CTkFrame):
