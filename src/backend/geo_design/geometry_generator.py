@@ -26,8 +26,8 @@ class GeometryGenerator:
         v_tail = VerticalSimpleSurface(
             name='V Tail',
             sections=[
-                Section((0,0,0), 1.1, 0),
-                Section((.2,0,.5), .9, 0),
+                Section((0,0,0), 1.1, 0, airfoil=Airfoil.from_naca('0012')),
+                Section((.2,0,.5), .9, 0, airfoil=Airfoil.from_naca('0012')),
             ],
             origin_position=(3.8, 0, .5),
             y_duplicate=False,
