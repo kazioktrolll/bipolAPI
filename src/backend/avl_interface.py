@@ -4,6 +4,7 @@ from tempfile import TemporaryDirectory
 import re
 
 
+val_dict = dict[str, float]
 avl_exe_path = Path(r"C:\Users\kazio\PycharmProjects\bipolAPI\src\avl\avl.exe")
 
 
@@ -49,7 +50,7 @@ class AVLInterface:
         return files
 
     @classmethod
-    def run_series(cls, geometry: Geometry, data: dict[str, list[float]]) -> list[list[dict[str, float]]]:
+    def run_series(cls, geometry: Geometry, data: dict[str, list[float]]) -> tuple[list[list[val_dict]], str]:
         """
         Runs all cases using 'ST' and returns the results.
 
@@ -69,12 +70,13 @@ class AVLInterface:
         with open(run_file_path, 'w') as run_file: run_file.write(contents)
 
         command = cls.create_st_command(files)
-        cls.execute(command, avl_file_path)
+        dump = cls.execute(command, avl_file_path)
+        errors = ResultsParser.loading_issues_from_dump(dump)
 
         vals = ResultsParser.all_sts_to_data(files)
 
         temp_dir.cleanup()
-        return vals
+        return vals, errors
 
 
 class ResultsParser:
@@ -96,7 +98,7 @@ class ResultsParser:
         return [block for block in dump if 'Vortex Lattice Output' in block]
 
     @classmethod
-    def forces_to_dict(cls, forces_str: str) -> dict[str, float]:
+    def forces_to_dict(cls, forces_str: str) -> val_dict:
         """Takes the chopped 'forces' string and converts it to a name-value dict."""
         vals = re.sub(r'\s+=\s+', '=', forces_str)
         vals = re.sub(r'\r\n', '', vals)
@@ -109,7 +111,7 @@ class ResultsParser:
         return _r
 
     @classmethod
-    def st_file_to_dict(cls, st_str: str) -> dict[str, float]:
+    def st_file_to_dict(cls, st_str: str) -> val_dict:
         """Takes the raw contents of the 'ST' file and converts it to a name-value dict."""
         st_str = re.sub(r'\s+=\s+', '=', st_str)
         st_str = re.sub(r'\n', '', st_str)
@@ -123,7 +125,7 @@ class ResultsParser:
         return _r
 
     @classmethod
-    def split_st_dict(cls, st_dict: dict[str, float]) -> list[dict[str, float]]:
+    def split_st_dict(cls, st_dict: val_dict) -> list[val_dict]:
         """Splits the 'ST_file' dict into 'forces' and 'ST' """
         breakpoints = ['Alpha', 'CLa']
         result = []
@@ -141,7 +143,7 @@ class ResultsParser:
         return result[1:]
 
     @classmethod
-    def all_sts_to_data(cls, paths: list[Path]) -> list[list[dict[str, float]]]:
+    def all_sts_to_data(cls, paths: list[Path]) -> list[list[val_dict]]:
         """Converts every file in the 'ST' directory and converts it to a dict."""
         _r = []
         for path in paths:
@@ -154,7 +156,7 @@ class ResultsParser:
         return _r
 
     @classmethod
-    def sort_forces_dict(cls, forces_dict: dict[str, float], join=True) -> dict[str, float] | list[dict[str, float]]:
+    def sort_forces_dict(cls, forces_dict: val_dict, join=True) -> val_dict | list[val_dict]:
         sorted_keys = (
             ('Alpha', 'Beta', 'Mach'),
             ('pb/2V', 'qc/2V', 'rb/2V'),
@@ -176,12 +178,12 @@ class ResultsParser:
         return sorted_dicts
 
     @classmethod
-    def sort_st_dict(cls, st_dict: dict[str, float], join=True) -> dict[str, dict[str, float]] | dict[str, float]:
+    def sort_st_dict(cls, st_dict: val_dict, join=True) -> dict[str, val_dict] | val_dict:
         """Sorts the dict so that relevant values are next to each other."""
         Xnp = st_dict.pop('Xnp')
         try: ClbCnr = st_dict.pop('Clb_Cnr/Clr_Cnb')
         except KeyError: ClbCnr = 0
-        dicts: dict[str, dict[str, float]] = {}
+        dicts: dict[str, val_dict] = {}
         for k, v in st_dict.items():
             category = k[-2:] if k[-2] == 'd' else k[-1:]
             if category not in dicts: dicts[category] = {}
