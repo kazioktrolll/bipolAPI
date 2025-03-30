@@ -85,3 +85,13 @@ class Geometry:
             ctrls = surf.get_controls()
             controls += [c for c in ctrls if c not in controls]
         return controls
+
+    def find_possible_simples(self):
+        from .surface import HorizontalSurface, HorizontalSimpleSurface
+        _r: list[HorizontalSimpleSurface] = []
+        for surf in self.surfaces.values():
+            if not isinstance(surf, HorizontalSurface): continue
+            simple = HorizontalSimpleSurface.from_complex(surf)
+            if simple is None: continue
+            _r.append(simple)
+        return _r
