@@ -2,11 +2,10 @@ from customtkinter import CTkFrame, CTkLabel, CTkButton, CTkEntry, CTkOptionMenu
 from abc import ABC, abstractmethod
 from ..strip_manager import RowManager
 from ..entry_with_instructions import EntryWithInstructions
+from ..help_top_level import HelpTopLevel
 
 
 Gridable = CTk | CTkFrame
-
-
 base_names = {
     'Alpha': ('A', 'alpha'),
     'Beta': ('B', 'beta'),
@@ -151,7 +150,9 @@ class ConstantConfig(ConfigItem):
         val = self.entry.get()
         self.entry.delete(0, 'end')
         try: val = float(val)
-        except ValueError: return
+        except ValueError:
+            HelpTopLevel(None, 'Value must be numeric.')
+            return
         self.value = val
         self.value_label.configure(text=str(round(val, 3)))
 
@@ -171,7 +172,10 @@ class RangeConfig(ConfigItem):
         self.set_button.grid(column=4, row=0)
 
     def set_value(self) -> None:
-        f, s, t = map(float, [e.get() for e in self.entries])
+        try: f, s, t = map(float, [e.get() for e in self.entries])
+        except ValueError:
+            HelpTopLevel(None, 'Values must be numeric.')
+            return
         for e in self.entries:
             e.delete(0, 'end')
             e.fill()
