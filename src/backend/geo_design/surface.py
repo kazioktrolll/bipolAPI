@@ -3,6 +3,8 @@ from .airfoil import Airfoil
 from ..to_re_docstring_decorator import to_re_docstring
 from ..vector3 import Vector3, AnyVector3
 from abc import ABC, abstractmethod
+from math import atan, degrees
+from typing import Optional
 
 
 class Surface(ABC):
@@ -358,6 +360,34 @@ class HorizontalSimpleSurface(HorizontalSurface):
             sym_controls[k] = [(-s, -e, xc) for s, e, xc in list_of_ranges]
         surf.mechanization = sym_controls
         return surf
+
+    @classmethod
+    def from_complex(cls, surface: HorizontalSurface, accuracy=.05) -> Optional['HorizontalSimpleSurface']:
+        root = surface.sections[0]
+        tip = surface.sections[-1]
+
+        leading_edge_x_equation = lambda y: root.x + y/tip.y * (tip.x - root.x)
+        leading_edge_z_equation = lambda y: root.z + y/tip.y * (tip.z - root.z)
+        chord_equation = lambda y: root.chord + y/tip.y * (tip.chord - root.chord)
+        inc = root.inclination
+
+        for section in surface.sections:
+            y = section.y
+            le = section.leading_edge_position
+            c = section.chord
+            if abs((le.x - leading_edge_x_equation(y)) / c) > accuracy: return None
+            if abs((le.z - leading_edge_z_equation(y)) / c) > accuracy: return None
+            if abs((c - chord_equation(y)) / c) > accuracy: return None
+            if section.inclination != inc: return None
+
+        tr = tip.chord / root.chord
+        sa = degrees(atan(abs(
+            (root.get_position_at_xc(.25).x - tip.get_position_at_xc(.25).x) / (tip.y - root.y)
+        )))
+
+        return cls(
+            surface.name, surface.span(), surface.mac(), tr, sa, surface.origin_position, inc, surface.airfoil
+        )
 
 
 class VerticalSimpleSurface(Surface):
