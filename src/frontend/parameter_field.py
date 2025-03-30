@@ -41,35 +41,38 @@ class ParameterField(CTkFrame):
         self.on_set = on_set
         self.assert_test = assert_test
         self.value = 0
+        self.has_message = help_message != ""
 
         # Set the display
-        if not help_message == "":
-            self.help_button = CTkButton(self, text='?', width=10, height=10, command=lambda: HelpTopLevel(self, self.help_message))
-            self.help_button.grid(column=0, row=0, sticky="w")
-
+        self.help_button = CTkButton(self, text='?', width=10, height=10, command=lambda: HelpTopLevel(self, self.help_message))
         self.name_label = CTkLabel(self, text=name)
-        self.name_label.grid(column=1, row=0, sticky="w")
-
         self.value_label = CTkLabel(self, text=str(self.value))
-        self.value_label.grid(column=2, row=0, sticky="w", padx=10)
-
         self.entry = CTkEntry(self)
-        self.entry.grid(column=3, row=0, sticky="ew")
-
         self.set_button = CTkButton(self, text="Set", width=30, command=self.set)
+
+        self.build()
+
+    def build(self):
+        if self.has_message: self.help_button.grid(column=0, row=0, sticky="w")
+        self.name_label.grid(column=1, row=0, sticky="w")
+        self.value_label.grid(column=2, row=0, sticky="w", padx=10)
+        self.entry.grid(column=3, row=0, sticky="ew")
         self.set_button.grid(column=4, row=0, sticky="e")
 
     def set(self, value: float = None) -> bool:
         """Sets the value in the entry as the new value of the parameter. Returns True if changed successfully."""
         if value is None: value = self.entry.get()
         if value == '': return False  # When the entry is empty
+
         try: self.value = float(value)
         except ValueError:
             ParameterField.raise_bad_input('Value must be numeric.')
             return False
+
         if not self.assert_test(self.value):
             ParameterField.raise_bad_input('Value does not meet requirements.\nCheck the help button [?] for more info.')
-            return False # When the new value doesn't fulfill the design criteria
+            return False
+
         self.entry.delete(0, "end")
         self.value_label.configure(text=value)
         self.focus()
@@ -84,6 +87,3 @@ class ParameterField(CTkFrame):
         """Disables the change of the parameter."""
         self.set_button.configure(state="disabled", fg_color="gray40", text_color="white")
         self.entry.configure(state="disabled")
-
-    def grid_def(self, row: int, column: int) -> None:
-        self.grid(row=row, column=column, sticky="nsew", padx=10, pady=5)

@@ -8,11 +8,9 @@ from ...backend.geo_design import Airfoil
 
 
 class AirfoilChooser(CTkFrame):
-    path: Path | None
     def __init__(self, parent):
         super().__init__(parent)
-        self.path = None
-
+        self.path: Path | None = None
         self.airfoil = Airfoil.empty()
 
         self.file_label = CTkLabel(self, text="", width=100)

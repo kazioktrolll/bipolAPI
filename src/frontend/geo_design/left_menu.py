@@ -62,4 +62,6 @@ class LeftMenu(CTkFrame):
 
     def show_first(self) -> None:
         if len(self.items) > 0:
-            self.show_item(clicked=list(self.items.values())[0])
+            first = list(self.items.values())[0]
+            self.show_item(clicked=first)
+            self.items_button.set(first.name)
