@@ -1,4 +1,3 @@
-import sys
 from pathlib import Path
 from typing import Callable
 from src.backend.geo_design import Geometry, GeometryGenerator
@@ -44,11 +43,18 @@ class App:
     def run(self) -> None:
         """Runs the app."""
         self.after(0, self.root.state, 'zoomed')
-        self.root.mainloop()
+        try: self.root.mainloop()
+        except (KeyboardInterrupt, SystemExit): pass
+
+    @classmethod
+    def destroy_all_children(cls, widget) -> None:
+        for child in widget.winfo_children():
+            App.destroy_all_children(child)
+            child.destroy()
 
     def exit(self) -> None:
+        App.destroy_all_children(self.root)
         self.root.destroy()
-        sys.exit(0)
 
     def set_scene(self, scene) -> None:
         """Sets the Scene instance as the new currently displayed scene."""
