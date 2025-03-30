@@ -63,13 +63,22 @@ class ParameterField(CTkFrame):
         """Sets the value in the entry as the new value of the parameter. Returns True if changed successfully."""
         if value is None: value = self.entry.get()
         if value == '': return False  # When the entry is empty
-        self.value = float(value)
-        if not self.assert_test(self.value): return False # When the new value doesn't fulfill the design criteria
+        try: self.value = float(value)
+        except ValueError:
+            ParameterField.raise_bad_input('Value must be numeric.')
+            return False
+        if not self.assert_test(self.value):
+            ParameterField.raise_bad_input('Value does not meet requirements.\nCheck the help button [?] for more info.')
+            return False # When the new value doesn't fulfill the design criteria
         self.entry.delete(0, "end")
         self.value_label.configure(text=value)
         self.focus()
         self.on_set(self.value)
         return True
+
+    @classmethod
+    def raise_bad_input(cls, message: str) -> None:
+        HelpTopLevel(None, message)
 
     def disable(self) -> None:
         """Disables the change of the parameter."""
