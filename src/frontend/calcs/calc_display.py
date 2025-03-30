@@ -5,12 +5,12 @@ from .results_display import ResultsDisplay
 class CalcDisplay(CTkFrame):
     def __init__(self, parent):
         from .oper_input import OperSeriesInputPanel
+        from customtkinter import CTkButton
         super().__init__(parent)
-        self.ois_frame = None
-        self.exec_button = None
-        self.results_display = ResultsDisplay(self, self.geometry.get_controls())
+        self.exec_button = CTkButton(self, text='Execute', command=self.run_case)
 
         controls_names = [c.name for c in self.geometry.get_controls()]
+        self.results_display = ResultsDisplay(self, controls_names)
         self.oip = OperSeriesInputPanel(self, controls_names)
 
         self.build()
@@ -26,8 +26,6 @@ class CalcDisplay(CTkFrame):
     def build(self):
         self.oip.grid(row=0, column=0, sticky="nsew")
 
-        from customtkinter import CTkButton
-        self.exec_button = CTkButton(self, text='Execute', command=self.run_case)
         self.rowconfigure(2, weight=1)
         self.exec_button.grid(row=1, column=0, sticky='news')
         self.columnconfigure(1, minsize=10)

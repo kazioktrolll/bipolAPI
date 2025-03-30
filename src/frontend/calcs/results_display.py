@@ -1,17 +1,17 @@
 from customtkinter import CTkFrame, CTkSegmentedButton, CTkLabel, CTkEntry, CTkButton
-from ...backend.geo_design import Control
 
 
 class ResultsDisplay(CTkFrame):
-    def __init__(self, parent, controls: list[Control]):
+    def __init__(self, parent, controls_names: list[str]):
         super().__init__(parent, fg_color=parent.cget('fg_color'))
+        self.controls_names = controls_names
         self.results: list[list[dict[str, float]]] = [[{}, {}]]
         self.page = 0
         self.page_button = CTkSegmentedButton(self, command=self.switch_page)
         self.mode_button = CTkSegmentedButton(self, values=['Simple', 'Stability', 'Full'], command=self.switch_mode)
         self.csv_button = CTkButton(self, text='Save to .csv', command=self.save_to_csv)
         self.simple_label = TextBox(self)
-        self.stability_label = STDisplay(self, controls)
+        self.stability_label = STDisplay(self, controls_names)
         self.full_label = TextBox(self)
         self.current_label = self.simple_label
         self.mode_button.set('Simple')
@@ -49,7 +49,7 @@ class ResultsDisplay(CTkFrame):
             'CLtot',
             'CDtot',
             'CDind'
-        ] + [c.name for c in self.control_surfaces()]
+        ] + self.controls_names
         simple_results = {k:v for k, v in self.active_results[0].items() if k in simple_keys}
         self.simple_label.set(simple_results)
         self.stability_label.set(self.active_results[1])
@@ -77,11 +77,6 @@ class ResultsDisplay(CTkFrame):
     def switch_page(self, page: str):
         self.page = int(page)
         self.update()
-
-    def control_surfaces(self):
-        from .calc_display import CalcDisplay
-        assert isinstance(self.master, CalcDisplay)
-        return self.master.geometry.get_controls()
 
     def save_to_csv(self):
         from pathlib import Path
@@ -130,9 +125,9 @@ class TextBox(CTkFrame):
 
 
 class STDisplay(CTkFrame):
-    def __init__(self, parent, controls: list[Control]):
+    def __init__(self, parent, controls_names: list[str]):
         super().__init__(parent, fg_color='transparent')
-        self.controls = list(dict.fromkeys([c.name for c in controls]))
+        self.controls = list(dict.fromkeys(controls_names)) # Remove duplicates
         self.dict: dict[str, float] = {}
 
     def get_split_dict(self) -> list[dict[str, float]]:
