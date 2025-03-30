@@ -2,6 +2,7 @@ import sys
 from pathlib import Path
 from typing import Callable
 from src.backend.geo_design import Geometry, GeometryGenerator
+from src.frontend import AskPopup
 
 
 class App:
@@ -124,7 +125,14 @@ class App:
             defaultextension='.avl',
             filetypes=[('AVL File', ['*.avl'])]
         ))
-        self.set_geometry(GeometryGenerator.from_avl(path))
+
+        geom = GeometryGenerator.from_avl(path)
+        self.set_geometry(geom)
+
+        for surf in geom.find_possible_simples():
+            a = AskPopup.ask(f'Convert {surf.name} to Simple Surface?', ['Y', 'N'], 'N')
+            if a == 'Y': geom.replace_surface(surf)
+        self.set_geometry(geom)
 
 
 from customtkinter import CTkFrame
