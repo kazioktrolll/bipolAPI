@@ -52,7 +52,7 @@ class OperSeriesInput(RowManager):
     def update(self):
         self.series_config.update()
         if not self.bound: self.bind_menu.grid_forget()
-        else: self.bind_menu.grid(column=1, row=self.master_index)
+        else: self.bind_menu.grid(column=2, row=self.master_index, padx=4)
 
     def build(self):
         self.grid.columnconfigure(1, minsize=120)

@@ -30,8 +30,8 @@ class ResultsDisplay(CTkFrame):
         self.columnconfigure(1, weight=0)
 
         self.page_button.grid(row=0, column=0, columnspan=2, sticky='nsew')
-        self.mode_button.grid(row=1, column=0, sticky='nsew')
-        self.csv_button.grid(row=1, column=1, sticky='nsew')
+        self.mode_button.grid(row=1, column=0, sticky='nsew', padx=3, pady=6)
+        self.csv_button.grid(row=1, column=1, sticky='nsew', padx=3, pady=6)
         self.current_label.grid(row=2, column=0, columnspan=2, sticky='nsew')
         self.update()
 
