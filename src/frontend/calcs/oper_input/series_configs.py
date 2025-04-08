@@ -109,6 +109,7 @@ class FileConfig(ConfigItem):
             self.value_label.configure(text=f'{file_name} \\ {series_name}')
             popup.destroy()
         CTkButton(popup, text='Set', command=set_and_close).grid(column=0, row=2, columnspan=2, sticky='ew')
+        popup.run()
 
     def set_value(self) -> None: pass
 

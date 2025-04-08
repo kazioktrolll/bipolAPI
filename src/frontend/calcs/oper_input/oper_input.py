@@ -1,4 +1,5 @@
 from customtkinter import CTkFrame, CTkLabel, CTkButton, CTkOptionMenu, CTk, CTkSegmentedButton
+from tkinter.filedialog import askopenfilename
 from .series_configs import SeriesConfig
 from .files_manager import FilesManager
 from ...strip_manager import RowManager
@@ -75,12 +76,10 @@ class OperSeriesInputPanel(CTkFrame):
         super().__init__(parent)
         self.files_manager = FilesManager()
 
-        self.files_manager.load_file(r"C:\Users\kazio\Downloads\mmmm.csv")
-
         sb = CTkSegmentedButton(self, values=['Single', 'Series'], command=self.toggle_series)
         sb.set('Single')
         sb.grid(row=0, column=2, sticky='w')
-        self.load_from_file_button = CTkButton(self, text='Add File', width=1)
+        self.load_from_file_button = CTkButton(self, text='Add File', width=1, command=self.add_file)
         self.ois: list[OperSeriesInput] = [
             OperSeriesInput(grid=self, files_manager=self.files_manager, name='Alpha', master_row=1, control_surfaces=control_surfaces)
         ]
@@ -119,3 +118,9 @@ class OperSeriesInputPanel(CTkFrame):
         names = [oi.run_file_names() for oi in self.ois]
         values = self.get_values()
         return dict(zip(names, values))
+
+    def add_file(self) -> None:
+        path = askopenfilename(
+            filetypes=[('CSV File', ['*.csv'])]
+        )
+        self.files_manager.load_file(path)
