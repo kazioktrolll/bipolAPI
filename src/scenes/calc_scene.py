@@ -4,9 +4,6 @@ from ..frontend import CalcDisplay
 
 
 class CalcScene(Scene):
-    def __init__(self, app):
-        super().__init__(app)
-
     @cached_property
     def display(self):
         return CalcDisplay(self)

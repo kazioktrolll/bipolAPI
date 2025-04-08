@@ -6,9 +6,6 @@ from ..frontend import GeometryDisplay, ViewMode, LeftMenu
 
 
 class GeoDesignScene(Scene):
-    def __init__(self, app) -> None:
-        super().__init__(app)
-
     @property
     def geometry(self) -> Geometry: return self.app.geometry
 
