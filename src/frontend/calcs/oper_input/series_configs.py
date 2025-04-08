@@ -1,4 +1,6 @@
 from abc import ABC, abstractmethod
+from typing import final
+
 from customtkinter import CTkFrame, CTkLabel, CTkButton, CTkEntry, CTkOptionMenu
 from .files_manager import FilesManager
 from ...popup import Popup
@@ -9,8 +11,10 @@ from ...entry_with_instructions import EntryWithInstructions
 class ConfigItem(CTkFrame, ABC):
     def __init__(self, parent):
         super().__init__(parent, fg_color='transparent')
+        self.values: list[float] | float = []
         self.value_label = CTkLabel(self, text='0', width=120, anchor='e')
         self.set_button = CTkButton(self, text='Set', width=40, command=self.set_value)
+        self.nof_values_label = CTkLabel(self, text='(0)', width=30, anchor='e')
 
     @abstractmethod
     def build(self) -> None: ...
@@ -18,21 +22,29 @@ class ConfigItem(CTkFrame, ABC):
     @abstractmethod
     def set_value(self) -> None: ...
 
-    @abstractmethod
-    def get_values(self) -> float | list[float]: ...
+    @final
+    def get_values(self) -> list[float]: return self.values
+
+    @property
+    @final
+    def nof_values(self):
+        if isinstance(self.values, int): return 1
+        return len(self.values)
 
 
 class ConstantConfig(ConfigItem):
     def __init__(self, parent):
         super().__init__(parent)
-        self.value = 0.0
+        self.values = 0.0
+        self.nof_values_label.configure(text='')
         self.entry = CTkEntry(self, width=120)
         self.build()
 
     def build(self) -> None:
         self.value_label.grid(column=0, row=0, padx=3)
-        self.entry.grid(column=1, row=0, padx=3)
-        self.set_button.grid(column=2, row=0, padx=3)
+        self.nof_values_label.grid(column=1, row=0, padx=3)
+        self.entry.grid(column=2, row=0, padx=3)
+        self.set_button.grid(column=3, row=0, padx=3)
 
     def set_value(self) -> None:
         val = self.entry.get()
@@ -41,10 +53,8 @@ class ConstantConfig(ConfigItem):
         except ValueError:
             HelpTopLevel(None, 'Value must be numeric.')
             return
-        self.value = val
+        self.values = val
         self.value_label.configure(text=str(round(val, 3)))
-
-    def get_values(self): return self.value
 
 
 class RangeConfig(ConfigItem):
@@ -56,8 +66,9 @@ class RangeConfig(ConfigItem):
 
     def build(self):
         self.value_label.grid(column=0, row=0, padx=3)
-        for i, e in enumerate(self.entries): e.grid(column=i+1, row=0, padx=1)
-        self.set_button.grid(column=4, row=0, padx=3)
+        self.nof_values_label.grid(column=1, row=0, padx=3)
+        for i, e in enumerate(self.entries): e.grid(column=i+2, row=0, padx=1)
+        self.set_button.grid(column=5, row=0, padx=3)
 
     def set_value(self) -> None:
         try: f, s, t = map(float, [e.get() for e in self.entries])
@@ -73,8 +84,7 @@ class RangeConfig(ConfigItem):
         while f <= t:
             self.values.append(f)
             f += s
-
-    def get_values(self) -> float | list[float]: return self.values
+        self.nof_values_label.configure(text=f'({self.nof_values})')
 
 
 class FileConfig(ConfigItem):
@@ -87,7 +97,8 @@ class FileConfig(ConfigItem):
 
     def build(self):
         self.value_label.grid(column=0, row=0, padx=3)
-        self.choose_file_button.grid(column=1, row=0, columnspan=2, sticky='ew', padx=6)
+        self.nof_values_label.grid(column=1, row=0, padx=3)
+        self.choose_file_button.grid(column=2, row=0, columnspan=2, sticky='ew', padx=6)
 
     def choose_file(self) -> None:
         popup = Popup(None)
@@ -109,13 +120,12 @@ class FileConfig(ConfigItem):
                 if series_name:
                     self.values = self.files_manager.files_dicts[file_name][series_name]
                     self.value_label.configure(text=f'{file_name} \\ {series_name}')
+                    self.nof_values_label.configure(text=f'({self.nof_values})')
             popup.destroy()
         CTkButton(popup, text='Set', command=set_and_close).grid(column=0, row=2, columnspan=2, sticky='ew', padx=10, pady=10)
         popup.run()
 
     def set_value(self) -> None: pass
-
-    def get_values(self) -> float | list[float]: return self.values
 
 
 class SeriesConfig(CTkFrame):
