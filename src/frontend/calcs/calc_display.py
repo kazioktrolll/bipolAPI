@@ -1,11 +1,10 @@
-from customtkinter import CTkFrame
+from customtkinter import CTkFrame, CTkButton
 from .results_display import ResultsDisplay
+from .oper_input import OperSeriesInputPanel
 
 
 class CalcDisplay(CTkFrame):
     def __init__(self, parent):
-        from .oper_input import OperSeriesInputPanel
-        from customtkinter import CTkButton
         super().__init__(parent)
         self.exec_button = CTkButton(self, text='Execute', command=self.run_case)
 
