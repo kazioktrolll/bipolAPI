@@ -1,5 +1,6 @@
 from customtkinter import CTkFrame, CTkLabel, CTkButton, CTkOptionMenu, CTk, CTkSegmentedButton
 from .series_configs import SeriesConfig
+from .files_manager import FilesManager
 from ...strip_manager import RowManager
 
 
@@ -21,7 +22,7 @@ bindable_names = {
 
 
 class OperSeriesInput(RowManager):
-    def __init__(self, grid: Gridable, name: str, master_row:int=None, control_surfaces: list[str] = None):
+    def __init__(self, grid: Gridable, files_manager: FilesManager, name: str, master_row:int=None, control_surfaces: list[str] = None):
         super().__init__(grid, master_row)
 
         self.base_names = base_names | {ctrl: (f'd{i}', ctrl) for i, ctrl in enumerate(control_surfaces)}
@@ -35,7 +36,7 @@ class OperSeriesInput(RowManager):
 
         self.name_label = CTkLabel(self.grid, text=self.display_name, anchor='e')
         self.bind_menu = CTkOptionMenu(self.grid, width=120, values=list(self.bindable_names.keys()))
-        self.series_config = SeriesConfig(self.grid)
+        self.series_config = SeriesConfig(self.grid, files_manager)
         self.bind_button = CTkButton(self.grid, text="Bind", width=20, command=self.bind_switch)
 
         self.bound = False
@@ -72,17 +73,21 @@ class OperSeriesInput(RowManager):
 class OperSeriesInputPanel(CTkFrame):
     def __init__(self, parent: Gridable, control_surfaces: list[str] = None):
         super().__init__(parent)
+        self.files_manager = FilesManager()
+
+        self.files_manager.load_file(r"C:\Users\kazio\Downloads\mmmm.csv")
+
         sb = CTkSegmentedButton(self, values=['Single', 'Series'], command=self.toggle_series)
         sb.set('Single')
         sb.grid(row=0, column=2, sticky='w')
         self.load_from_file_button = CTkButton(self, text='Add File', width=1)
         self.ois: list[OperSeriesInput] = [
-            OperSeriesInput(grid=self, name='Alpha', master_row=1, control_surfaces=control_surfaces)
+            OperSeriesInput(grid=self, files_manager=self.files_manager, name='Alpha', master_row=1, control_surfaces=control_surfaces)
         ]
         for i, name in enumerate(self.ois[0].base_names.keys()):
             if i == 0: continue
             self.ois.append(
-                OperSeriesInput(grid=self, name=name, master_row=i+1, control_surfaces=control_surfaces)
+                OperSeriesInput(grid=self, files_manager=self.files_manager, name=name, master_row=i+1, control_surfaces=control_surfaces)
             )
 
     def get_values(self) -> list[list[float]]:

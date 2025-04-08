@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 from customtkinter import CTkFrame, CTkLabel, CTkButton, CTkEntry, CTkOptionMenu
+from .files_manager import FilesManager
+from ...popup import Popup
 from ...help_top_level import HelpTopLevel
 from ...entry_with_instructions import EntryWithInstructions
 
@@ -76,9 +78,10 @@ class RangeConfig(ConfigItem):
 
 
 class FileConfig(ConfigItem):
-    def __init__(self, parent):
+    def __init__(self, parent, files_manager: FilesManager):
         super().__init__(parent)
-        self.choose_file_button = CTkButton(self, text='Choose File', width=160)
+        self.files_manager = files_manager
+        self.choose_file_button = CTkButton(self, text='Choose File', width=160, command=self.choose_file)
         self.values: list[float] = []
         self.build()
 
@@ -86,18 +89,39 @@ class FileConfig(ConfigItem):
         self.value_label.grid(column=0, row=0)
         self.choose_file_button.grid(column=1, row=0, columnspan=2, sticky='ew')
 
+    def choose_file(self) -> None:
+        popup = Popup(None)
+        CTkLabel(popup, text='Choose File', width=160, anchor='e').grid(column=0, row=0)
+        CTkLabel(popup, text='Choose Series', width=160, anchor='e').grid(column=0, row=1)
+        file_menu = CTkOptionMenu(popup, values=[''])
+        file_menu.grid(column=1, row=0)
+        series_menu = CTkOptionMenu(popup, values=[''])
+        series_menu.grid(column=1, row=1)
+
+        def update_series(file_name):
+            series_menu.configure(values=self.files_manager.series_names(file_name))
+        file_menu.configure(command=update_series, values=self.files_manager.file_names)
+
+        def set_and_close():
+            file_name = file_menu.get()
+            series_name = series_menu.get()
+            self.values = self.files_manager.files_dicts[file_name][series_name]
+            self.value_label.configure(text=f'{file_name} \\ {series_name}')
+            popup.destroy()
+        CTkButton(popup, text='Set', command=set_and_close).grid(column=0, row=2, columnspan=2, sticky='ew')
+
     def set_value(self) -> None: pass
 
     def get_values(self) -> float | list[float]: return self.values
 
 
 class SeriesConfig(CTkFrame):
-    def __init__(self, parent):
+    def __init__(self, parent, files_manager: FilesManager):
         super().__init__(parent)
         self.mode_menu = CTkOptionMenu(self, values=['Constant', 'Range', 'From File'], command=self.switch_mode)
         self.constant_entry = ConstantConfig(self)
         self.range_entry = RangeConfig(self)
-        self.from_file_entry = FileConfig(self)
+        self.from_file_entry = FileConfig(self, files_manager)
         self.active_entry = None
         self.series_enabled = False
         self.build()
