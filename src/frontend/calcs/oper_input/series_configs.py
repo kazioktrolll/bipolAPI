@@ -30,9 +30,9 @@ class ConstantConfig(ConfigItem):
         self.build()
 
     def build(self) -> None:
-        self.value_label.grid(column=0, row=0)
-        self.entry.grid(column=1, row=0)
-        self.set_button.grid(column=2, row=0)
+        self.value_label.grid(column=0, row=0, padx=3)
+        self.entry.grid(column=1, row=0, padx=3)
+        self.set_button.grid(column=2, row=0, padx=3)
 
     def set_value(self) -> None:
         val = self.entry.get()
@@ -55,9 +55,9 @@ class RangeConfig(ConfigItem):
         self.build()
 
     def build(self):
-        self.value_label.grid(column=0, row=0)
-        for i, e in enumerate(self.entries): e.grid(column=i+1, row=0)
-        self.set_button.grid(column=4, row=0)
+        self.value_label.grid(column=0, row=0, padx=3)
+        for i, e in enumerate(self.entries): e.grid(column=i+1, row=0, padx=1)
+        self.set_button.grid(column=4, row=0, padx=3)
 
     def set_value(self) -> None:
         try: f, s, t = map(float, [e.get() for e in self.entries])
@@ -86,15 +86,15 @@ class FileConfig(ConfigItem):
         self.build()
 
     def build(self):
-        self.value_label.grid(column=0, row=0)
-        self.choose_file_button.grid(column=1, row=0, columnspan=2, sticky='ew')
+        self.value_label.grid(column=0, row=0, padx=3)
+        self.choose_file_button.grid(column=1, row=0, columnspan=2, sticky='ew', padx=6)
 
     def choose_file(self) -> None:
         popup = Popup(None)
         CTkLabel(popup, text='Choose File', width=160, anchor='e').grid(column=0, row=0)
         CTkLabel(popup, text='Choose Series', width=160, anchor='e').grid(column=0, row=1)
         file_menu = CTkOptionMenu(popup, values=[''])
-        file_menu.grid(column=1, row=0)
+        file_menu.grid(column=1, row=0, padx=10, pady=10)
         series_menu = CTkOptionMenu(popup, values=[''])
         series_menu.grid(column=1, row=1)
 
@@ -104,11 +104,13 @@ class FileConfig(ConfigItem):
 
         def set_and_close():
             file_name = file_menu.get()
-            series_name = series_menu.get()
-            self.values = self.files_manager.files_dicts[file_name][series_name]
-            self.value_label.configure(text=f'{file_name} \\ {series_name}')
+            if file_name:
+                series_name = series_menu.get()
+                if series_name:
+                    self.values = self.files_manager.files_dicts[file_name][series_name]
+                    self.value_label.configure(text=f'{file_name} \\ {series_name}')
             popup.destroy()
-        CTkButton(popup, text='Set', command=set_and_close).grid(column=0, row=2, columnspan=2, sticky='ew')
+        CTkButton(popup, text='Set', command=set_and_close).grid(column=0, row=2, columnspan=2, sticky='ew', padx=10, pady=10)
         popup.run()
 
     def set_value(self) -> None: pass

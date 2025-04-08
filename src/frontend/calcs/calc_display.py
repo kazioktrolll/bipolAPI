@@ -5,12 +5,17 @@ from .oper_input import OperSeriesInputPanel
 
 class CalcDisplay(CTkFrame):
     def __init__(self, parent):
-        super().__init__(parent)
-        self.exec_button = CTkButton(self, text='Execute', command=self.run_case)
+        super().__init__(parent, fg_color='transparent')
+        self.left_frame = CTkFrame(self, fg_color='transparent', border_width=3)
+        self.right_frame = CTkFrame(self, fg_color='transparent', border_width=3)
+        self.left_frame.grid(row=0, column=0, sticky='nsew', padx=20, pady=20)
+        self.right_frame.grid(row=0, column=2, sticky='nsew', padx=20, pady=20)
+
+        self.exec_button = CTkButton(self.left_frame, text='Execute', command=self.run_case)
 
         controls_names = [c.name for c in self.geometry.get_controls()]
-        self.results_display = ResultsDisplay(self, controls_names)
-        self.oip = OperSeriesInputPanel(self, controls_names)
+        self.results_display = ResultsDisplay(self.right_frame, controls_names)
+        self.oip = OperSeriesInputPanel(self.left_frame, controls_names)
 
         self.build()
 
@@ -23,13 +28,16 @@ class CalcDisplay(CTkFrame):
         return self.master.app.geometry
 
     def build(self):
-        self.oip.grid(row=0, column=0, sticky="nsew")
+        self.rowconfigure(0, weight=1)
 
-        self.rowconfigure(2, weight=1)
-        self.exec_button.grid(row=1, column=0, sticky='news')
-        self.columnconfigure(1, minsize=10)
+        self.oip.grid(row=0, column=0, sticky="nw", padx=20, pady=20)
+        self.left_frame.rowconfigure(1, weight=1)
+        self.exec_button.grid(row=1, column=0, sticky='news', padx=20, pady=20)
 
-        self.results_display.grid(row=0, column=2, rowspan=2, sticky='news')
+        self.columnconfigure(1, weight=1)
+
+        self.results_display.grid(row=0, column=1, sticky='news', padx=20, pady=20)
+
         self.run_case()
 
     def update(self):

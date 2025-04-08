@@ -33,15 +33,25 @@ class StripManager(ABC):
             for item in item:
                 self._stack(item, **kwargs)
 
+    @abstractmethod
+    def stack_spacing(self, size: int): ...
+
 
 class ColumnManager(StripManager):
     def _stack(self, item: CTkBaseClass, **kwargs):
-        super().stack(item, **kwargs)
         item.grid(column=self.master_index, row=self.curr_index, **kwargs)
+        self.curr_index += 1
+
+    def stack_spacing(self, size: int):
+        self.grid.rowconfigure(self.curr_index, minsize=size)
         self.curr_index += 1
 
 
 class RowManager(StripManager):
     def _stack(self, item: CTkBaseClass, **kwargs):
         item.grid(column=self.curr_index, row=self.master_index, **kwargs)
+        self.curr_index += 1
+
+    def stack_spacing(self, size: int):
+        self.grid.columnconfigure(self.curr_index, minsize=size)
         self.curr_index += 1

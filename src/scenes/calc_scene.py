@@ -14,4 +14,4 @@ class CalcScene(Scene):
     def build(self) -> None:
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
-        self.display.grid(row=0, column=0)
+        self.display.grid(row=0, column=0, sticky='news')

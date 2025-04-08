@@ -38,8 +38,7 @@ class AVLInterface:
     def execute(cls, command: str, avl_file_path) -> str:
         from subprocess import Popen, PIPE
         avl = Popen([avl_exe_path, str(avl_file_path)], stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=True)
-        dump = avl.communicate(bytes(command, encoding='utf-8'),
-                               timeout=1)[0].decode()
+        dump = avl.communicate(bytes(command, encoding='utf-8'), timeout=1)[0].decode()
         return dump
 
     @classmethod

@@ -56,12 +56,13 @@ class OperSeriesInput(RowManager):
 
     def build(self):
         self.grid.columnconfigure(1, minsize=120)
-        self.stack(self.name_label, sticky='e')
+        self.stack_spacing(0)
+        self.stack(self.name_label, sticky='e', pady=6)
         self.stack([
             self.bind_menu,
             self.series_config,
             self.bind_button
-        ])
+        ], padx=4, pady=6)
         self.update()
 
     def run_file_names(self) -> str:
@@ -73,13 +74,13 @@ class OperSeriesInput(RowManager):
 
 class OperSeriesInputPanel(CTkFrame):
     def __init__(self, parent: Gridable, control_surfaces: list[str] = None):
-        super().__init__(parent)
+        super().__init__(parent, fg_color='transparent', border_width=3)
         self.files_manager = FilesManager()
 
         sb = CTkSegmentedButton(self, values=['Single', 'Series'], command=self.toggle_series)
         sb.set('Single')
-        sb.grid(row=0, column=2, sticky='w')
-        self.load_from_file_button = CTkButton(self, text='Add File', width=1, command=self.add_file)
+        sb.grid(row=0, column=2, sticky='w', pady=10)
+        self.load_from_file_button = CTkButton(self, text='Add File', width=169, command=self.add_file)
         self.ois: list[OperSeriesInput] = [
             OperSeriesInput(grid=self, files_manager=self.files_manager, name='Alpha', master_row=1, control_surfaces=control_surfaces)
         ]
@@ -108,7 +109,7 @@ class OperSeriesInputPanel(CTkFrame):
                 self.load_from_file_button.grid_forget()
             case 'Series':
                 target = True
-                self.load_from_file_button.grid(row=0, column=1, sticky='ew')
+                self.load_from_file_button.grid(row=0, column=3, sticky='e', padx=3)
             case _: raise ValueError("Invalid mode")
         for oi in self.ois:
             oi.series_config.series_enabled = target
