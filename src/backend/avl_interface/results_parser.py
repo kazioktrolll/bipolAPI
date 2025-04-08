@@ -1,82 +1,8 @@
-from .geo_design import Geometry
 from pathlib import Path
-from tempfile import TemporaryDirectory
 import re
 
 
 val_dict = dict[str, float]
-avl_exe_path = Path(r"C:\Users\kazio\PycharmProjects\bipolAPI\src\avl\avl.exe")
-
-
-class AVLInterface:
-    @classmethod
-    def create_run_file_contents(cls, geometry: Geometry, run_file_data: dict[str, list[float]]) -> str:
-        """Returns a string containing the input data transformed into a .run format."""
-        no_of_runs = len(list(run_file_data.values())[0])
-        _r = ''
-        for i in range(no_of_runs):
-            _r += (f"Run case  {i+1}: AutoGenCase{i}\n"
-                  f"X_cg = {geometry.ref_pos.x}\n")
-            _r += '\n'.join([f"{names} = {value[i]}" for names, value in run_file_data.items()])
-            _r += '\n\n'
-
-        _r += ('grav.acc. = 9.80665 m/s^2\n'
-              'density = 1.2250122659906943 kg/m^3\n')
-        return _r
-
-    @classmethod
-    def create_st_command(cls, paths: list[Path]) -> str:
-        """Creates a command string for running a given number of cases, each run 'ST' and saved to file."""
-        _r = 'OPER\n'
-        for i, path in enumerate(paths):
-            _r += f'{i+1}\nX\nst\n'
-            _r += str(path.absolute())
-            _r += '\n'
-        return _r
-
-    @classmethod
-    def execute(cls, command: str, avl_file_path) -> str:
-        from subprocess import Popen, PIPE
-        avl = Popen([avl_exe_path, str(avl_file_path)], stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=True)
-        dump = avl.communicate(bytes(command, encoding='utf-8'),
-                               timeout=1)[0].decode()
-        return dump
-
-    @classmethod
-    def create_temp_files(cls, temp_dir: Path, nof_cases: int) -> list[Path]:
-        path = temp_dir.joinpath('st_files')
-        path.mkdir()
-        files = [path.joinpath(f'{i+1}') for i in range(nof_cases)]
-        return files
-
-    @classmethod
-    def run_series(cls, geometry: Geometry, data: dict[str, list[float]]) -> tuple[list[list[val_dict]], str]:
-        """
-        Runs all cases using 'ST' and returns the results.
-
-        Return:
-            [[{name-value} for intro, forces, ST] for each case]
-        """
-        nof_cases = len(list(data.values())[0])
-        contents = cls.create_run_file_contents(geometry, data)
-        temp_dir = TemporaryDirectory(prefix='gavl_')
-        temp_dir_path = Path(temp_dir.name)
-
-        files = cls.create_temp_files(temp_dir_path, nof_cases)
-
-        avl_file_path = temp_dir_path.joinpath('plane.avl')
-        run_file_path = temp_dir_path.joinpath('plane.run')
-        with open(avl_file_path, 'w') as avl_file: avl_file.write(geometry.string())
-        with open(run_file_path, 'w') as run_file: run_file.write(contents)
-
-        command = cls.create_st_command(files)
-        dump = cls.execute(command, avl_file_path)
-        errors = ResultsParser.loading_issues_from_dump(dump)
-
-        vals = ResultsParser.all_sts_to_data(files)
-
-        temp_dir.cleanup()
-        return vals, errors
 
 
 class ResultsParser:
