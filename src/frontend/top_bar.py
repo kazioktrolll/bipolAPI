@@ -33,3 +33,10 @@ class TopBarItem(CTkButton):
     def collapse(self):
         if self.dropdown.winfo_ismapped():
             self.dropdown.place_forget()
+
+
+class TopBarButton(CTkButton):
+    def __init__(self, parent, name: str, command:Callable[[], None]) -> None:
+        super().__init__(
+            parent, text=name, command=command, corner_radius=0, fg_color=parent.cget('bg_color')
+        )
