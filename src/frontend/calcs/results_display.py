@@ -10,14 +10,13 @@ class ResultsDisplay(CTkFrame):
         self.results: list[list[dict[str, float]]] = [[{}, {}]]
         self.page = 0
         self.page_button = CTkSegmentedButton(self, command=self.switch_page)
-        self.mode_button = CTkSegmentedButton(self, values=['Simple', 'Stability', 'Full'], command=self.switch_mode)
+        self.mode_button = CTkSegmentedButton(self, values=['Forces', 'Stability'], command=self.switch_mode)
         self.csv_button = CTkButton(self, text='Save to .csv', command=self.save_to_csv)
-        self.simple_label = TextBox(self)
+        self.forces_label = FullDisplay(self, controls_names)
         self.stability_label = STDisplay(self, controls_names)
-        self.full_label = TextBox(self)
-        self.current_label = self.simple_label
+        self.current_label = self.forces_label
         self.plot_button = PlotButton(self, calc_display)
-        self.mode_button.set('Simple')
+        self.mode_button.set('Forces')
         self.build()
 
     @property
@@ -40,35 +39,17 @@ class ResultsDisplay(CTkFrame):
         self.update()
 
     def update(self):
-        simple_keys = [
-            'Alpha',
-            'pb/2V',
-            'Beta',
-            'qc/2V',
-            'rb/2V',
-            'Cltot',
-            'CYtot',
-            'Cmtot',
-            'Cntot',
-            'CLtot',
-            'CDtot',
-            'CDind'
-        ] + self.controls_names
-        simple_results = {k:v for k, v in self.active_results[0].items() if k in simple_keys}
-        self.simple_label.set(simple_results)
+        self.forces_label.set(self.active_results[0])
         self.stability_label.set(self.active_results[1])
-        self.full_label.set(self.active_results[0])
 
-        self.simple_label.place(x=1e4, y=8576)
         self.stability_label.place(x=1e4, y=9366)
-        self.full_label.place(x=1e4, y=5592)
+        self.forces_label.place(x=1e4, y=5592)
         self.current_label.grid(row=2, column=0, columnspan=2, sticky='nsew')
 
     def switch_mode(self, mode: str):
         match mode:
-            case 'Simple': self.current_label = self.simple_label
+            case 'Forces': self.current_label = self.forces_label
             case 'Stability': self.current_label = self.stability_label
-            case 'Full': self.current_label = self.full_label
         self.update()
 
     def set_results(self, results: list[list[dict[str, float]]]):
@@ -169,6 +150,53 @@ class STDisplay(CTkFrame):
         self.dict = data
         children = list(self.children.values())
         for i in range(len(children)+1, -1, 1): children[i-1].destroy()
+        if not data: return
+        self.display_blocks(self.get_split_dict())
+
+
+class FullDisplay(CTkFrame):
+    def __init__(self, parent, controls_names: list[str]):
+        super().__init__(parent, fg_color='transparent')
+        self.controls = list(dict.fromkeys(controls_names)) # Remove duplicates
+        self.dict: dict[str, float] = {}
+
+    def get_split_dict(self) -> list[dict[str, float]]:
+        blocks: list[dict[str, float]] = []
+        current_block: dict[str, float] | None = None
+        breakpoints = [
+            'Alpha',
+            'pb/2V',
+            "p'b/2V",
+            'CXtot',
+            'Cltot',
+            "Cl'tot",
+            'CLtot',
+            'CDind'
+        ]
+        if self.controls: breakpoints.append(self.controls[0])
+
+        for k, v in self.dict.items():
+            if k in breakpoints:
+                if current_block: blocks.append(current_block)
+                current_block = {k: v}
+            else:
+                current_block[k] = v
+        if current_block: blocks.append(current_block)
+
+        return blocks
+
+    def display_blocks(self, blocks: list[dict[str, float]]):
+        for i, block in enumerate(blocks):
+            tb = TextBox(self)
+            tb.set(block)
+            r = i//3
+            c = i%3
+            tb.grid(row=r, column=c, padx=5, pady=5, sticky="nsew")
+
+    def set(self, data: dict[str, float]) -> None:
+        self.dict = data
+        children = list(self.children.values())
+        for i in range(len(children) + 1, -1, 1): children[i - 1].destroy()
         if not data: return
         self.display_blocks(self.get_split_dict())
 
