@@ -1,8 +1,10 @@
 from customtkinter import CTkFrame, CTkSegmentedButton, CTkLabel, CTkEntry, CTkButton
 
+from src.backend import PlotWindow
+
 
 class ResultsDisplay(CTkFrame):
-    def __init__(self, parent, controls_names: list[str]):
+    def __init__(self, parent, calc_display, controls_names: list[str]):
         super().__init__(parent, fg_color=parent.cget('fg_color'))
         self.controls_names = controls_names
         self.results: list[list[dict[str, float]]] = [[{}, {}]]
@@ -14,6 +16,7 @@ class ResultsDisplay(CTkFrame):
         self.stability_label = STDisplay(self, controls_names)
         self.full_label = TextBox(self)
         self.current_label = self.simple_label
+        self.plot_button = PlotButton(self, calc_display)
         self.mode_button.set('Simple')
         self.build()
 
@@ -33,6 +36,7 @@ class ResultsDisplay(CTkFrame):
         self.mode_button.grid(row=1, column=0, sticky='nsew', padx=3, pady=6)
         self.csv_button.grid(row=1, column=1, sticky='nsew', padx=3, pady=6)
         self.current_label.grid(row=2, column=0, columnspan=2, sticky='nsew')
+        self.plot_button.grid(row=3, column=0, columnspan=2, sticky='nsew')
         self.update()
 
     def update(self):
@@ -167,3 +171,37 @@ class STDisplay(CTkFrame):
         for i in range(len(children)+1, -1, 1): children[i-1].destroy()
         if not data: return
         self.display_blocks(self.get_split_dict())
+
+
+class PlotButton(CTkButton):
+    def __init__(self, parent, calc_display):
+        from ...backend import PlotWindow
+        super().__init__(parent, text='Plot Trefftz', command=self.toggle)
+        self.plot_window: PlotWindow | None = None
+        self._calc_display = calc_display
+
+    @property
+    def calc_display(self):
+        from .calc_display import CalcDisplay
+        assert isinstance(self._calc_display, CalcDisplay)
+        return self._calc_display
+
+    @property
+    def current_page(self):
+        return self.calc_display.results_display.page
+
+    def toggle(self):
+        if self.plot_window is None: self.plot()
+        else: self.close()
+
+    def plot(self):
+        geometry = self.calc_display.geometry
+        run_file_data = self.calc_display.oip.get_run_file_data()
+        case_number = self.current_page
+        self.plot_window = PlotWindow.plot_trefftz(geometry, run_file_data, case_number)
+        self.configure(text='Close')
+
+    def close(self):
+        self.plot_window.close()
+        self.configure(text='Plot Trefftz')
+        self.plot_window = None
