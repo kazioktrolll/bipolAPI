@@ -1,4 +1,4 @@
-from customtkinter import CTkFrame, CTkLabel, CTkEntry, CTkButton
+from customtkinter import CTkFrame, CTkLabel, CTkEntry, CTkButton, CTkCheckBox
 from .help_top_level import HelpTopLevel
 from typing import Callable
 
@@ -24,6 +24,7 @@ class ParameterField(CTkFrame):
                  help_message: str,
                  on_set: Callable[[float], None] = lambda _: None,
                  assert_test: Callable[[float], bool] = lambda _: True,
+                 mode:str = 'val'
                  ) -> None:
         """
         Parameters:
@@ -38,6 +39,7 @@ class ParameterField(CTkFrame):
 
         self.name = name
         self.help_message = help_message
+        self.mode = mode
         self.on_set = on_set
         self.assert_test = assert_test
         self.value = 0
@@ -47,8 +49,14 @@ class ParameterField(CTkFrame):
         self.help_button = CTkButton(self, text='?', width=10, height=10, command=lambda: HelpTopLevel(self, self.help_message))
         self.name_label = CTkLabel(self, text=name)
         self.value_label = CTkLabel(self, text=str(self.value))
-        self.entry = CTkEntry(self)
-        self.set_button = CTkButton(self, text="Set", width=30, command=self.set)
+        match self.mode:
+            case 'val':
+                self.entry = CTkEntry(self)
+                self.set_button = CTkButton(self, text="Set", width=30, command=self.set)
+            case 'bool':
+                self.entry = CTkCheckBox(self, text='', width=170, command=self.set)
+                self.entry.select()
+            case _: raise ValueError
 
         self.build()
 
@@ -57,10 +65,10 @@ class ParameterField(CTkFrame):
         self.name_label.grid(column=1, row=0, sticky="w")
         self.value_label.grid(column=2, row=0, sticky="w", padx=10)
         self.entry.grid(column=3, row=0, sticky="ew")
-        self.set_button.grid(column=4, row=0, sticky="e")
+        if self.mode == 'val': self.set_button.grid(column=4, row=0, sticky="e")
 
-    def set(self, value: float = None) -> bool:
-        """Sets the value in the entry as the new value of the parameter. Returns True if changed successfully."""
+    def set_entry(self, value: float) -> bool:
+        assert isinstance(self.entry, CTkEntry)
         if value is None: value = self.entry.get()
         if value == '': return False  # When the entry is empty
 
@@ -78,6 +86,20 @@ class ParameterField(CTkFrame):
         self.focus()
         self.on_set(self.value)
         return True
+
+    def set_checkbox(self) -> bool:
+        assert isinstance(self.entry, CTkCheckBox)
+        self.value = self.entry.get()
+        self.on_set(self.value)
+        return True
+
+    def set(self, value: float = None) -> bool:
+        """Sets the value in the entry as the new value of the parameter. Returns True if changed successfully."""
+        if isinstance(self.entry, CTkCheckBox):
+            return self.set_checkbox()
+        elif isinstance(self.entry, CTkEntry):
+            return self.set_entry(value)
+        raise NotImplementedError
 
     @classmethod
     def raise_bad_input(cls, message: str) -> None:
