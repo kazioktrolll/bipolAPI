@@ -1,5 +1,5 @@
-from typing import Callable
-from customtkinter import CTkFrame, CTkLabel, DoubleVar, StringVar, CTkEntry, CTkButton, CTkFont
+from typing import Callable, TypeVar, Generic
+from customtkinter import CTkFrame, CTkLabel, DoubleVar, StringVar, CTkEntry, CTkButton, CTkFont, CTkOptionMenu
 from abc import ABC, abstractmethod
 from .parameter_field import HelpTopLevel
 from .popup import Popup
@@ -7,16 +7,19 @@ from ..backend import Vector3
 from ..backend.geo_design import Control, Section
 
 
-class Item(ABC):
+T = TypeVar('T', bound=tuple)
+
+
+class Item(ABC, Generic[T]):
     @abstractmethod
     def edit(self, display_update: Callable[[], None]) -> None: pass
     @abstractmethod
-    def get_values(self) -> tuple: pass
+    def get_values(self) -> T: pass
     @abstractmethod
     def display(self, parentL: CTkFrame) -> CTkFrame: pass
 
 
-class FlapItem(Item):
+class FlapItem(Item[tuple[float, float, float]]):
     def __init__(self):
         self.start = DoubleVar(value=0)
         self.end = DoubleVar(value=0)
@@ -131,18 +134,25 @@ class FlapItem(Item):
         return FlapDisplay(item=self, parent=parent)
 
 
-class SectionItem(Item):
-    def __init__(self):
+class SectionItem(Item[tuple[Vector3, float, float, Control|None]]):
+    def __init__(self, left_menu):
+        self._left_menu = left_menu
         self.x = DoubleVar(value=0)
         self.y = DoubleVar(value=0)
         self.z = DoubleVar(value=0)
         self.chord = DoubleVar(value=0.0)
         self.inclination = DoubleVar(value=0.0)
-        self.control = None
+        self.control: Control | None = None
+
+    @property
+    def left_menu(self):
+        from .geo_design.left_menu_item import LeftMenuItem
+        assert isinstance(self._left_menu, LeftMenuItem)
+        return self._left_menu
 
     @classmethod
-    def from_section(cls, section: Section):
-        _r = SectionItem()
+    def from_section(cls, section: Section, left_menu) -> 'SectionItem':
+        _r = SectionItem(left_menu)
         _r.x.set(section.x)
         _r.y.set(section.y)
         _r.z.set(section.z)
@@ -194,6 +204,15 @@ class SectionItem(Item):
         CTkEntry(window.frame, textvariable=incvar
                  ).grid(column=2, row=6, sticky='nsew')
 
+        CTkLabel(window.frame, text="Control: "
+                 ).grid(column=0, row=7, sticky="e")
+        controls_available = self.left_menu.mechanizations.get_values()
+        values = ['None'] + list(controls_available.keys())
+        control_picker = CTkOptionMenu(window.frame, values=values)
+        if self.control:
+            control_picker.set(self.control.name.capitalize())
+        control_picker.grid(column=2, row=7, sticky='nsew')
+
         CTkButton(window.frame, text='?', width=25, height=25,
                   command=lambda: HelpTopLevel(None, message="Input new parameters of the device.\n"
                                                              "start, stop: y-coordinate of the "
@@ -203,17 +222,17 @@ class SectionItem(Item):
                                                              "xc: chord-wise position of the hinge as a percentage "
                                                              "of the chord. Must be between 0 and 1.",
                                                max_width=40)
-                  ).grid(column=0, row=7, columnspan=2, sticky='nsew')
+                  ).grid(column=0, row=8, columnspan=2, sticky='nsew')
 
         CTkButton(window.frame, text="Set",
-                  command=lambda: (self.set_values(xvar, yvar, zvar, chordvar, incvar),
+                  command=lambda: (self.set_values(xvar, yvar, zvar, chordvar, incvar, control_picker.get()),
                                    window.destroy(),
                                    do_on_update())
-                  ).grid(column=2, row=7, sticky='nsew')
+                  ).grid(column=2, row=8, sticky='nsew')
 
         window.run()
 
-    def set_values(self, x: StringVar, y: StringVar, z: StringVar, chord: StringVar, inc: StringVar) -> None:
+    def set_values(self, x: StringVar, y: StringVar, z: StringVar, chord: StringVar, inc: StringVar, ctrl: str) -> None:
         try:
             x = float(x.get())
             y = float(y.get())
@@ -227,6 +246,12 @@ class SectionItem(Item):
         self.z.set(z)
         self.chord.set(chord)
         self.inclination.set(inc)
+        if ctrl == 'None':
+            self.control = None
+        else:
+            vals = self.left_menu.mechanizations.get_values()
+            val = vals[ctrl]
+            self.control = val
 
     def get_values(self) -> tuple[Vector3, float, float, Control|None]:
         return self.position, self.chord.get(), self.inclination.get(), self.control

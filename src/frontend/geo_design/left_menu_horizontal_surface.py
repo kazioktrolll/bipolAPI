@@ -1,27 +1,27 @@
 from .left_menu_item import LeftMenuItem
-from .. import Item
+from ..items import Item, SectionItem
 from ..list_preset import ListPreset
-from ..items import SectionItem
 from ...backend.geo_design import HorizontalSurface, Section
 
 
 class LeftMenuHorizontalSurface(LeftMenuItem):
     def __init__(self, parent, surface: HorizontalSurface):
-        super().__init__(parent, surface)
+        super().__init__(parent, surface, False)
         self.sections_list = SectionsListPreset(self, self.surface.sections)
         self.airfoil_chooser.set(self.surface.airfoil)
         self.build()
 
     def build(self) -> None:
-        for i, mech in enumerate(self.mechanizations.values()):
-            mech.grid(row=i, column=0, padx=10, pady=10, sticky='nsew')
-
         self.columnconfigure(0, weight=1)
 
         self.pf_frame.grid(row=0, column=0, sticky='nsew')
         self.sections_list.grid(row=1, column=0, sticky='nsew')
-        self.mechanizations_frame.grid(row=2, column=0, sticky='nsew')
+        self.mechanizations.grid(row=2, column=0, sticky='nsew')
         self.airfoil_chooser.grid(row=3, column=0, padx=10, pady=10, sticky='nsew')
+
+    def init_mechanization(self):
+        for c in self.surface.get_controls():
+            self.mechanizations.add_by_control(c)
 
     def init_pfs(self) -> None:
         # keyword, name, message, assert, initial
@@ -31,7 +31,7 @@ class LeftMenuHorizontalSurface(LeftMenuItem):
             ('x', 'X', 'The X-axis position of the tip of the root section.', lambda x: True, surf.origin_position.x),
             ('y', 'Y', 'The Y-axis position of the tip of the root section.', lambda y: True, surf.origin_position.y),
             ('z', 'Z', 'The Z-axis position of the tip of the root section.', lambda z: True, surf.origin_position.z),
-            ('y_duplicate', 'Y-symmetric', "", lambda y: y in (0, 1), int(surf.y_duplicate)),
+            ('y_duplicate', 'Y-symmetric', "", lambda y: y in (0, 1), int(surf.y_duplicate), 'bool'),
         ]
         for pf_params in pfs_params: super()._init_pf(*pf_params)
         super().init_pfs()
@@ -58,7 +58,7 @@ class LeftMenuHorizontalSurface(LeftMenuItem):
 class SectionsListPreset(ListPreset):
     def __init__(self, parent: LeftMenuHorizontalSurface, sections: list[Section]):
         super().__init__(parent, 'Sections', SectionItem, parent.update_surface)
-        for sect in sections: self.add_position(SectionItem.from_section(sect))
+        for sect in sections: self.add_position(SectionItem.from_section(sect, parent))
 
     def sort(self):
         self.item_frames.sort(key=lambda i_f: i_f.item.y.get())

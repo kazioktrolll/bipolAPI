@@ -1,7 +1,6 @@
-from typing import Callable
-
+from typing import Callable, TypeVar
 from customtkinter import CTkFrame, CTkLabel, CTkButton
-from .items import Item
+from .items import Item, T
 
 
 class ListPreset:
@@ -9,7 +8,7 @@ class ListPreset:
         self.category_name = category_name
         self.item_class = item_class
         self.do_on_update = do_on_update
-        self.items: list[Item] = []
+        self.items: list[Item[T]] = []
         self.item_frames: list[ItemFrame] = []
 
         self.main_frame = CTkFrame(None)
@@ -61,7 +60,7 @@ class ListPreset:
 
         if needs_init: edit_item()
 
-    def get_values(self) -> list[tuple]:
+    def get_values(self) -> list[T]:
         return [item.get_values() for item in self.items]
 
 
