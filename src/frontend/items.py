@@ -36,25 +36,25 @@ class FlapItem(Item):
 
         window.columnconfigure(1, minsize=5)
 
-        CTkLabel(window, text="Specify geometry of the device", font=CTkFont(weight='bold')
+        CTkLabel(window.frame, text="Specify geometry of the device", font=CTkFont(weight='bold')
                  ).grid(column=0, row=0, columnspan=3, sticky='nsew', padx=5, pady=5)
 
-        CTkLabel(window, text="start:"
+        CTkLabel(window.frame, text="start:"
                  ).grid(column=0, row=1, sticky="e")
-        CTkEntry(window, textvariable=startvar
+        CTkEntry(window.frame, textvariable=startvar
                  ).grid(column=2, row=1, sticky='nsew')
 
-        CTkLabel(window, text="end: "
+        CTkLabel(window.frame, text="end: "
                  ).grid(column=0, row=2, sticky="e")
-        CTkEntry(window, textvariable=endvar
+        CTkEntry(window.frame, textvariable=endvar
                  ).grid(column=2, row=2, sticky='nsew')
 
-        CTkLabel(window, text="xc: "
+        CTkLabel(window.frame, text="xc: "
                  ).grid(column=0, row=3, sticky="e")
-        CTkEntry(window, textvariable=xcvar
+        CTkEntry(window.frame, textvariable=xcvar
                  ).grid(column=2, row=3, sticky='nsew')
 
-        CTkButton(window, text='?', width=25, height=25,
+        CTkButton(window.frame, text='?', width=25, height=25,
                   command=lambda: HelpTopLevel(None, message="Input new parameters of the device.\n"
                                                                "start, stop: y-coordinate of the "
                                                                "start and the end of the device. "
@@ -65,7 +65,7 @@ class FlapItem(Item):
                                                max_width=40)
                   ).grid(column=0, row=4, columnspan=2, sticky='nsew')
 
-        CTkButton(window, text="Set",
+        CTkButton(window.frame, text="Set",
                   command=lambda: (self.set_values(startvar, endvar, xcvar),
                                    window.destroy(),
                                    do_on_update())
@@ -164,37 +164,37 @@ class SectionItem(Item):
         chordvar = StringVar(value=str(self.chord.get()))
         incvar = StringVar(value=str(self.inclination.get()))
 
-        window.columnconfigure(1, minsize=5)
+        window.frame.columnconfigure(1, minsize=5)
 
-        CTkLabel(window, text="Specify parameters of the section", font=CTkFont(weight='bold')
+        CTkLabel(window.frame, text="Specify parameters of the section", font=CTkFont(weight='bold')
                  ).grid(column=0, row=0, columnspan=3, sticky='nsew', padx=5, pady=5)
 
-        CTkLabel(window, text="x: "
+        CTkLabel(window.frame, text="x: "
                  ).grid(column=0, row=2, sticky="e")
-        CTkEntry(window, textvariable=xvar
+        CTkEntry(window.frame, textvariable=xvar
                  ).grid(column=2, row=2, sticky='nsew')
 
-        CTkLabel(window, text="y: "
+        CTkLabel(window.frame, text="y: "
                  ).grid(column=0, row=3, sticky="e")
-        CTkEntry(window, textvariable=yvar
+        CTkEntry(window.frame, textvariable=yvar
                  ).grid(column=2, row=3, sticky='nsew')
 
-        CTkLabel(window, text="z: "
+        CTkLabel(window.frame, text="z: "
                  ).grid(column=0, row=4, sticky="e")
-        CTkEntry(window, textvariable=zvar
+        CTkEntry(window.frame, textvariable=zvar
                  ).grid(column=2, row=4, sticky='nsew')
 
-        CTkLabel(window, text="chord: "
+        CTkLabel(window.frame, text="chord: "
                  ).grid(column=0, row=5, sticky="e")
-        CTkEntry(window, textvariable=chordvar
+        CTkEntry(window.frame, textvariable=chordvar
                  ).grid(column=2, row=5, sticky='nsew')
 
-        CTkLabel(window, text="inclination: "
+        CTkLabel(window.frame, text="inclination: "
                  ).grid(column=0, row=6, sticky="e")
-        CTkEntry(window, textvariable=incvar
+        CTkEntry(window.frame, textvariable=incvar
                  ).grid(column=2, row=6, sticky='nsew')
 
-        CTkButton(window, text='?', width=25, height=25,
+        CTkButton(window.frame, text='?', width=25, height=25,
                   command=lambda: HelpTopLevel(None, message="Input new parameters of the device.\n"
                                                              "start, stop: y-coordinate of the "
                                                              "start and the end of the device. "
@@ -205,7 +205,7 @@ class SectionItem(Item):
                                                max_width=40)
                   ).grid(column=0, row=7, columnspan=2, sticky='nsew')
 
-        CTkButton(window, text="Set",
+        CTkButton(window.frame, text="Set",
                   command=lambda: (self.set_values(xvar, yvar, zvar, chordvar, incvar),
                                    window.destroy(),
                                    do_on_update())

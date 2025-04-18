@@ -35,7 +35,7 @@ class MechanizationChooser(ListPreset):
 
         window = Popup(master=None)
         CTkLabel(window, text='Type:').grid(column=0, row=1, padx=10, pady=10)
-        om = CTkOptionMenu(window, values=vals)
+        om = CTkOptionMenu(window.frame, values=vals)
         om.grid(column=1, row=1)
 
         def confirm():
@@ -43,7 +43,7 @@ class MechanizationChooser(ListPreset):
             window.destroy()
             self.add_by_type(val)
 
-        CTkButton(window, text='Confirm', command=confirm
+        CTkButton(window.frame, text='Confirm', command=confirm
                   ).grid(column=0, row=2, columnspan=2, sticky='nsew', padx=10, pady=10)
         window.run()
 

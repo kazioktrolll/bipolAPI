@@ -28,7 +28,7 @@ class AirfoilChooser(CTkFrame):
 
     def load_naca(self):
         window = Popup(self)
-        entry = CTkEntry(window)
+        entry = CTkEntry(window.frame)
         entry.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
 
         def get_airfoil():
@@ -42,7 +42,7 @@ class AirfoilChooser(CTkFrame):
             self.file_label.configure(text="")
             window.destroy()
 
-        CTkButton(window, text="Set", width=50, command=get_airfoil
+        CTkButton(window.frame, text="Set", width=50, command=get_airfoil
                   ).grid(row=0, column=1, sticky="nsew", padx=10, pady=10)
 
         window.run()

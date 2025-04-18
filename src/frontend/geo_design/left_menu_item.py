@@ -10,7 +10,8 @@ from ...backend.geo_design import Surface, Geometry
 
 class LeftMenuItem(CTkFrame, ABC):
     def __init__(self, parent, surface: Surface):
-        super().__init__(parent)
+        CTkFrame.__init__(self, parent)
+        ABC.__init__(self)
         self.pfs: dict[str, ParameterField] = {}
         self.initialized = False
         self.surface = surface
@@ -45,9 +46,9 @@ class LeftMenuItem(CTkFrame, ABC):
         self.initialized = True
 
     @final
-    def _init_pf(self, keyword: str, name: str, message: str, assert_test: Callable[[float], bool], initial_value: float) -> None:
+    def _init_pf(self, keyword: str, name: str, message: str, assert_test: Callable[[float], bool], initial_value: float, mode: str = 'val') -> None:
         if keyword in self.pfs: raise ValueError(f'{keyword} already initialized')
-        self.pfs[keyword] = ParameterField(self.pf_frame, name=name, help_message=message, on_set=self.update_surface, assert_test=assert_test)
+        self.pfs[keyword] = ParameterField(self.pf_frame, name=name, help_message=message, on_set=self.update_surface, assert_test=assert_test, mode=mode)
         self.pfs[keyword].set(initial_value)
         self.pfs[keyword].grid(row=len(self.pfs)-1, column=0, sticky='e', padx=10, pady=10)
 

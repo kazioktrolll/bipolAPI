@@ -1,4 +1,4 @@
-from customtkinter import CTkToplevel, CTkFrame
+from customtkinter import CTkToplevel, CTkFrame, CTkButton
 
 
 class Popup(CTkToplevel):
@@ -6,6 +6,17 @@ class Popup(CTkToplevel):
         super().__init__(master)
         self.overrideredirect(True)
         self.bind("<Escape>", lambda _: self.destroy())
+        self.frame = CTkFrame(self, width=0, height=0, fg_color='transparent')
+        self.frame.grid(row=1, column=1, sticky="nsew")
+        CTkButton(
+            self, text='x', command=self.destroy, fg_color='red3', hover_color='red4', width=1, height=1
+        ).grid(row=0, column=2)
+        self.columnconfigure(0, weight=0, minsize=20)
+        self.columnconfigure(1, weight=1)
+        self.columnconfigure(2, weight=0, minsize=20)
+        self.rowconfigure(0, weight=0, minsize=20)
+        self.rowconfigure(1, weight=1)
+        self.rowconfigure(2, weight=0, minsize=20)
 
     def run(self):
         self.wm_geometry("")

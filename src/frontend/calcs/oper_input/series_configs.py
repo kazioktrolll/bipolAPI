@@ -102,11 +102,11 @@ class FileConfig(ConfigItem):
 
     def choose_file(self) -> None:
         popup = Popup(None)
-        CTkLabel(popup, text='Choose File', width=160, anchor='e').grid(column=0, row=0)
-        CTkLabel(popup, text='Choose Series', width=160, anchor='e').grid(column=0, row=1)
-        file_menu = CTkOptionMenu(popup, values=[''])
+        CTkLabel(popup.frame, text='Choose File', width=160, anchor='e').grid(column=0, row=0)
+        CTkLabel(popup.frame, text='Choose Series', width=160, anchor='e').grid(column=0, row=1)
+        file_menu = CTkOptionMenu(popup.frame, values=[''])
         file_menu.grid(column=1, row=0, padx=10, pady=10)
-        series_menu = CTkOptionMenu(popup, values=[''])
+        series_menu = CTkOptionMenu(popup.frame, values=[''])
         series_menu.grid(column=1, row=1)
 
         def update_series(file_name):
@@ -122,7 +122,8 @@ class FileConfig(ConfigItem):
                     self.value_label.configure(text=f'{file_name} \\ {series_name}')
                     self.nof_values_label.configure(text=f'({self.nof_values})')
             popup.destroy()
-        CTkButton(popup, text='Set', command=set_and_close).grid(column=0, row=2, columnspan=2, sticky='ew', padx=10, pady=10)
+        CTkButton(popup.frame, text='Set', command=set_and_close
+                  ).grid(column=0, row=2, columnspan=2, sticky='ew', padx=10, pady=10)
         popup.run()
 
     def set_value(self) -> None: pass
@@ -154,7 +155,11 @@ class SeriesConfig(CTkFrame):
         self.switch_mode()
 
     def switch_mode(self, _=None):
-        curr_active = {'Constant': self.constant_entry, 'Range': self.range_entry, 'From File': self.from_file_entry}[self.mode]
+        curr_active = {
+            'Constant': self.constant_entry,
+            'Range': self.range_entry,
+            'From File': self.from_file_entry
+        }[self.mode]
         if curr_active is self.active_entry: return
         if self.active_entry is not None:
             self.active_entry.grid_forget()
