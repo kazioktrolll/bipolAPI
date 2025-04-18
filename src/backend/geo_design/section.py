@@ -122,6 +122,15 @@ class Control:
         return ("CONTROL\n"
                 f"{self.name} {self.gain} {self.x_hinge} 0. 0. 0. {"+1" if self.SgnDup else "-1"}\n")
 
+    def is_equal_to(self, other) -> bool:
+        """Returns True if the two control surfaces are of the same type and should be connected."""
+        if not isinstance(other, Control): return False
+        return (self.name == other.name
+                and self.gain == other.gain
+                and self.x_hinge == other.x_hinge
+                and self.SgnDup == other.SgnDup
+                and self.color == other.color)
+
 
 class PreDefControl(Control):
     """An interface for pre-defined types of control surfaces."""
@@ -136,7 +145,7 @@ class Flap(PreDefControl):
             x_hinge (float): The x/c position of the hinge.
         """
         assert 0 < x_hinge < 1
-        super().__init__(name='flap', x_hinge=x_hinge, SgnDup=True, color='yellow')
+        super().__init__(name='flaps', x_hinge=x_hinge, SgnDup=True, color='yellow')
 
 
 class Aileron(PreDefControl):
@@ -146,7 +155,7 @@ class Aileron(PreDefControl):
             x_hinge (float): The x/c position of the hinge.
         """
         assert 0 < x_hinge < 1
-        super().__init__(name='aileron', x_hinge=x_hinge, SgnDup=False)
+        super().__init__(name='ailerons', x_hinge=x_hinge, SgnDup=False)
 
 
 class Elevator(PreDefControl):
@@ -156,4 +165,4 @@ class Elevator(PreDefControl):
             x_hinge (float): The x/c position of the hinge.
         """
         assert 0 < x_hinge < 1
-        super().__init__(name='elevator', x_hinge=x_hinge, SgnDup=True, color='green3')
+        super().__init__(name='elevators', x_hinge=x_hinge, SgnDup=True, color='green3')
