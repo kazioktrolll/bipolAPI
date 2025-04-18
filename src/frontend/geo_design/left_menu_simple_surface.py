@@ -7,7 +7,7 @@ from ...backend.geo_design import HorizontalSimpleSurface
 
 class LeftMenuSimpleSurface(LeftMenuItem):
     def __init__(self, parent, surface: HorizontalSimpleSurface):
-        super().__init__(parent, surface)
+        super().__init__(parent, surface, True)
         self.build()
 
     def init_pfs(self) -> None:
@@ -46,7 +46,7 @@ class LeftMenuSimpleSurface(LeftMenuItem):
         if not self.surface.mechanization: return
         for key, list_of_ranges in self.surface.mechanization.items():
             key = key.capitalize()
-            list_preset = ControlTypeItem(key, self.update_surface)
+            list_preset = ControlTypeItem(key, self.update_surface, True)
             for start, stop, xc in list_of_ranges:
                 item = FlapItem()
                 item.set_values(StringVar(value=f'{start}'), StringVar(value=f'{stop}'), StringVar(value=f'{xc}'))

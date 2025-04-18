@@ -9,7 +9,7 @@ from ...backend.geo_design import Surface, Geometry
 
 
 class LeftMenuItem(CTkFrame, ABC):
-    def __init__(self, parent, surface: Surface):
+    def __init__(self, parent, surface: Surface, define_mech_ranges: bool):
         CTkFrame.__init__(self, parent)
         ABC.__init__(self)
         self.pfs: dict[str, ParameterField] = {}
@@ -19,7 +19,7 @@ class LeftMenuItem(CTkFrame, ABC):
         self.pf_frame = CTkFrame(self, fg_color='transparent')
         self.pf_frame.columnconfigure(0, weight=1)
 
-        self.mechanizations = MechanizationChooser(self, self.update_surface)
+        self.mechanizations = MechanizationChooser(self, self.update_surface, define_mech_ranges)
         self.airfoil_chooser = AirfoilChooser(self)
         self.airfoil_chooser.set(surface.airfoil)
 
@@ -87,7 +87,7 @@ class LeftMenuItem(CTkFrame, ABC):
 
 class LeftMenuNotImplemented(LeftMenuItem):
     def __init__(self, parent, surface: Surface) -> None:
-        super().__init__(parent, surface)
+        super().__init__(parent, surface, False)
 
     def init_pfs(self) -> None: ...
     def update_surface(self, _=None) -> None: ...

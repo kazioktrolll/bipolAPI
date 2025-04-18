@@ -4,7 +4,7 @@ from ...backend.geo_design import VerticalSimpleSurface, Section
 
 class LeftMenuVerticalSurface(LeftMenuItem):
     def __init__(self, parent, surface: VerticalSimpleSurface) -> None:
-        super().__init__(parent, surface)
+        super().__init__(parent, surface, True)
         self.build()
 
     def init_pfs(self) -> None:
