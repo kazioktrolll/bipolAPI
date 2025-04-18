@@ -1,6 +1,6 @@
 from customtkinter import StringVar
 from .left_menu_item import LeftMenuItem
-from .mechanization_chooser import ListPresetItem
+from .mechanization_chooser import ControlTypeItem
 from .. import FlapItem
 from ...backend.geo_design import HorizontalSimpleSurface
 
@@ -46,12 +46,12 @@ class LeftMenuSimpleSurface(LeftMenuItem):
         if not self.surface.mechanization: return
         for key, list_of_ranges in self.surface.mechanization.items():
             key = key.capitalize()
-            list_preset = ListPresetItem(key, self.update_surface)
+            list_preset = ControlTypeItem(key, self.update_surface)
             for start, stop, xc in list_of_ranges:
                 item = FlapItem()
                 item.set_values(StringVar(value=f'{start}'), StringVar(value=f'{stop}'), StringVar(value=f'{xc}'))
                 list_preset.add_position(item)
-            self.mechanizations.add_position((key, list_preset))
+            self.mechanizations.add_position(list_preset)
 
     def update_surface(self, _=None) -> None:
         surface_generator = lambda: HorizontalSimpleSurface(
