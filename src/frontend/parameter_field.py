@@ -67,7 +67,7 @@ class ParameterField(CTkFrame):
         self.entry.grid(column=3, row=0, sticky="ew")
         if self.mode == 'val': self.set_button.grid(column=4, row=0, sticky="e")
 
-    def set_entry(self, value: float) -> bool:
+    def set_entry(self, value: float|str) -> bool:
         assert isinstance(self.entry, CTkEntry)
         if value is None: value = self.entry.get()
         if value == '': return False  # When the entry is empty
@@ -82,7 +82,7 @@ class ParameterField(CTkFrame):
             return False
 
         self.entry.delete(0, "end")
-        self.value_label.configure(text=value)
+        self.value_label.configure(text=str(round(self.value, 2)))
         self.focus()
         self.on_set(self.value)
         return True
