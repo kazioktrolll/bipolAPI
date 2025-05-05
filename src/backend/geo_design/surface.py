@@ -337,8 +337,11 @@ class HorizontalSimpleSurface(HorizontalSurface):
 
         for key, value in kwargs.items():
             key = key.lower()
-            try: mech_type = {"ailerons": Aileron, "flaps": Flap, "elevators":Elevator}[key]
-            except KeyError: raise ValueError(f"Unknown mechanism type: {key}")
+            for mech_type in [Flap, Aileron, Elevator]:
+                if mech_type.is_alias(key):
+                    break
+            else:
+                raise ValueError(f"Unknown mechanism type: {key}")
             # To add a control surface in AVL, you add a control surface to a section,
             # and it is valid up to the next section.
             for start, end, hinge_x in value:

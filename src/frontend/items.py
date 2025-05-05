@@ -240,7 +240,7 @@ class SectionItem(Item[tuple[Vector3, float, float, Control | None]]):
         values = ['None'] + list(controls_available.keys())
         control_picker = CTkOptionMenu(window.frame, values=values)
         if self.control:
-            control_picker.set(self.control.name.capitalize())
+            control_picker.set(self.control.class_name.capitalize())
         control_picker.grid(column=2, row=7, sticky='nsew')
 
         CTkButton(window.frame, text='?', width=25, height=25,

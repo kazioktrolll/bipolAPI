@@ -90,9 +90,10 @@ class Section:
 
 
 class Control:
+    class_name: str
     """Class representing a control surface attached to a section."""
-    def __init__(self, name: str, x_hinge: float, SgnDup: bool,
-                 gain: float = 1, color: str = 'green') -> None:
+    def __init__(self, x_hinge: float, SgnDup: bool,
+                 gain: float = 1, color: str = 'green', name: str = None) -> None:
         """
         Parameters:
             name (str): The name of the control surface.
@@ -104,11 +105,11 @@ class Control:
         """
         assert -1 < x_hinge < 1
 
-        self.name = name
         self.x_hinge = x_hinge
         self.SgnDup = SgnDup
         self.gain = gain
         self.color = color
+        self.instance_name = name
 
     def __repr__(self) -> str:
         return self.name
@@ -131,38 +132,56 @@ class Control:
                 and self.SgnDup == other.SgnDup
                 and self.color == other.color)
 
+    @property
+    def name(self):
+        try: return self.class_name
+        except AttributeError: return self.instance_name
+
+    @classmethod
+    def is_alias(cls, name: str) -> bool:
+        name = name.lower()
+        return name == cls.class_name or name+ 's' == cls.class_name
+
 
 class PreDefControl(Control):
     """An interface for pre-defined types of control surfaces."""
+    def __init__(self, x_hinge: float, SgnDup: bool,
+                 gain: float = 1, color: str = 'green') -> None:
+        super().__init__(x_hinge, SgnDup, gain, color)
+        assert self.class_name is not None
+
     def copy(self: T) -> T:
         return self.__class__(self.x_hinge)
 
 
 class Flap(PreDefControl):
+    class_name = 'flaps'
     def __init__(self, x_hinge: float):
         """
         Parameters:
             x_hinge (float): The x/c position of the hinge.
         """
         assert 0 < x_hinge < 1
-        super().__init__(name='flaps', x_hinge=x_hinge, SgnDup=True, color='yellow')
+        super().__init__(x_hinge=x_hinge, SgnDup=True, color='yellow')
 
 
 class Aileron(PreDefControl):
+    class_name = 'ailerons'
     def __init__(self, x_hinge: float):
         """
         Parameters:
             x_hinge (float): The x/c position of the hinge.
         """
         assert 0 < x_hinge < 1
-        super().__init__(name='ailerons', x_hinge=x_hinge, SgnDup=False)
+        super().__init__(x_hinge=x_hinge, SgnDup=False)
 
 
 class Elevator(PreDefControl):
+    class_name = 'elevators'
     def __init__(self, x_hinge: float):
         """
         Parameters:
             x_hinge (float): The x/c position of the hinge.
         """
         assert 0 < x_hinge < 1
-        super().__init__(name='elevators', x_hinge=x_hinge, SgnDup=True, color='green3')
+        super().__init__(x_hinge=x_hinge, SgnDup=True, color='green3')

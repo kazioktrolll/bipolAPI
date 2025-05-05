@@ -184,7 +184,7 @@ class FromAvl:
     def handle_section_level(cls, block: list[str], scale=(1,1,1), angle=0) -> Section:
         """Returns a Section based on .avl description lines."""
         vals = list(map(float, block.pop(0).split()))
-        section_data = {
+        section_data: dict[str, Any] = {
             'leading_edge_position': Vector3(*vals[:3]).scale(scale),
             'chord': vals[3],
             'inclination': vals[4] + angle,
