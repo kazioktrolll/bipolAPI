@@ -6,24 +6,29 @@ from .popup import Popup
 from ..backend import Vector3
 from ..backend.geo_design import Control, Section
 
-
 T = TypeVar('T', bound=tuple)
 
 
 class Item(ABC, Generic[T]):
     @abstractmethod
     def edit(self, display_update: Callable[[], None]) -> None: pass
+
     @abstractmethod
     def get_values(self) -> T: pass
+
     @abstractmethod
     def display(self, parentL: CTkFrame) -> CTkFrame: pass
 
 
 class FlapItem(Item[tuple[float, float, float]]):
-    def __init__(self):
+    def __init__(self, ranged=True):
+        self.ranged = ranged
         self.start = DoubleVar(value=0)
         self.end = DoubleVar(value=0)
         self.xc = DoubleVar(value=0)
+
+    def __repr__(self):
+        return f'FlapItem({self.start.get()} {self.end.get()} {self.xc.get()})'
 
     def edit(self, do_on_update: Callable[[], None]):
         window = Popup(master=None)
@@ -42,15 +47,16 @@ class FlapItem(Item[tuple[float, float, float]]):
         CTkLabel(window.frame, text="Specify geometry of the device", font=CTkFont(weight='bold')
                  ).grid(column=0, row=0, columnspan=3, sticky='nsew', padx=5, pady=5)
 
-        CTkLabel(window.frame, text="start:"
-                 ).grid(column=0, row=1, sticky="e")
-        CTkEntry(window.frame, textvariable=startvar
-                 ).grid(column=2, row=1, sticky='nsew')
+        if self.ranged:
+            CTkLabel(window.frame, text="start:"
+                     ).grid(column=0, row=1, sticky="e")
+            CTkEntry(window.frame, textvariable=startvar
+                     ).grid(column=2, row=1, sticky='nsew')
 
-        CTkLabel(window.frame, text="end: "
-                 ).grid(column=0, row=2, sticky="e")
-        CTkEntry(window.frame, textvariable=endvar
-                 ).grid(column=2, row=2, sticky='nsew')
+            CTkLabel(window.frame, text="end: "
+                     ).grid(column=0, row=2, sticky="e")
+            CTkEntry(window.frame, textvariable=endvar
+                     ).grid(column=2, row=2, sticky='nsew')
 
         CTkLabel(window.frame, text="xc: "
                  ).grid(column=0, row=3, sticky="e")
@@ -59,12 +65,12 @@ class FlapItem(Item[tuple[float, float, float]]):
 
         CTkButton(window.frame, text='?', width=25, height=25,
                   command=lambda: HelpTopLevel(None, message="Input new parameters of the device.\n"
-                                                               "start, stop: y-coordinate of the "
-                                                               "start and the end of the device. "
-                                                               "Start must be closer to the main axis of the aircraft, "
-                                                               "while stop must be closer to the wing tip.\n"
-                                                               "xc: chord-wise position of the hinge as a percentage "
-                                                               "of the chord. Must be between 0 and 1.",
+                                                             "start, stop: y-coordinate of the "
+                                                             "start and the end of the device. "
+                                                             "Start must be closer to the main axis of the aircraft, "
+                                                             "while stop must be closer to the wing tip.\n"
+                                                             "xc: chord-wise position of the hinge as a percentage "
+                                                             "of the chord. Must be between 0 and 1.",
                                                max_width=40)
                   ).grid(column=0, row=4, columnspan=2, sticky='nsew')
 
@@ -78,10 +84,12 @@ class FlapItem(Item[tuple[float, float, float]]):
 
     def set_values(self, start: StringVar, end: StringVar, xc: StringVar) -> None:
         try:
-            start = float(start.get())
-            end = float(end.get())
+            if self.ranged:
+                start = float(start.get())
+                end = float(end.get())
             xc = float(xc.get())
-        except ValueError: return
+        except ValueError:
+            return
         if not abs(start) <= abs(end): return
         if not 0 < xc < 1: return
         self.start.set(start)
@@ -94,19 +102,20 @@ class FlapItem(Item[tuple[float, float, float]]):
     def display(self, parent: CTkFrame) -> CTkFrame:
 
         class FlapDisplay(CTkFrame):
-            def __init__(self, item: 'FlapItem', parent: CTkFrame):
+            def __init__(self, item: 'FlapItem', parent: CTkFrame, ranged: bool):
                 CTkFrame.__init__(self, parent, fg_color=parent.cget('fg_color'))
                 self.item = item
 
-                CTkLabel(self, text="start: "
-                         ).grid(column=0, row=0)
-                CTkLabel(self, textvariable=item.start, width=30, anchor='w'
-                         ).grid(column=1, row=0)
+                if ranged:
+                    CTkLabel(self, text="start: "
+                             ).grid(column=0, row=0)
+                    CTkLabel(self, textvariable=item.start, width=30, anchor='w'
+                             ).grid(column=1, row=0)
 
-                CTkLabel(self, text="end: "
-                         ).grid(column=2, row=0)
-                CTkLabel(self, textvariable=item.end, width=30, anchor='w'
-                         ).grid(column=3, row=0)
+                    CTkLabel(self, text="end: "
+                             ).grid(column=2, row=0)
+                    CTkLabel(self, textvariable=item.end, width=30, anchor='w'
+                             ).grid(column=3, row=0)
 
                 CTkLabel(self, text="xc: "
                          ).grid(column=4, row=0)
@@ -116,10 +125,14 @@ class FlapItem(Item[tuple[float, float, float]]):
                 self.update()
 
             def update(self) -> None:
-                if self.item.start.get() == 0 and self.item.end.get() == 0:
+                if (
+                        self.item.ranged and self.item.start.get() == 0 and self.item.end.get() == 0
+                ) or (
+                        not self.item.ranged and self.item.xc.get() == 0
+                ):
                     self.disable()
-                    return
-                self.enable()
+                else:
+                    self.enable()
 
             def disable(self):
                 for child in self.children.values():
@@ -131,10 +144,26 @@ class FlapItem(Item[tuple[float, float, float]]):
                     if not isinstance(child, CTkLabel): continue
                     child.configure(text_color='white')
 
-        return FlapDisplay(item=self, parent=parent)
+        return FlapDisplay(item=self, parent=parent, ranged=self.ranged)
 
 
-class SectionItem(Item[tuple[Vector3, float, float, Control|None]]):
+class NonRangedFlapItem(FlapItem):
+    def __init__(self):
+        super().__init__(ranged=False)
+
+    def __repr__(self):
+        return f'NonRangedFlapItem({self.xc.get()})'
+
+    def set_values(self, start: StringVar, end: StringVar, xc: StringVar) -> None:
+        try:
+            xc = float(xc.get())
+        except ValueError:
+            return
+        if not 0 < xc < 1: return
+        self.xc.set(xc)
+
+
+class SectionItem(Item[tuple[Vector3, float, float, Control | None]]):
     def __init__(self, left_menu):
         self._left_menu = left_menu
         self.x = DoubleVar(value=0)
@@ -163,7 +192,8 @@ class SectionItem(Item[tuple[Vector3, float, float, Control|None]]):
         return _r
 
     @property
-    def position(self): return Vector3(self.x.get(), self.y.get(), self.z.get())
+    def position(self):
+        return Vector3(self.x.get(), self.y.get(), self.z.get())
 
     def edit(self, do_on_update: Callable[[], None]) -> None:
         window = Popup(master=None)
@@ -232,14 +262,16 @@ class SectionItem(Item[tuple[Vector3, float, float, Control|None]]):
 
         window.run()
 
-    def set_values(self, x: StringVar, y: StringVar, z: StringVar, chord: StringVar, inc: StringVar, ctrl: str) -> None:
+    def set_values(self, x: StringVar, y: StringVar, z: StringVar,
+                   chord: StringVar, inc: StringVar, ctrl: str) -> None:
         try:
             x = float(x.get())
             y = float(y.get())
             z = float(z.get())
             chord = float(chord.get())
             inc = float(inc.get())
-        except ValueError: return
+        except ValueError:
+            return
         if chord <= 0: return
         self.x.set(x)
         self.y.set(y)
@@ -253,7 +285,7 @@ class SectionItem(Item[tuple[Vector3, float, float, Control|None]]):
             val = vals[ctrl]
             self.control = val
 
-    def get_values(self) -> tuple[Vector3, float, float, Control|None]:
+    def get_values(self) -> tuple[Vector3, float, float, Control | None]:
         return self.position, self.chord.get(), self.inclination.get(), self.control
 
     def display(self, parent: CTkFrame) -> CTkFrame:

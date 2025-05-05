@@ -1,11 +1,10 @@
 from customtkinter import CTkFrame, CTkSegmentedButton
 from typing import Callable
 
-from .left_menu_item import LeftMenuItem
+from .left_menu_item import LeftMenuItem, LeftMenuNotImplemented
 from .left_menu_simple_surface import LeftMenuSimpleSurface
 from .left_menu_vertical_surface import LeftMenuVerticalSurface
-from .left_menu_horizontal_surface import LeftMenuHorizontalSurface
-from ...backend.geo_design import Geometry, HorizontalSimpleSurface, VerticalSimpleSurface, HorizontalSurface
+from ...backend.geo_design import Geometry, HorizontalSimpleSurface, VerticalSimpleSurface
 
 
 class LeftMenu(CTkFrame):
@@ -34,11 +33,11 @@ class LeftMenu(CTkFrame):
 
     def update_items(self) -> None:
         menu_item = {HorizontalSimpleSurface: LeftMenuSimpleSurface,
-                     VerticalSimpleSurface: LeftMenuVerticalSurface,
-                     HorizontalSurface: LeftMenuHorizontalSurface}
+                     VerticalSimpleSurface: LeftMenuVerticalSurface}
         self.items.clear()
         for name, surface in self.geometry.surfaces.items():
-            item_type = menu_item[type(surface)]
+            try: item_type = menu_item[type(surface)]
+            except KeyError: item_type = LeftMenuNotImplemented
             self.items[name] = item_type(self, surface)
         self.items_button.configure(values=[item.name for item in self.items.values()])
 

@@ -1,4 +1,4 @@
-from typing import Callable, TypeVar
+from typing import Callable
 from customtkinter import CTkFrame, CTkLabel, CTkButton
 from .items import Item, T
 
