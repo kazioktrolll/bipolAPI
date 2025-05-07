@@ -385,9 +385,9 @@ class HorizontalSimpleSurface(HorizontalSurface):
             if section.inclination != inc: return None
 
         tr = tip.chord / root.chord
-        sa = degrees(atan(abs(
+        sa = degrees(atan(
             (root.get_position_at_xc(.25).x - tip.get_position_at_xc(.25).x) / (tip.y - root.y)
-        )))
+        ))
 
         simplified = cls(
             surface.name, surface.span(), surface.mac(), tr, sa, surface.origin_position, inc, surface.airfoil
