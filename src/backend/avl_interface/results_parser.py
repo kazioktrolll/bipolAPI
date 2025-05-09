@@ -13,9 +13,12 @@ class ResultsParser:
         return dump
 
     @classmethod
-    def loading_issues_from_dump(cls, dump: str) -> str:
+    def loading_issues_from_dump(cls, dump: str) -> str | None:
         """Returns the issue part of the dump."""
-        return cls._split_dump(dump)[2]
+        issues = cls._split_dump(dump)[2]
+        geom, mass, run = re.split(r'-{8,}', issues)
+        if '*' in geom: return '\n'.join([line for line in geom.splitlines() if '*' in line])
+        return None
 
     @classmethod
     def chop_results(cls, dump: str) -> list[str]:

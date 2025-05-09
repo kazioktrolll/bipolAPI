@@ -1,6 +1,7 @@
 from customtkinter import CTkFrame, CTkButton
 from .results_display import ResultsDisplay
 from .oper_input import OperSeriesInputPanel
+from ..help_top_level import HelpTopLevel
 
 
 class CalcDisplay(CTkFrame):
@@ -50,5 +51,15 @@ class CalcDisplay(CTkFrame):
         self.exec_button.configure(state='disabled')
         data = self.oip.get_run_file_data()
         vals, errors = AVLInterface.run_series(self.geometry, data)
+        if errors:
+            self.run_errors(errors)
+            return
         self.results_display.set_results(vals)
         self.exec_button.configure(state='normal')
+
+    def run_errors(self, errors):
+        for e in errors.split('\n') if errors else []:
+            self.error(e)
+
+    def error(self, text: str) -> None:
+        HelpTopLevel(self, text)
