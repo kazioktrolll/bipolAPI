@@ -1,11 +1,12 @@
 from customtkinter import CTkLabel
+from typing import Literal
 from .popup import Popup
 import textwrap
 
 
 class HelpTopLevel(Popup):
-    def __init__(self, master, message, padding=15, max_width=30):
-        super().__init__(master)
+    def __init__(self, master, message, padding=15, max_width=30, position: Literal['center', 'cursor'] = 'center'):
+        super().__init__(master, position)
 
         # Wrap text into lines to make it roughly square
         for i, paragraph in enumerate(message.splitlines()):

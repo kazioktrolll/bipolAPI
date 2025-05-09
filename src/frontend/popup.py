@@ -1,9 +1,11 @@
 from customtkinter import CTkToplevel, CTkFrame, CTkButton
+from typing import Literal
 
 
 class Popup(CTkToplevel):
-    def __init__(self, master: CTkFrame|None):
+    def __init__(self, master: CTkFrame|None, position: Literal['center', 'cursor'] = 'center'):
         super().__init__(master)
+        self.position = position
         self.overrideredirect(True)
         self.bind("<Escape>", lambda _: self.destroy())
         self.frame = CTkFrame(self, width=0, height=0, fg_color='transparent')
@@ -27,7 +29,13 @@ class Popup(CTkToplevel):
         def position():
             w = self.winfo_width()
             h = self.winfo_height()
-            x = self.winfo_pointerx()
-            y = self.winfo_pointery()
+            match self.position:
+                case 'cursor':
+                    x = self.winfo_pointerx()
+                    y = self.winfo_pointery()
+                case 'center':
+                    x = (self.winfo_screenwidth() - w) // 2
+                    y = (self.winfo_screenheight() - h) // 2
+                case _: raise NotImplementedError
             self.geometry(f"{w}x{h}+{x}+{y}")
-        self.after(50, position)    # noqa
+        self.after(80, position)    # noqa
