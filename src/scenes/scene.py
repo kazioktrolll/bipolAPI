@@ -32,6 +32,9 @@ class Scene(CTkFrame):
 
     @final
     def update(self) -> None:
+        if not self.winfo_exists():
+            return
+
         for tu in self.to_update:
             tu.update()
 
