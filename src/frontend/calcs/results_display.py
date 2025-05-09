@@ -9,7 +9,7 @@ class ResultsDisplay(CTkFrame):
         self.controls_names = controls_names
         self.results: list[list[dict[str, float]]] = [[{}, {}]]
         self.page = 0
-        self.page_button = CTkSegmentedButton(self, command=self.switch_page)
+        self.page_button = PagesNumberStrip(self, command=self.switch_page)
         self.mode_button = CTkSegmentedButton(self, values=['Forces', 'Stability'], command=self.switch_mode)
         self.csv_button = CTkButton(self, text='Save to .csv', command=self.save_to_csv)
         self.forces_label = FullDisplay(self, controls_names)
@@ -54,13 +54,11 @@ class ResultsDisplay(CTkFrame):
 
     def set_results(self, results: list[list[dict[str, float]]]):
         self.results = results
-        pages = list(range(len(results)))
-        self.page_button.configure(values=list(map(str, pages)))
-        self.page_button.set('0')
+        self.page_button.set_size(len(results))
         self.update()
 
     def switch_page(self, page: str):
-        self.page = int(page)
+        self.page = int(page) - 1
         self.update()
 
     def save_to_csv(self):
@@ -233,3 +231,59 @@ class PlotButton(CTkButton):
         self.plot_window.close()
         self.configure(text='Plot Trefftz')
         self.plot_window = None
+
+
+class PagesNumberStrip(CTkSegmentedButton):
+    _size = 1
+    _chapter_size = 20
+    _current_chapter = 0
+
+    @property
+    def current_pages(self):
+        try:
+            return list(super()._buttons_dict.keys())
+        except AttributeError:
+            return []
+
+    def set_size(self, size: int):
+        self._size = size
+        self.goto(1)
+
+    def goto(self, page: int):
+        if str(page) not in self.current_pages:
+            self.change_chapter(page)
+        self.set(str(page))
+
+    def change_chapter(self, page: int):
+        do_previous = True
+        do_next = True
+        chapter = page // self._chapter_size
+        self._current_chapter = chapter
+        if chapter == 0: do_previous = False
+        start = chapter * self._chapter_size + 1
+        end = start + self._chapter_size - 1
+        if end >= self._size:
+            end = self._size
+            do_next = False
+
+        values = ['<'] if do_previous else []
+        values += list(map(str, range(start, end+1)))
+        if do_next: values += ['>']
+
+        self.configure(values=values)
+
+    def previous(self):
+        start_previous = (self._current_chapter - 1) * self._chapter_size
+        self.change_chapter(start_previous)
+
+    def next(self):
+        start_previous = (self._current_chapter + 1) * self._chapter_size
+        self.change_chapter(start_previous)
+
+    def set(self, value: str, from_variable_callback: bool = False, from_button_callback: bool = False):
+        if value == '<':
+            self.previous()
+        elif value == '>':
+            self.next()
+        else:
+            super().set(value, from_variable_callback, from_button_callback)
