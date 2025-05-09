@@ -75,14 +75,17 @@ class ResultsParser:
     def all_sts_to_data(cls, paths: list[Path]) -> list[list[val_dict]]:
         """Converts every file in the 'ST' directory and converts it to a dict."""
         _r = []
-        for path in paths:
-            with open(path) as f: data = f.read()
-            data = cls.st_file_to_dict(data)
-            data = cls.split_st_dict(data)
-            data[0] = cls.sort_forces_dict(data[0])
-            data[1] = cls.sort_st_dict(data[1])
-            _r.append(data)
-        return _r
+        try:
+            for path in paths:
+                with open(path) as f: data = f.read()
+                data = cls.st_file_to_dict(data)
+                data = cls.split_st_dict(data)
+                data[0] = cls.sort_forces_dict(data[0])
+                data[1] = cls.sort_st_dict(data[1])
+                _r.append(data)
+            return _r
+        except FileNotFoundError:
+            return []
 
     @classmethod
     def sort_forces_dict(cls, forces_dict: val_dict, join=True) -> val_dict | list[val_dict]:

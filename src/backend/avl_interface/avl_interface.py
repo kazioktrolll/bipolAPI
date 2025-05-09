@@ -5,7 +5,7 @@ from .results_parser import ResultsParser
 
 
 val_dict = dict[str, float]
-avl_exe_path = Path(r"C:\Users\kazio\PycharmProjects\bipolAPI\src\avl\avl.exe")
+avl_exe_path = Path(__file__).parent.parent.parent / 'avl' / 'avl.exe'
 
 
 class AVLInterface:
@@ -49,13 +49,14 @@ class AVLInterface:
         return files
 
     @classmethod
-    def run_series(cls, geometry: Geometry, data: dict[str, list[float]]) -> tuple[list[list[val_dict]], str]:
+    def run_series(cls, geometry: Geometry, data: dict[str, list[float]], flag: 'AbortFlag') -> tuple[list[list[val_dict]], str]:
         """
         Runs all cases using 'ST' and returns the results.
 
         Return:
             [[{name-value} for intro, forces, ST] for each case]
         """
+        if flag: return [], 'Aborted'
         nof_cases = len(list(data.values())[0])
         contents = cls.create_run_file_contents(geometry, data)
         temp_dir = TemporaryDirectory(prefix='gavl_')
@@ -63,16 +64,29 @@ class AVLInterface:
 
         files = cls.create_temp_files(temp_dir_path, nof_cases)
 
-        avl_file_path = temp_dir_path.joinpath('plane.avl')
-        run_file_path = temp_dir_path.joinpath('plane.run')
+        avl_file_path = temp_dir_path / 'plane.avl'
+        run_file_path = temp_dir_path / 'plane.run'
         with open(avl_file_path, 'w') as avl_file: avl_file.write(geometry.string())
         with open(run_file_path, 'w') as run_file: run_file.write(contents)
-
-        command = cls.create_st_command(files)
-        dump = cls.execute(command, avl_file_path)
-        errors = ResultsParser.loading_issues_from_dump(dump)
-
-        vals = ResultsParser.all_sts_to_data(files)
+        if not flag:
+            command = cls.create_st_command(files)
+            dump = cls.execute(command, avl_file_path)
+        if not flag:
+            errors = ResultsParser.loading_issues_from_dump(dump)
+            vals = ResultsParser.all_sts_to_data(files)
+        else:
+            errors = 'Aborted'
+            vals = []
 
         temp_dir.cleanup()
         return vals, errors
+
+
+class AbortFlag:
+    """A simple object passed along the process thread to monitor if the process should be aborted."""
+    def __init__(self):
+        self._aborted = False
+    def abort(self):
+        self._aborted = True
+    def __bool__(self):
+        return self._aborted

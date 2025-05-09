@@ -1,8 +1,9 @@
-from customtkinter import CTkFrame, CTkButton
+from customtkinter import CTkFrame, CTkButton, CTkLabel
 from threading import Thread
 from .results_display import ResultsDisplay
 from .oper_input import OperSeriesInputPanel
 from ..help_top_level import HelpTopLevel
+from ..popup import Popup
 
 
 class CalcDisplay(CTkFrame):
@@ -54,30 +55,42 @@ class CalcDisplay(CTkFrame):
             return None
 
     def run_case(self):
-        from ...backend import AVLInterface
+        from ...backend import AVLInterface, AbortFlag
 
         self.exec_button.configure(state='disabled')
-        popup = HelpTopLevel(self, 'Running...')
-        self.update_idletasks()
+        popup = Popup(self)
+        CTkLabel(popup, text='Running...').grid(row=0, column=0)
+        abort_button = CTkButton(popup, text='Cancel')
+        abort_button.grid(row=1, column=0)
+        popup.run()
+        data = self.get_data()
+        abort_flag = AbortFlag()
 
         def task():
-            data = self.get_data()
-            if data:
-                vals, errors = AVLInterface.run_series(self.geometry, data)
-            else:
-                vals, errors = [], ''
-            self.after(0, on_task_done, *(vals, errors, popup))
+            vals, errors = AVLInterface.run_series(self.geometry, data, abort_flag)
+            self.after(0, on_task_done, *(vals, errors))
 
-        def on_task_done(vals, errors, popup):
+        def abort():
+            abort_flag.abort()
+            on_task_done()
+
+        def on_task_done(vals=[], errors=''):
             popup.destroy()
             self.exec_button.configure(state='normal')
+            if abort_flag: return
             if errors:
                 self.run_errors(errors)
                 return
             if vals:
                 self.results_display.set_results(vals)
 
-        Thread(target=task).start()
+        if data:
+            abort_button.configure(command=abort)
+            self.update_idletasks()
+            Thread(target=task).start()
+        else:
+            on_task_done()
+
 
     def run_errors(self, errors):
         for e in errors.split('\n') if errors else []:
