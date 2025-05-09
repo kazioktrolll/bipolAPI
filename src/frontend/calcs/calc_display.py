@@ -46,6 +46,13 @@ class CalcDisplay(CTkFrame):
         self.build()
         self.results_display.update()
 
+    def get_data(self):
+        try:
+            return self.oip.get_run_file_data()
+        except ValueError as e:
+            HelpTopLevel(self, e.args[0])
+            return None
+
     def run_case(self):
         from ...backend import AVLInterface
 
@@ -54,17 +61,21 @@ class CalcDisplay(CTkFrame):
         self.update_idletasks()
 
         def task():
-            data = self.oip.get_run_file_data()
-            vals, errors = AVLInterface.run_series(self.geometry, data)
+            data = self.get_data()
+            if data:
+                vals, errors = AVLInterface.run_series(self.geometry, data)
+            else:
+                vals, errors = [], ''
             self.after(0, on_task_done, *(vals, errors, popup))
 
         def on_task_done(vals, errors, popup):
             popup.destroy()
+            self.exec_button.configure(state='normal')
             if errors:
                 self.run_errors(errors)
                 return
-            self.results_display.set_results(vals)
-            self.exec_button.configure(state='normal')
+            if vals:
+                self.results_display.set_results(vals)
 
         Thread(target=task).start()
 

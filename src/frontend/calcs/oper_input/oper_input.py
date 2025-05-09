@@ -45,6 +45,8 @@ class OperSeriesInput(RowManager):
 
     def get_value(self): return self.series_config.get_value()
 
+    def get_size(self): return self.series_config.vals_size
+
     def bind_switch(self):
         self.bound = not self.bound
         self.update()
@@ -92,15 +94,26 @@ class OperSeriesInputPanel(CTkFrame):
 
     def get_values(self) -> list[list[float]]:
         vals = [item.get_value() for item in self.ois]
-        lists = [val for val in vals if type(val) == list]
-        if len(lists) == 0: return [[val] for val in vals]
-        for lst in lists:
-            if len(lst) != len(lists[0]): raise ValueError("Invalid length")
+        size = self.validate_vals_length()
+
         _r = []
         for val in vals:
             if type(val) == list: _r.append(val)
-            if type(val) == float: _r.append([val]*len(lists[0]))
+            if type(val) == float: _r.append([val] * size)
         return _r
+
+    def validate_vals_length(self) -> int:
+        """Ensures the series are of the same length or constants."""
+        size = 1
+        for oi in self.ois:
+            oi_size = oi.get_size()
+            if oi_size == 1:
+                continue
+            if size == 1:
+                size = oi_size
+                continue
+            if oi_size != size: raise ValueError(f"Every series has to be of the same size or constant!\nConflicting series: {oi.display_name}")
+        return size
 
     def toggle_series(self, mode: str):
         match mode:

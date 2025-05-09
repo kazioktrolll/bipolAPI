@@ -1,3 +1,8 @@
+"""
+Code related to the direct means of input of Calc workflow.
+"""
+
+
 from abc import ABC, abstractmethod
 from typing import final
 
@@ -168,3 +173,8 @@ class SeriesConfig(CTkFrame):
 
     def get_value(self) -> float | list[float]: return self.active_entry.get_values()
 
+    @property
+    def vals_size(self) -> int:
+        vals = self.get_value()
+        if isinstance(vals, float): return 1
+        return len(vals)
