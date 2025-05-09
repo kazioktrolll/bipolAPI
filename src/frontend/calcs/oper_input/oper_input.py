@@ -92,9 +92,9 @@ class OperSeriesInputPanel(CTkFrame):
                 OperSeriesInput(grid=self, files_manager=self.files_manager, name=name, master_row=i+1, control_surfaces=control_surfaces)
             )
 
-    def get_values(self) -> list[list[float]]:
+    def get_values(self, forced) -> list[list[float]]:
         vals = [item.get_value() for item in self.ois]
-        size = self.validate_vals_length()
+        size = self.validate_vals_length(forced)
 
         _r = []
         for val in vals:
@@ -102,7 +102,7 @@ class OperSeriesInputPanel(CTkFrame):
             if type(val) == float: _r.append([val] * size)
         return _r
 
-    def validate_vals_length(self) -> int:
+    def validate_vals_length(self, forced: bool) -> int:
         """Ensures the series are of the same length or constants."""
         size = 1
         for oi in self.ois:
@@ -113,6 +113,7 @@ class OperSeriesInputPanel(CTkFrame):
                 size = oi_size
                 continue
             if oi_size != size: raise ValueError(f"Every series has to be of the same size or constant!\nConflicting series: {oi.display_name}")
+        if size >= 1000 and not forced: raise ResourceWarning
         return size
 
     def toggle_series(self, mode: str):
@@ -128,9 +129,9 @@ class OperSeriesInputPanel(CTkFrame):
             oi.series_config.series_enabled = target
             oi.update()
 
-    def get_run_file_data(self) -> dict[str, list[float]]:
+    def get_run_file_data(self, forced=False) -> dict[str, list[float]]:
         names = [oi.run_file_names() for oi in self.ois]
-        values = self.get_values()
+        values = self.get_values(forced)
         return dict(zip(names, values))
 
     def add_file(self) -> None:

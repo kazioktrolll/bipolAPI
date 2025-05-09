@@ -4,6 +4,7 @@ from .results_display import ResultsDisplay
 from .oper_input import OperSeriesInputPanel
 from ..help_top_level import HelpTopLevel
 from ..popup import Popup
+from ..ask_popup import AskPopup
 
 
 class CalcDisplay(CTkFrame):
@@ -53,6 +54,12 @@ class CalcDisplay(CTkFrame):
         except ValueError as e:
             HelpTopLevel(self, e.args[0])
             return None
+        except ResourceWarning:
+            force = AskPopup.ask('It is highly discouraged to run more than a thousand cases at once.\nContinue anyway?',
+                                 ['Cancel', 'Continue'], 'Cancel')
+            print(force)
+            if force == 'Cancel': return None
+            return self.oip.get_run_file_data(forced=True)
 
     def run_case(self):
         from ...backend import AVLInterface, AbortFlag
@@ -74,7 +81,7 @@ class CalcDisplay(CTkFrame):
             abort_flag.abort()
             on_task_done()
 
-        def on_task_done(vals=[], errors=''):
+        def on_task_done(vals=None, errors=''):
             popup.destroy()
             self.exec_button.configure(state='normal')
             if abort_flag: return
