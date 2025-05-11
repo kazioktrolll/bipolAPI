@@ -2,6 +2,7 @@ from customtkinter import CTkFrame, CTkButton, CTkLabel
 from threading import Thread
 from .results_display import ResultsDisplay
 from .oper_input import OperSeriesInputPanel
+from .static_input import StaticInputPanel
 from ..help_top_level import HelpTopLevel
 from ..popup import Popup
 from ..ask_popup import AskPopup
@@ -20,6 +21,7 @@ class CalcDisplay(CTkFrame):
         controls_names = [c.class_name for c in self.geometry.get_controls()]
         self.results_display = ResultsDisplay(self.right_frame, self, controls_names)
         self.oip = OperSeriesInputPanel(self.left_frame, controls_names)
+        self.static_input = StaticInputPanel(self.left_frame, self.geometry.ref_pos.tuple())
 
         self.build()
 
@@ -34,9 +36,10 @@ class CalcDisplay(CTkFrame):
     def build(self):
         self.rowconfigure(0, weight=1)
 
-        self.oip.grid(row=0, column=0, sticky="nw", padx=20, pady=20)
-        self.left_frame.rowconfigure(1, weight=1)
-        self.exec_button.grid(row=1, column=0, sticky='news', padx=20, pady=20)
+        self.oip.grid(row=0, column=0, sticky="news", padx=20, pady=20)
+        self.static_input.grid(row=1, column=0, sticky="news", padx=20, pady=20)
+        self.left_frame.rowconfigure(2, weight=1)
+        self.exec_button.grid(row=2, column=0, sticky='news', padx=20, pady=20)
 
         self.columnconfigure(1, weight=1)
 
@@ -50,7 +53,8 @@ class CalcDisplay(CTkFrame):
 
     def get_data(self):
         try:
-            return self.oip.get_run_file_data()
+            oip_data, size = self.oip.get_run_file_data()
+            return self.static_input.get_data(size) | oip_data
         except ValueError as e:
             HelpTopLevel(self, e.args[0])
             return None

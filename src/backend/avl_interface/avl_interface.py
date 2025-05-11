@@ -14,13 +14,12 @@ class AVLInterface:
         no_of_runs = len(list(run_file_data.values())[0])
         _r = ''
         for i in range(no_of_runs):
-            _r += (f"Run case  {i + 1}: AutoGenCase{i}\n"
-                   f"X_cg = {geometry.ref_pos.x}\n")
+            _r += f"Run case  {i + 1}: AutoGenCase{i}\n"
             _r += '\n'.join([f"{names} = {value[i]}" for names, value in run_file_data.items()])
             _r += '\n\n'
 
         _r += ('grav.acc. = 9.80665 m/s^2\n'
-               'density = 1.2250122659906943 kg/m^3\n')
+               'density = 1.225 kg/m^3\n')
         return _r
 
     @classmethod

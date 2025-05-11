@@ -95,7 +95,7 @@ class OperSeriesInputPanel(CTkFrame):
                 OperSeriesInput(grid=self, files_manager=self.files_manager, name=name, master_row=i + 1, control_surfaces=control_surfaces)
             )
 
-    def get_values(self, forced) -> list[list[float]]:
+    def get_values(self, forced) -> tuple[list[list[float]], int]:
         vals = [item.get_value() for item in self.ois]
         size = self.validate_vals_length(forced)
 
@@ -103,7 +103,7 @@ class OperSeriesInputPanel(CTkFrame):
         for val in vals:
             if type(val) == list: _r.append(val)
             if type(val) == float: _r.append([val] * size)
-        return _r
+        return _r, size
 
     def validate_vals_length(self, forced: bool) -> int:
         """Ensures the series are of the same length or constants."""
@@ -133,10 +133,10 @@ class OperSeriesInputPanel(CTkFrame):
             oi.series_config.series_enabled = target
             oi.update()
 
-    def get_run_file_data(self, forced=False) -> dict[str, list[float]]:
+    def get_run_file_data(self, forced=False) -> tuple[dict[str, list[float]], int]:
         names = [oi.run_file_names() for oi in self.ois]
-        values = self.get_values(forced)
-        return dict(zip(names, values))
+        values, size = self.get_values(forced)
+        return dict(zip(names, values)), size
 
     def add_file(self) -> None:
         path = askopenfilename(

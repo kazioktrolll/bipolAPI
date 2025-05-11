@@ -9,7 +9,7 @@ from customtkinter import CTkFrame, CTkLabel, CTkButton, CTkEntry, CTkOptionMenu
 from .files_manager import FilesManager
 from ...popup import Popup
 from ...help_top_level import HelpTopLevel
-from ...entry_with_instructions import EntryWithInstructions
+from ...entry_with_instructions import EntryWithInstructionsBlock
 
 
 class ConfigItem(CTkFrame, ABC):
@@ -66,24 +66,22 @@ class RangeConfig(ConfigItem):
     def __init__(self, parent):
         super().__init__(parent)
         self.values = []
-        self.entries = [EntryWithInstructions(self, t, width=40) for t in ['from', 'step', 'to']]
+        self.entries = EntryWithInstructionsBlock(self, ('from', 'step', 'to'), 40,1, fg_color='transparent')
         self.build()
 
     def build(self):
         self.value_label.grid(column=0, row=0, padx=3)
         self.nof_values_label.grid(column=1, row=0, padx=3)
-        for i, e in enumerate(self.entries): e.grid(column=i + 2, row=0, padx=1)
-        self.set_button.grid(column=5, row=0, padx=3)
+        self.entries.grid(column=2, row=0)
+        self.set_button.grid(column=3, row=0, padx=3)
 
     def set_value(self) -> None:
         try:
-            f, s, t = map(float, [e.get() for e in self.entries])
+            f, s, t = map(float, self.entries.get())
         except ValueError:
             HelpTopLevel(None, 'Values must be numeric.')
             return
-        for e in self.entries:
-            e.delete(0, 'end')
-            e.fill()
+        self.entries.clear()
         self.focus_set()
         self.value_label.configure(text=f'{round(f, 3)} : {round(s, 3)} : {round(t, 3)}')
         self.values.clear()
