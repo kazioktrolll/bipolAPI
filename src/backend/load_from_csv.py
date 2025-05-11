@@ -3,7 +3,8 @@ from pathlib import Path
 
 def load_from_csv(path: Path | str) -> dict[str, list[float]] | list[list[float]]:
     if isinstance(path, str): path = Path(path)
-    with open(path) as f: data = f.readlines()
+    with open(path) as f:
+        data = f.readlines()
     raw_vals = [line.split(',') for line in data]
     try:
         float(raw_vals[0][0])

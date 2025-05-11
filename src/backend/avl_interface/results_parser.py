@@ -1,7 +1,6 @@
 from pathlib import Path
 import re
 
-
 val_dict = dict[str, float]
 
 
@@ -113,8 +112,10 @@ class ResultsParser:
     def sort_st_dict(cls, st_dict: val_dict, join=True) -> dict[str, val_dict] | val_dict:
         """Sorts the dict so that relevant values are next to each other."""
         Xnp = st_dict.pop('Xnp')
-        try: ClbCnr = st_dict.pop('Clb_Cnr/Clr_Cnb')
-        except KeyError: ClbCnr = 0
+        try:
+            ClbCnr = st_dict.pop('Clb_Cnr/Clr_Cnb')
+        except KeyError:
+            ClbCnr = 0
         dicts: dict[str, val_dict] = {}
         for k, v in st_dict.items():
             category = k[-2:] if k[-2] == 'd' else k[-1:]

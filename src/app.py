@@ -43,8 +43,10 @@ class App:
     def run(self) -> None:
         """Runs the app."""
         self.after(0, self.root.state, 'zoomed')
-        try: self.root.mainloop()
-        except (KeyboardInterrupt, SystemExit): pass
+        try:
+            self.root.mainloop()
+        except (KeyboardInterrupt, SystemExit):
+            pass
 
     @classmethod
     def destroy_all_children(cls, widget) -> None:
@@ -77,7 +79,7 @@ class App:
 
     # 'File' menu
 
-    def save_as(self, path:str|Path=None) -> None:
+    def save_as(self, path: str | Path = None) -> None:
         """Saves the current geometry as a .gavl file."""
         self.top_bar.collapse_all()
         from tkinter.filedialog import asksaveasfilename
@@ -88,9 +90,9 @@ class App:
         ))
         import pickle
         with open(path, 'wb') as f:
-            pickle.dump(self.geometry, f)   # noqa
+            pickle.dump(self.geometry, f)  # noqa
 
-    def load(self, path:str|Path=None) -> None:
+    def load(self, path: str | Path = None) -> None:
         """Loads the geometry from a .gavl file."""
         self.top_bar.collapse_all()
         from tkinter.filedialog import askopenfilename
@@ -111,7 +113,7 @@ class App:
         from src.backend.geo_design import GeometryGenerator
         self.set_geometry(GeometryGenerator.default())
 
-    def export_to_avl(self, path:str|Path=None) -> None:
+    def export_to_avl(self, path: str | Path = None) -> None:
         """Exports the current geometry to an .avl file."""
         self.top_bar.collapse_all()
         from tkinter.filedialog import asksaveasfilename
@@ -122,7 +124,7 @@ class App:
         ))
         self.geometry.save_to_avl(path=path)
 
-    def import_from_avl(self, path:str|Path=None) -> None:
+    def import_from_avl(self, path: str | Path = None) -> None:
         """Imports the current geometry from an .avl file."""
         from src.backend.geo_design import GeometryGenerator
         from tkinter.filedialog import askopenfilename
@@ -145,7 +147,7 @@ from customtkinter import CTkFrame
 
 
 class TopBar(CTkFrame):
-    def __init__(self, app:App):
+    def __init__(self, app: App):
         super().__init__(app.root, height=20)
         from src.frontend import TopBarItem, TopBarButton
         TopBarItem(self, app.root, 'File', [
@@ -164,5 +166,7 @@ class TopBar(CTkFrame):
 
     def collapse_all(self):
         for child in self.children.values():
-            try: child.collapse()   # noqa
-            except AttributeError: pass
+            try:
+                child.collapse()  # noqa
+            except AttributeError:
+                pass

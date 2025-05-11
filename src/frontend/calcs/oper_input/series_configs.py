@@ -2,7 +2,6 @@
 Code related to the direct means of input of Calc workflow.
 """
 
-
 from abc import ABC, abstractmethod
 from typing import final
 
@@ -54,7 +53,8 @@ class ConstantConfig(ConfigItem):
     def set_value(self) -> None:
         val = self.entry.get()
         self.entry.delete(0, 'end')
-        try: val = float(val)
+        try:
+            val = float(val)
         except ValueError:
             HelpTopLevel(None, 'Value must be numeric.')
             return
@@ -72,11 +72,12 @@ class RangeConfig(ConfigItem):
     def build(self):
         self.value_label.grid(column=0, row=0, padx=3)
         self.nof_values_label.grid(column=1, row=0, padx=3)
-        for i, e in enumerate(self.entries): e.grid(column=i+2, row=0, padx=1)
+        for i, e in enumerate(self.entries): e.grid(column=i + 2, row=0, padx=1)
         self.set_button.grid(column=5, row=0, padx=3)
 
     def set_value(self) -> None:
-        try: f, s, t = map(float, [e.get() for e in self.entries])
+        try:
+            f, s, t = map(float, [e.get() for e in self.entries])
         except ValueError:
             HelpTopLevel(None, 'Values must be numeric.')
             return
@@ -116,6 +117,7 @@ class FileConfig(ConfigItem):
 
         def update_series(file_name):
             series_menu.configure(values=self.files_manager.series_names(file_name))
+
         file_menu.configure(command=update_series, values=self.files_manager.file_names)
 
         def set_and_close():
@@ -127,11 +129,13 @@ class FileConfig(ConfigItem):
                     self.value_label.configure(text=f'{file_name} \\ {series_name}')
                     self.nof_values_label.configure(text=f'({self.nof_values})')
             popup.destroy()
+
         CTkButton(popup.frame, text='Set', command=set_and_close
                   ).grid(column=0, row=2, columnspan=2, sticky='ew', padx=10, pady=10)
         popup.run()
 
-    def set_value(self) -> None: pass
+    def set_value(self) -> None:
+        pass
 
 
 class SeriesConfig(CTkFrame):
@@ -171,7 +175,8 @@ class SeriesConfig(CTkFrame):
         self.active_entry = curr_active
         self.active_entry.grid(column=1, row=0)
 
-    def get_value(self) -> float | list[float]: return self.active_entry.get_values()
+    def get_value(self) -> float | list[float]:
+        return self.active_entry.get_values()
 
     @property
     def vals_size(self) -> int:

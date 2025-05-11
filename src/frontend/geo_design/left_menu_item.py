@@ -37,7 +37,8 @@ class LeftMenuItem(CTkFrame, ABC):
         self.mechanizations.grid(row=2, column=0, sticky='nsew')
 
     @abstractmethod
-    def init_mechanization(self): ...
+    def init_mechanization(self):
+        ...
 
     @abstractmethod
     def init_pfs(self) -> None:
@@ -50,7 +51,7 @@ class LeftMenuItem(CTkFrame, ABC):
         if keyword in self.pfs: raise ValueError(f'{keyword} already initialized')
         self.pfs[keyword] = ParameterField(self.pf_frame, name=name, help_message=message, on_set=self.update_surface, assert_test=assert_test, mode=mode)
         self.pfs[keyword].set(initial_value)
-        self.pfs[keyword].grid(row=len(self.pfs)-1, column=0, sticky='e', padx=10, pady=10)
+        self.pfs[keyword].grid(row=len(self.pfs) - 1, column=0, sticky='e', padx=10, pady=10)
 
     @abstractmethod
     def update_surface(self, _=None) -> None:
@@ -92,5 +93,7 @@ class LeftMenuNotImplemented(LeftMenuItem):
         CTkLabel(self, text='NOT EDITABLE').grid(row=0, column=0, sticky='nsew')
 
     def init_pfs(self) -> None: ...
+
     def update_surface(self, _=None) -> None: ...
+
     def init_mechanization(self): ...

@@ -32,7 +32,8 @@ class AirfoilChooser(CTkFrame):
         entry.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
 
         def get_airfoil():
-            try: self.airfoil = Airfoil.from_naca(entry.get())
+            try:
+                self.airfoil = Airfoil.from_naca(entry.get())
             except ValueError:
                 HelpTopLevel(self, "Incorrect NACA code!")
                 entry.delete(0, "end")
@@ -51,7 +52,8 @@ class AirfoilChooser(CTkFrame):
         path = Path(filedialog.askopenfilename(title="Select File",
                                                filetypes=(("DAT, CSV, TXT Files", ".dat .csv .txt"),
                                                           ("All Files", ".*"))))
-        try: self.airfoil = Airfoil.from_file(name=path.name, path=path)
+        try:
+            self.airfoil = Airfoil.from_file(name=path.name, path=path)
         except ValueError:
             HelpTopLevel(self, "Incorrect input file!")
             return

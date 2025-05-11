@@ -7,13 +7,16 @@ from ..frontend import GeometryDisplay, ViewMode, LeftMenu
 
 class GeoDesignScene(Scene):
     @property
-    def geometry(self) -> Geometry: return self.app.geometry
+    def geometry(self) -> Geometry:
+        return self.app.geometry
 
     @cached_property
-    def geometry_display(self): return GeometryDisplay(self)
+    def geometry_display(self):
+        return GeometryDisplay(self)
 
     @cached_property
-    def left_menu(self) -> LeftMenu: return LeftMenu(self, self.geometry_display.update)
+    def left_menu(self) -> LeftMenu:
+        return LeftMenu(self, self.geometry_display.update)
 
     def build(self):
         self.columnconfigure(0, weight=0)
@@ -29,7 +32,7 @@ class GeoDesignScene(Scene):
         self.left_menu.grid(row=0, column=0, sticky='nsew', padx=5, pady=5)
 
     def bind_display(self):
-        if platform in ("linux",  "linux2"):
+        if platform in ("linux", "linux2"):
             self.bind("<Button-4>", lambda e: self.geometry_display.zoom())
             self.bind("<Button-5>", lambda e: self.geometry_display.unzoom())
         else:

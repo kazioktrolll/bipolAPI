@@ -10,12 +10,14 @@ def is_number(s: str):
     except ValueError:
         return False
 
+
 def are_numbers(ls: list[str]):
     """Checks if a list of strings are all valid numbers."""
     for s in ls:
         if not is_number(s):
             return False
     return True
+
 
 def valid_naca(naca: str):
     """Checks if a string is a valid 4-digit symmetric NACA code."""
@@ -38,7 +40,7 @@ class Airfoil:
     name: str
     active_range: tuple[float, float]
 
-    def __init__(self, name: str, points:list[tuple[float, float]]|None, naca:str|None, active_range:tuple[float, float]):
+    def __init__(self, name: str, points: list[tuple[float, float]] | None, naca: str | None, active_range: tuple[float, float]):
         """
         Parameters:
             name (str): The name of the airfoil.
@@ -57,7 +59,8 @@ class Airfoil:
         """Creates an Airfoil object using geometry from a file."""
         if isinstance(path, str): path = Path(path)
         name = name or path.stem
-        with open(path) as f: raw_lines = f.readlines()
+        with open(path) as f:
+            raw_lines = f.readlines()
 
         lines = []
         for line in raw_lines:
@@ -69,7 +72,6 @@ class Airfoil:
             line = [s for s in line if s]
             lines.append(line)
 
-
         data: list[tuple[float, float]] = []
         for i, line in enumerate(lines):
             if not line: continue
@@ -79,9 +81,9 @@ class Airfoil:
             if not (-1 < new_line[0] < 1) or not (-1 < new_line[1] < 1): continue
             data.append(new_line)
 
-        positive = [(x,y) for x,y in data if y>=0]
+        positive = [(x, y) for x, y in data if y >= 0]
         positive.sort(key=lambda p: -p[0])
-        negative = [(x,y) for x,y in data if y<0]
+        negative = [(x, y) for x, y in data if y < 0]
         negative.sort(key=lambda p: p[0])
         sorted_data = positive + negative
 
@@ -91,10 +93,10 @@ class Airfoil:
         return af
 
     @classmethod
-    def from_points(cls, points:list[tuple[float, float]], name: str, active_range=(0.0, 1.0)) -> 'Airfoil':
+    def from_points(cls, points: list[tuple[float, float]], name: str, active_range=(0.0, 1.0)) -> 'Airfoil':
         """Creates an Airfoil object from a list of points."""
         positive = [(x, y) for x, y in points if y >= 0]
-        negative = [(x, y) for x, y in points if y <  0]
+        negative = [(x, y) for x, y in points if y < 0]
         positive.sort(key=lambda p: -p[0])
         negative.sort(key=lambda p: p[0])
         points = positive + negative

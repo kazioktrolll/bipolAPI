@@ -24,7 +24,7 @@ class PlotWindow:
         self.process.stdin.close()
 
     @classmethod
-    def plot_trefftz(cls, geometry: Geometry, run_file_data: dict[str, list[float]], case_number:int=1):
+    def plot_trefftz(cls, geometry: Geometry, run_file_data: dict[str, list[float]], case_number: int = 1):
         contents = AVLInterface.create_run_file_contents(geometry, run_file_data)
         temp_dir = TemporaryDirectory(prefix='gavl_')
         temp_dir_path = Path(temp_dir.name)

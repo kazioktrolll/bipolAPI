@@ -4,7 +4,6 @@ from .series_configs import SeriesConfig
 from .files_manager import FilesManager
 from ...strip_manager import RowManager
 
-
 Gridable = CTk | CTkFrame
 base_names = {
     'Alpha': ('A', 'alpha'),
@@ -23,7 +22,7 @@ bindable_names = {
 
 
 class OperSeriesInput(RowManager):
-    def __init__(self, grid: Gridable, files_manager: FilesManager, name: str, master_row:int=None, control_surfaces: list[str] = None):
+    def __init__(self, grid: Gridable, files_manager: FilesManager, name: str, master_row: int = None, control_surfaces: list[str] = None):
         super().__init__(grid, master_row)
 
         self.base_names = base_names | {ctrl: (f'd{i}', ctrl) for i, ctrl in enumerate(control_surfaces)}
@@ -43,9 +42,11 @@ class OperSeriesInput(RowManager):
         self.bound = False
         self.build()
 
-    def get_value(self): return self.series_config.get_value()
+    def get_value(self):
+        return self.series_config.get_value()
 
-    def get_size(self): return self.series_config.vals_size
+    def get_size(self):
+        return self.series_config.vals_size
 
     def bind_switch(self):
         self.bound = not self.bound
@@ -53,8 +54,10 @@ class OperSeriesInput(RowManager):
 
     def update(self):
         self.series_config.update()
-        if not self.bound: self.bind_menu.grid_forget()
-        else: self.bind_menu.grid(column=2, row=self.master_index, padx=4)
+        if not self.bound:
+            self.bind_menu.grid_forget()
+        else:
+            self.bind_menu.grid(column=2, row=self.master_index, padx=4)
 
     def build(self):
         self.grid.columnconfigure(1, minsize=120)
@@ -89,7 +92,7 @@ class OperSeriesInputPanel(CTkFrame):
         for i, name in enumerate(self.ois[0].base_names.keys()):
             if i == 0: continue
             self.ois.append(
-                OperSeriesInput(grid=self, files_manager=self.files_manager, name=name, master_row=i+1, control_surfaces=control_surfaces)
+                OperSeriesInput(grid=self, files_manager=self.files_manager, name=name, master_row=i + 1, control_surfaces=control_surfaces)
             )
 
     def get_values(self, forced) -> list[list[float]]:
@@ -124,7 +127,8 @@ class OperSeriesInputPanel(CTkFrame):
             case 'Series':
                 target = True
                 self.load_from_file_button.grid(row=0, column=3, sticky='e', padx=3)
-            case _: raise ValueError("Invalid mode")
+            case _:
+                raise ValueError("Invalid mode")
         for oi in self.ois:
             oi.series_config.series_enabled = target
             oi.update()

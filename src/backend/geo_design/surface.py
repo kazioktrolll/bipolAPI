@@ -19,13 +19,14 @@ class Surface(ABC):
         sections (list[Section]): The sections of the surface.
           Is always sorted along the surface's major axis, ascending.
     """
+
     @to_re_docstring
     def __init__(self,
                  name: str,
                  sections: list[Section],
                  y_duplicate: bool,
                  origin_position: AnyVector3,
-                 airfoil: Airfoil = None,):
+                 airfoil: Airfoil = None, ):
         """
         Parameters:
             name (str): The name of the lifting surface.
@@ -74,7 +75,7 @@ class Surface(ABC):
     def mac(self) -> float:
         area = 0
         for i in range(1, len(self.sections)):
-            prev = self.sections[i-1]
+            prev = self.sections[i - 1]
             curr = self.sections[i]
             area += (prev.chord + curr.chord) * (curr.y - prev.y) / 2
         if self.y_duplicate: area *= 2
@@ -165,7 +166,7 @@ class Surface(ABC):
         """Returns the current geometry as a .avl type string."""
         _r = (f"SURFACE\n"
               f"{self.name}\n"
-              f"{int(self.mac()*8)} 1.0 {int(self.span()*4)} 1.0\n"
+              f"{int(self.mac() * 8)} 1.0 {int(self.span() * 4)} 1.0\n"
               f"{'YDUPLICATE\n0.0' if self.y_duplicate else ''}\n"
               f"SCALE\n"
               f"1.0 1.0 1.0\n"
@@ -241,7 +242,7 @@ class HorizontalSurface(Surface):
         return super().get_section_at(ma=y)
 
     def get_sections_between(self, y_start: float, y_end: float,
-                             include_start: bool = True, include_end: bool = False ) -> list[Section]:
+                             include_start: bool = True, include_end: bool = False) -> list[Section]:
         """Returns a list of sections between ``y_start`` and ``y_end``."""
         return super().get_sections_between(ma_start=y_start, ma_end=y_end,
                                             include_start=include_start, include_end=include_end)
@@ -369,9 +370,9 @@ class HorizontalSimpleSurface(HorizontalSurface):
         root = surface.sections[0]
         tip = surface.sections[-1]
 
-        leading_edge_x_equation = lambda y: root.x + y/tip.y * (tip.x - root.x)
-        leading_edge_z_equation = lambda y: root.z + y/tip.y * (tip.z - root.z)
-        chord_equation = lambda y: root.chord + y/tip.y * (tip.chord - root.chord)
+        leading_edge_x_equation = lambda y: root.x + y / tip.y * (tip.x - root.x)
+        leading_edge_z_equation = lambda y: root.z + y / tip.y * (tip.z - root.z)
+        chord_equation = lambda y: root.chord + y / tip.y * (tip.chord - root.chord)
         inc = root.inclination
 
         # Check if the surface is of correct shape
@@ -519,4 +520,3 @@ class SurfaceCreator:
         else:
             return VerticalSimpleSurface(name=name, sections=sections,
                                          y_duplicate=y_duplicate, origin_position=origin_position, airfoil=airfoil)
-

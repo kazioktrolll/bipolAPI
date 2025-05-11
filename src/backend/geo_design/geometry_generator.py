@@ -26,8 +26,8 @@ class GeometryGenerator:
         v_tail = VerticalSimpleSurface(
             name='V Tail',
             sections=[
-                Section((0,0,0), 1.1, 0, airfoil=Airfoil.from_naca('0012')),
-                Section((.2,0,.5), .9, 0, airfoil=Airfoil.from_naca('0012')),
+                Section((0, 0, 0), 1.1, 0, airfoil=Airfoil.from_naca('0012')),
+                Section((.2, 0, .5), .9, 0, airfoil=Airfoil.from_naca('0012')),
             ],
             origin_position=(3.8, 0, .5),
             y_duplicate=False,
@@ -152,7 +152,7 @@ class FromAvl:
         )
 
         blocks = cls.split_into_blocks(block, keywords)
-        scale = (1,1,1)
+        scale = (1, 1, 1)
         angle = 0
         for keyword, lines in blocks:
             match keyword:
@@ -181,7 +181,7 @@ class FromAvl:
         return SurfaceCreator.UnknownSurface(**surface_data)
 
     @classmethod
-    def handle_section_level(cls, block: list[str], scale=(1,1,1), angle=0) -> Section:
+    def handle_section_level(cls, block: list[str], scale=(1, 1, 1), angle=0) -> Section:
         """Returns a Section based on .avl description lines."""
         vals = list(map(float, block.pop(0).split()))
         section_data: dict[str, Any] = {
@@ -198,8 +198,10 @@ class FromAvl:
                 case 'NACA':
                     section_data['airfoil'] = Airfoil.from_naca(naca=lines[1])
                 case 'AIRFOIL':
-                    if '#' in lines[0]: name = lines[0].split('#')[1]
-                    else: name = 'UnknownAirfoil'
+                    if '#' in lines[0]:
+                        name = lines[0].split('#')[1]
+                    else:
+                        name = 'UnknownAirfoil'
                     lines = lines[1:]
                     points_str = [line.split() for line in lines]
                     points_float = [(float(x), float(y)) for x, y in points_str]

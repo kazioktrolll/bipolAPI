@@ -38,8 +38,8 @@ class GeometryDisplay(CTkFrame):
 
     def update(self) -> None:
         """Adjust the display to the window size, redraws everything."""
-        self.origin = (self.winfo_width() * 4/10 + self.drag_offset[0],
-                       self.winfo_height() * 6/10 + self.drag_offset[1])
+        self.origin = (self.winfo_width() * 4 / 10 + self.drag_offset[0],
+                       self.winfo_height() * 6 / 10 + self.drag_offset[1])
         self.reset_camera_button.place(x=10, y=self.winfo_height() - 40)
         self.clear()
         self.draw()
@@ -66,8 +66,8 @@ class GeometryDisplay(CTkFrame):
                 X = y
                 Y = -z
             case ViewMode.ISO:
-                X = 3**.5/2 * x - 3**.5/2 * y
-                Y = .5 *  ( -x - y) - z
+                X = 3 ** .5 / 2 * x - 3 ** .5 / 2 * y
+                Y = .5 * (-x - y) - z
             case _:
                 raise NotImplementedError
 
@@ -107,16 +107,16 @@ class GeometryDisplay(CTkFrame):
                 yi += gap_size
 
         meter = self.scale
-        draw_grid_simple(.1*meter, 1)
-        draw_grid_simple(.5*meter, 2)
-        draw_grid_simple(1*meter, 2, color="gray87")
-        draw_grid_simple(5*meter, 4, color="gray87")
-        draw_grid_simple(10*meter, 4, color="gray80")
+        draw_grid_simple(.1 * meter, 1)
+        draw_grid_simple(.5 * meter, 2)
+        draw_grid_simple(1 * meter, 2, color="gray87")
+        draw_grid_simple(5 * meter, 4, color="gray87")
+        draw_grid_simple(10 * meter, 4, color="gray80")
 
     def draw_axis(self) -> None:
-        self.canvas.create_line(self.project(0, 0, 0), self.project(30/self.scale, 0, 0), arrow='last', fill='red', width=3)
-        self.canvas.create_line(self.project(0, 0, 0), self.project(0, 30/self.scale, 0), arrow='last', fill='green', width=3)
-        self.canvas.create_line(self.project(0, 0, 0), self.project(0, 0, 30/self.scale), arrow='last', fill='blue', width=3)
+        self.canvas.create_line(self.project(0, 0, 0), self.project(30 / self.scale, 0, 0), arrow='last', fill='red', width=3)
+        self.canvas.create_line(self.project(0, 0, 0), self.project(0, 30 / self.scale, 0), arrow='last', fill='green', width=3)
+        self.canvas.create_line(self.project(0, 0, 0), self.project(0, 0, 30 / self.scale), arrow='last', fill='blue', width=3)
 
     def display_CG(self, x: float, y: float, z: float) -> None:
         """Displays a center-of-mass marker at given coordinates."""
@@ -141,7 +141,7 @@ class GeometryDisplay(CTkFrame):
         if not section.has_control: return
         if section.y == 0 and surface.y_duplicate: return
         X, Y = self.project(*(section.get_position_at_xc(section.control.x_hinge) + surface.origin_position))
-        self.canvas.create_oval(X-3, Y-3, X+3, Y+3,
+        self.canvas.create_oval(X - 3, Y - 3, X + 3, Y + 3,
                                 outline='black', tags="control",
                                 fill=section.control.color)
 
@@ -249,8 +249,10 @@ class GeometryDisplay(CTkFrame):
 
     def scroll_zoom(self, event: Event) -> None:
         direction = event.delta // abs(event.delta)
-        if direction == -1: self.unzoom()
-        elif direction == 1: self.zoom()
+        if direction == -1:
+            self.unzoom()
+        elif direction == 1:
+            self.zoom()
 
     def start_drag(self, event: Event) -> None:
         if event.widget is not self.canvas: return

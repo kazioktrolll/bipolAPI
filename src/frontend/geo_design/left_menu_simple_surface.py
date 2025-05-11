@@ -13,7 +13,7 @@ class LeftMenuSimpleSurface(LeftMenuItem):
     def init_pfs(self) -> None:
         # keyword, name, message, assert, initial
         surf = self.surface
-        assert isinstance(surf, HorizontalSimpleSurface)    # for type checker
+        assert isinstance(surf, HorizontalSimpleSurface)  # for type checker
         pfs_params = [
             ('x', 'X', 'The X-axis position of the tip of the root section.',
              lambda x: True, surf.origin_position.x),
@@ -79,6 +79,6 @@ class LeftMenuSimpleSurface(LeftMenuItem):
             chord_length=1
         )
         from .left_menu import LeftMenu
-        assert(isinstance(parent, LeftMenu))
+        assert (isinstance(parent, LeftMenu))
         parent.geometry.add_surface(surface)
         return cls(parent, surface)

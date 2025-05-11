@@ -3,7 +3,7 @@ from typing import Literal
 
 
 class Popup(CTkToplevel):
-    def __init__(self, master: CTkFrame|None, position: Literal['center', 'cursor'] = 'center'):
+    def __init__(self, master: CTkFrame | None, position: Literal['center', 'cursor'] = 'center'):
         super().__init__(master)
         self.position = position
         self.overrideredirect(True)
@@ -26,6 +26,7 @@ class Popup(CTkToplevel):
         self.transient()
         self.grab_set()
         self.focus_force()
+
         def position():
             w = self.winfo_width()
             h = self.winfo_height()
@@ -36,6 +37,8 @@ class Popup(CTkToplevel):
                 case 'center':
                     x = (self.winfo_screenwidth() - w) // 2
                     y = (self.winfo_screenheight() - h) // 2
-                case _: raise NotImplementedError
+                case _:
+                    raise NotImplementedError
             self.geometry(f"{w}x{h}+{x}+{y}")
-        self.after(80, position)    # noqa
+
+        self.after(80, position)  # noqa

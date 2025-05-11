@@ -10,6 +10,7 @@ class AskPopup:
         CTkLabel(popup.frame, text=question).grid(column=0, row=0, columnspan=len(options), sticky='nsew')
 
         clicked: str = default
+
         def on_click(_i):
             nonlocal clicked
             clicked = options[_i]

@@ -36,8 +36,10 @@ class LeftMenu(CTkFrame):
                      VerticalSimpleSurface: LeftMenuVerticalSurface}
         self.items.clear()
         for name, surface in self.geometry.surfaces.items():
-            try: item_type = menu_item[type(surface)]
-            except KeyError: item_type = LeftMenuNotImplemented
+            try:
+                item_type = menu_item[type(surface)]
+            except KeyError:
+                item_type = LeftMenuNotImplemented
             self.items[name] = item_type(self, surface)
         self.items_button.configure(values=[item.name for item in self.items.values()])
 
@@ -57,7 +59,7 @@ class LeftMenu(CTkFrame):
             if item == clicked:
                 item.grid(row=2, column=0, sticky='nsew', padx=10)
                 continue
-            item.place(x=-i*1e4, y=-1e4)
+            item.place(x=-i * 1e4, y=-1e4)
 
     def show_first(self) -> None:
         if len(self.items) > 0:

@@ -6,11 +6,11 @@ class FilesManager:
     def __init__(self):
         self.files_dicts: dict[str, dict[str, list[float]]] = {}
 
-    def load_file(self, path: Path|str):
+    def load_file(self, path: Path | str):
         path = Path(path)
         data = load_from_csv(path)
         if isinstance(data, list):
-            data_dict = {f'Series {i+1}': line for i, line in enumerate(data)}
+            data_dict = {f'Series {i + 1}': line for i, line in enumerate(data)}
         else:
             data_dict = data
         self.files_dicts[path.name] = data_dict

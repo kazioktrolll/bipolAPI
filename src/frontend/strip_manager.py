@@ -2,7 +2,6 @@ from customtkinter import CTkFrame, CTk, CTkBaseClass
 from abc import ABC, abstractmethod
 from typing import final
 
-
 Gridable = CTkFrame | CTk
 
 
@@ -22,7 +21,8 @@ class StripManager(ABC):
         return children
 
     @abstractmethod
-    def _stack(self, item: CTkBaseClass, **kwargs): ...
+    def _stack(self, item: CTkBaseClass, **kwargs):
+        ...
 
     @final
     def stack(self, item: CTkBaseClass | list[CTkBaseClass], **kwargs):
@@ -34,7 +34,8 @@ class StripManager(ABC):
                 self._stack(item, **kwargs)
 
     @abstractmethod
-    def stack_spacing(self, size: int): ...
+    def stack_spacing(self, size: int):
+        ...
 
 
 class ColumnManager(StripManager):

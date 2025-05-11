@@ -98,7 +98,6 @@ class CalcDisplay(CTkFrame):
         else:
             on_task_done()
 
-
     def run_errors(self, errors):
         for e in errors.split('\n') if errors else []:
             self.error(e)

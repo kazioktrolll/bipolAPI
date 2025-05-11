@@ -3,7 +3,6 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from .results_parser import ResultsParser
 
-
 val_dict = dict[str, float]
 avl_exe_path = Path(__file__).parent.parent.parent / 'avl' / 'avl.exe'
 
@@ -15,13 +14,13 @@ class AVLInterface:
         no_of_runs = len(list(run_file_data.values())[0])
         _r = ''
         for i in range(no_of_runs):
-            _r += (f"Run case  {i+1}: AutoGenCase{i}\n"
-                  f"X_cg = {geometry.ref_pos.x}\n")
+            _r += (f"Run case  {i + 1}: AutoGenCase{i}\n"
+                   f"X_cg = {geometry.ref_pos.x}\n")
             _r += '\n'.join([f"{names} = {value[i]}" for names, value in run_file_data.items()])
             _r += '\n\n'
 
         _r += ('grav.acc. = 9.80665 m/s^2\n'
-              'density = 1.2250122659906943 kg/m^3\n')
+               'density = 1.2250122659906943 kg/m^3\n')
         return _r
 
     @classmethod
@@ -29,7 +28,7 @@ class AVLInterface:
         """Creates a command string for running a given number of cases, each run 'ST' and saved to file."""
         _r = 'OPER\n'
         for i, path in enumerate(paths):
-            _r += f'{i+1}\nX\nst\n'
+            _r += f'{i + 1}\nX\nst\n'
             _r += str(path.absolute())
             _r += '\n'
         return _r
@@ -45,7 +44,7 @@ class AVLInterface:
     def create_temp_files(cls, temp_dir: Path, nof_cases: int) -> list[Path]:
         path = temp_dir.joinpath('st_files')
         path.mkdir()
-        files = [path.joinpath(f'{i+1}') for i in range(nof_cases)]
+        files = [path.joinpath(f'{i + 1}') for i in range(nof_cases)]
         return files
 
     @classmethod
@@ -66,8 +65,10 @@ class AVLInterface:
 
         avl_file_path = temp_dir_path / 'plane.avl'
         run_file_path = temp_dir_path / 'plane.run'
-        with open(avl_file_path, 'w') as avl_file: avl_file.write(geometry.string())
-        with open(run_file_path, 'w') as run_file: run_file.write(contents)
+        with open(avl_file_path, 'w') as avl_file:
+            avl_file.write(geometry.string())
+        with open(run_file_path, 'w') as run_file:
+            run_file.write(contents)
         if not flag:
             command = cls.create_st_command(files)
             dump = cls.execute(command, avl_file_path)
@@ -84,9 +85,12 @@ class AVLInterface:
 
 class AbortFlag:
     """A simple object passed along the process thread to monitor if the process should be aborted."""
+
     def __init__(self):
         self._aborted = False
+
     def abort(self):
         self._aborted = True
+
     def __bool__(self):
         return self._aborted

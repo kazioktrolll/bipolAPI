@@ -74,7 +74,8 @@ class ControlTypeItem(ListPreset, Item):
         Item.__init__(self)
         ListPreset.__init__(self, None, self.control_type_name, FlapItem, do_on_update)
 
-    def edit(self, display_update: Callable[[], None]): ...
+    def edit(self, display_update: Callable[[], None]):
+        ...
 
     def get_values(self) -> list[tuple]:
         if not self.define_ranges: return []

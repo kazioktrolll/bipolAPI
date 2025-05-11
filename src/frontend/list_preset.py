@@ -56,7 +56,7 @@ class ListPreset:
         edit_item = lambda: item.edit(self.do_on_update)
         position = ItemFrame(self, self.body_frame, item, edit_item)
         self.item_frames.append(position)
-        position.grid(column=0, row=len(self.body_frame.children)-1, sticky="nsew")
+        position.grid(column=0, row=len(self.body_frame.children) - 1, sticky="nsew")
 
         if needs_init: edit_item()
 
@@ -65,7 +65,7 @@ class ListPreset:
 
 
 class ItemFrame(CTkFrame):
-    def __init__(self, parent: ListPreset, frame: CTkFrame, item:Item, edit_item: Callable[[], None]) -> None:
+    def __init__(self, parent: ListPreset, frame: CTkFrame, item: Item, edit_item: Callable[[], None]) -> None:
         super().__init__(frame, border_width=2, border_color='gray30')
         self.item = item
         self.locked = False
@@ -79,9 +79,11 @@ class ItemFrame(CTkFrame):
         self.remove_button = CTkButton(
             self, text='-', fg_color='red3', hover_color='red4', width=25, height=25,
             command=lambda: (self.destroy(), parent.items.remove(item), parent.do_on_update())
-            )
+        )
         self.update()
 
     def update(self) -> None:
-        if self.locked: self.remove_button.grid_forget()
-        else: self.remove_button.grid(column=2, row=0, sticky="e", padx=5, pady=5)
+        if self.locked:
+            self.remove_button.grid_forget()
+        else:
+            self.remove_button.grid(column=2, row=0, sticky="e", padx=5, pady=5)

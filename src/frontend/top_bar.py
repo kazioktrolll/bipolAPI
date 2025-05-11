@@ -3,7 +3,7 @@ from typing import Callable
 
 
 class TopBarItem(CTkButton):
-    def __init__(self, parent, root, name:str, options:list[tuple[str, Callable[[], None]]]):
+    def __init__(self, parent, root, name: str, options: list[tuple[str, Callable[[], None]]]):
         self.options = options
         super().__init__(
             parent, text=name, command=self.toggle_menu, corner_radius=0, fg_color=parent.cget('bg_color')
@@ -11,7 +11,7 @@ class TopBarItem(CTkButton):
         self.dropdown = CTkFrame(root)
         self.update()
 
-    def add_option(self, name:str, func:Callable[[], None]) -> None:
+    def add_option(self, name: str, func: Callable[[], None]) -> None:
         self.options.append((name, func))
         self.update()
 
@@ -36,7 +36,7 @@ class TopBarItem(CTkButton):
 
 
 class TopBarButton(CTkButton):
-    def __init__(self, parent, name: str, command:Callable[[], None]) -> None:
+    def __init__(self, parent, name: str, command: Callable[[], None]) -> None:
         super().__init__(
             parent, text=name, command=command, corner_radius=0, fg_color=parent.cget('bg_color')
         )

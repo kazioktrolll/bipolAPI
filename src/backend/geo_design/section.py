@@ -3,7 +3,6 @@ from math import tan, radians
 from .airfoil import Airfoil
 from ..vector3 import Vector3, AnyVector3
 
-
 T = TypeVar('T', bound='Control')
 
 
@@ -92,6 +91,7 @@ class Section:
 class Control:
     class_name: str
     """Class representing a control surface attached to a section."""
+
     def __init__(self, x_hinge: float, SgnDup: bool,
                  gain: float = 1, color: str = 'green', name: str = None) -> None:
         """
@@ -134,17 +134,20 @@ class Control:
 
     @property
     def name(self):
-        try: return self.class_name
-        except AttributeError: return self.instance_name
+        try:
+            return self.class_name
+        except AttributeError:
+            return self.instance_name
 
     @classmethod
     def is_alias(cls, name: str) -> bool:
         name = name.lower()
-        return name == cls.class_name or name+ 's' == cls.class_name
+        return name == cls.class_name or name + 's' == cls.class_name
 
 
 class PreDefControl(Control):
     """An interface for pre-defined types of control surfaces."""
+
     def __init__(self, x_hinge: float, SgnDup: bool,
                  gain: float = 1, color: str = 'green') -> None:
         super().__init__(x_hinge, SgnDup, gain, color)
@@ -156,6 +159,7 @@ class PreDefControl(Control):
 
 class Flap(PreDefControl):
     class_name = 'flaps'
+
     def __init__(self, x_hinge: float):
         """
         Parameters:
@@ -167,6 +171,7 @@ class Flap(PreDefControl):
 
 class Aileron(PreDefControl):
     class_name = 'ailerons'
+
     def __init__(self, x_hinge: float):
         """
         Parameters:
@@ -178,6 +183,7 @@ class Aileron(PreDefControl):
 
 class Elevator(PreDefControl):
     class_name = 'elevators'
+
     def __init__(self, x_hinge: float):
         """
         Parameters:
