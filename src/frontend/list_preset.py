@@ -10,7 +10,7 @@ the Free Software Foundation, either version 3 of the License, or
 
 from typing import Callable
 from customtkinter import CTkFrame, CTkLabel, CTkButton
-from .items import Item, T
+from .items import Item
 
 
 class ListPreset:
@@ -18,7 +18,7 @@ class ListPreset:
         self.category_name = category_name
         self.item_class = item_class
         self.do_on_update = do_on_update
-        self.items: list[Item[T]] = []
+        self.items: list[Item] = []
         self.item_frames: list[ItemFrame] = []
 
         self.main_frame = CTkFrame(None)
@@ -45,6 +45,7 @@ class ListPreset:
         self.redo_item_frames()
 
     def redo_item_frames(self):
+        for frame in self.item_frames: frame.destroy()
         self.item_frames.clear()
         for i, item in enumerate(self.items):
             edit_item = lambda: item.edit(self.do_on_update)
@@ -56,7 +57,11 @@ class ListPreset:
         self.main_frame.grid(**kwargs)
 
     def update_items(self) -> None:
-        for item_frame in self.item_frames: item_frame.update()
+        self.redo_item_frames()
+        for i, item_frame in enumerate(self.item_frames):
+            item_frame.update()
+            item_frame.grid_forget()
+            item_frame.grid(column=0, row=i, sticky="nsew")
 
     def add_position(self, item: Item = None) -> None:
         needs_init = item is None
@@ -66,11 +71,11 @@ class ListPreset:
         edit_item = lambda: item.edit(self.do_on_update)
         position = ItemFrame(self, self.body_frame, item, edit_item)
         self.item_frames.append(position)
-        position.grid(column=0, row=len(self.body_frame.children) - 1, sticky="nsew")
+        self.update_items()
 
         if needs_init: edit_item()
 
-    def get_values(self) -> list[T]:
+    def get_values(self) -> list  :
         return [item.get_values() for item in self.items]
 
 

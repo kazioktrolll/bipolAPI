@@ -48,6 +48,9 @@ class GeometryDisplay(CTkFrame):
 
     def update(self) -> None:
         """Adjust the display to the window size, redraws everything."""
+        if not self.winfo_exists():
+            return
+
         self.origin = (self.winfo_width() * 4 / 10 + self.drag_offset[0],
                        self.winfo_height() * 6 / 10 + self.drag_offset[1])
         self.reset_camera_button.place(x=10, y=self.winfo_height() - 40)

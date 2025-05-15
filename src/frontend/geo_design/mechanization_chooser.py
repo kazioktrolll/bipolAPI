@@ -18,13 +18,28 @@ from ...backend.geo_design import Control
 
 class MechanizationChooser(ListPreset):
     def __init__(self, parent: CTkFrame, do_on_update: Callable[[], None], define_ranges: bool):
-        super().__init__(parent, 'Control Surfaces', ControlTypeItem, do_on_update)
+        super().__init__(parent, 'Control Surfaces', ControlTypeItem, self.do_on_update)
         self.lists: dict[str, ControlTypeItem] = {}
         self.controls: dict[str, Control] = {}
         self.define_ranges = define_ranges
+        self.given_do_on_update = do_on_update
         # Initialization should be specified not in this class,
         # but in appropriate LeftMenu class, as it will be different
         # depending on the type of the lifting surface being represented.
+
+    def do_on_update(self):
+        self.check_if_removed()
+        self.given_do_on_update()
+
+    def check_if_removed(self):
+        """Checks if any of the items has been removed."""
+        current_names = [control.control_type_name for control in self.items]
+        to_pop = []
+        for name in self.lists.keys():
+            if not name in current_names:
+                to_pop.append(name)
+        for name in to_pop:
+            self.lists.pop(name)
 
     def add_position(self, item: 'ControlTypeItem' = None) -> None:
         """Adds an existing item or creates a new one by asking the user."""

@@ -23,11 +23,11 @@ class AirfoilChooser(CTkFrame):
         self.path: Path | None = None
         self.airfoil = Airfoil.empty()
 
-        self.file_label = CTkLabel(self, text="", width=100)
-        self.file_label.grid(row=0, column=0, sticky="nsw", padx=5, pady=5)
+        self.name_label = CTkLabel(self, text="Choose Airfoil:", width=100)
+        self.name_label.grid(row=0, column=0, sticky="nsw", padx=5, pady=5)
 
-        self.naca_label = CTkLabel(self, text="", width=100)
-        self.naca_label.grid(row=2, column=0, sticky="nsw", padx=5, pady=5)
+        self.airfoil_label = CTkLabel(self, text="", width=100)
+        self.airfoil_label.grid(row=2, column=0, sticky="nsw", padx=5, pady=5)
 
         self.columnconfigure(1, weight=1)
 
@@ -49,8 +49,7 @@ class AirfoilChooser(CTkFrame):
                 entry.delete(0, "end")
                 return
 
-            self.naca_label.configure(text=f"NACA {self.airfoil.name}")
-            self.file_label.configure(text="")
+            self.airfoil_label.configure(text=f"NACA {self.airfoil.name}")
             window.destroy()
 
         CTkButton(window.frame, text="Set", width=50, command=get_airfoil
@@ -67,14 +66,8 @@ class AirfoilChooser(CTkFrame):
         except ValueError:
             HelpTopLevel(self, "Incorrect input file!")
             return
-        self.file_label.configure(text=self.airfoil.name)
-        self.naca_label.configure(text="")
+        self.airfoil_label.configure(text=self.airfoil.name)
 
     def set(self, airfoil: Airfoil):
         self.airfoil = airfoil
-        if airfoil.naca:
-            self.naca_label.configure(text=f"NACA {airfoil.name}")
-            self.file_label.configure(text="")
-        else:
-            self.naca_label.configure(text="")
-            self.file_label.configure(text=self.airfoil.name)
+        self.airfoil_label.configure(text=f"NACA {airfoil.name}")
