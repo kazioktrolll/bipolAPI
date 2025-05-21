@@ -122,7 +122,7 @@ class Control:
         self.instance_name = name
 
     def __repr__(self) -> str:
-        return self.name
+        return f"{self.name}: {super().__repr__()}"
 
     def copy(self: T) -> T:
         """Returns a copy of this control surface."""

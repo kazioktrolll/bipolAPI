@@ -179,7 +179,8 @@ class GeometryDisplay(CTkFrame):
         for i in range(1, len(sections)):
             curr_sec = sections[i]
             prev_sec = sections[i - 1]
-            self.display_section(curr_sec, wing)
+            if abs(curr_sec.y - prev_sec.y) > 0.01:
+                self.display_section(curr_sec, wing)
 
             def globalize(pos: Vector3) -> Vector3:
                 return pos + wing.origin_position
@@ -199,8 +200,7 @@ class GeometryDisplay(CTkFrame):
 
             # Draw control surface, if exists
             if prev_sec.control is None or curr_sec.control is None: continue
-            if type(prev_sec.control) is not type(curr_sec.control): continue
-            if prev_sec.control.name != curr_sec.control.name: continue
+            if not prev_sec.control.is_equal_to(curr_sec.control): continue
 
             color = prev_sec.control.color
             x_hinge = prev_sec.control.x_hinge

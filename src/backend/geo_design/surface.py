@@ -161,6 +161,8 @@ class Surface(ABC):
                              include_start: bool = True, include_end: bool = False
                              ) -> list[Section]:
         """Returns a list of sections between ``ma_start`` and ``ma_end``."""
+        if not ma_start < ma_end:
+            raise Exception('ma_start must be smaller than ma_end!')
         secs = []
         if include_start and self.has_section_at(ma_start):
             secs.append(self.get_section_at(ma_start))
@@ -195,6 +197,11 @@ class Surface(ABC):
             if sec.control and sec.control not in controls:
                 controls.append(sec.control)
         return controls
+
+    def clear_controls(self) -> None:
+        """Removes all control surfaces from the surface."""
+        for sec in self.sections:
+            sec.control = None
 
 
 class HorizontalSurface(Surface):
@@ -343,7 +350,8 @@ class HorizontalSimpleSurface(HorizontalSurface):
             This will create **ailerons** for ``y`` = <1 : 2> ``hinge`` 0.7 x/c and ``y`` = <3 : 3.5> ``hinge`` 0.6 x/c,
             and **flaps** for ``y`` = <2.1 : 2.9> ``hinge`` 0.6 x/c.
         """
-        if self.mechanization: raise ValueError("The surface {} already has mechanization!".format(self.name))
+        if self.mechanization:
+            raise ValueError("The surface {} already has mechanization!".format(self.name))
         self.mechanization = kwargs
 
         for key, value in kwargs.items():
@@ -361,18 +369,31 @@ class HorizontalSimpleSurface(HorizontalSurface):
                 if not self.has_section_at(end): self.add_section_gentle(end)
                 # Add ``Control`` to every Section between 'start' and 'end'.
                 sections = self.get_sections_between(start, end, include_end=True)
+                control_instance = mech_type(x_hinge=hinge_x)
                 for section in sections:
                     if section.has_control: raise Exception("A section already has a control surface!")
-                    section.control = mech_type(x_hinge=hinge_x)
+                    section.control = control_instance
+
+            # Check if there are blocks with the same control next to each other,
+            # and if so, add a section in between.
+            for i, section in enumerate(self.sections):
+                if i == 0: continue
+                prev_section = self.sections[i - 1]
+                if section.control is None: continue
+                if section.control.is_equal_to(prev_section.control) and section.control is not prev_section.control:
+                    self.add_section_gentle(prev_section.y + 0.01)
+
 
     def get_symmetric(self) -> 'HorizontalSimpleSurface':
         """Returns a new instance of HorizontalSimpleSurface reflected about the y-axis."""
         surf = super().get_symmetric()
         assert isinstance(surf, HorizontalSimpleSurface)
+        surf.clear_controls()
+        surf.mechanization = {}
         sym_controls = {}
-        for k, list_of_ranges in surf.mechanization.items():
-            sym_controls[k] = [(-s, -e, xc) for s, e, xc in list_of_ranges]
-        surf.mechanization = sym_controls
+        for k, list_of_ranges in self.mechanization.items():
+            sym_controls[k] = [(-e, -s, xc) for s, e, xc in list_of_ranges]
+        surf.set_mechanization(**sym_controls)
         return surf
 
     @classmethod
