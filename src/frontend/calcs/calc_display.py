@@ -28,7 +28,7 @@ class CalcDisplay(CTkFrame):
 
         self.exec_button = CTkButton(self.left_frame, text='Execute', command=self.run_case)
 
-        controls_names = [c.class_name for c in self.geometry.get_controls()]
+        controls_names = [c.name for c in self.geometry.get_controls()]
         self.results_display = ResultsDisplay(self.right_frame, self, controls_names)
         self.oip = OperSeriesInputPanel(self.left_frame, controls_names)
         self.static_input = StaticInputPanel(self.left_frame, self.geometry.ref_pos.tuple())

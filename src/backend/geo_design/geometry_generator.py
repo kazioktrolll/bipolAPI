@@ -231,7 +231,7 @@ class FromAvl:
         name = vals.pop(0)
         vals = list(map(float, vals))
         control_data = {
-            'name': name,
+            'instance_name': name,
             'gain': vals[0],
             'x_hinge': vals[1],
             'SgnDup': vals[5]

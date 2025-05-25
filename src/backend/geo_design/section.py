@@ -103,7 +103,7 @@ class Control:
     """Class representing a control surface attached to a section."""
 
     def __init__(self, x_hinge: float, SgnDup: bool,
-                 gain: float = 1, color: str = 'green', name: str = None) -> None:
+                 gain: float = 1, color: str = 'green', instance_name: str = None) -> None:
         """
         Parameters:
             name (str): The name of the control surface.
@@ -119,7 +119,7 @@ class Control:
         self.SgnDup = SgnDup
         self.gain = gain
         self.color = color
-        self.instance_name = name
+        self.instance_name = instance_name
 
     def __repr__(self) -> str:
         return f"{self.name}: {super().__repr__()}"
@@ -199,5 +199,5 @@ class Elevator(PreDefControl):
         Parameters:
             x_hinge (float): The x/c position of the hinge.
         """
-        assert 0 < x_hinge < 1
+        assert 0 <= x_hinge <= 1
         super().__init__(x_hinge=x_hinge, SgnDup=True, color='green3')
