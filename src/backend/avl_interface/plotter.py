@@ -8,7 +8,7 @@ the Free Software Foundation, either version 3 of the License, or
 """
 
 
-from subprocess import Popen, PIPE, TimeoutExpired
+from subprocess import Popen, PIPE, TimeoutExpired, run
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from time import sleep
@@ -44,8 +44,20 @@ class PlotWindow:
         with open(avl_file_path, 'w') as avl_file: avl_file.write(geometry.string())
         with open(run_file_path, 'w') as run_file: run_file.write(contents)
 
-        command = f'OPER\n{case_number}\nX\nT\n'
+        command = f'OPER\n{case_number}\nX\nT\nH\n\n\nQ\n'
         pw = cls(avl_file_path, command)
         sleep(.5)
         temp_dir.cleanup()
         return pw
+
+    @classmethod
+    def ps2png(cls, ps_path: str | Path, png_path: str | Path, add_background: bool = True):
+        """Converts the given PostScript file to a PNG file."""
+        run([
+            "gswin32c",  # Or "gswin32c" if you're using 32-bit
+            "-dSAFER", "-dBATCH", "-dNOPAUSE",
+            f"-sDEVICE={"png16m" if add_background else "pngalpha"}",
+            "-r300",
+            f"-sOutputFile={png_path}",
+            ps_path
+        ], check=True)
