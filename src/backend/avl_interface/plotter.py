@@ -17,9 +17,8 @@ from ..geo_design import Geometry
 
 
 class PlotWindow:
-    def __init__(self, file_path: str | Path, command: str):
-        file_path = Path(file_path)
-        self.process = Popen([avl_exe_path, file_path], stdin=PIPE, text=True)
+    def __init__(self, file_path: str | Path, command: str, cwd: str | Path):
+        self.process = Popen([avl_exe_path, file_path], stdin=PIPE, text=True, cwd=cwd)
         self.process.stdin.write(command)
         self.process.stdin.flush()
 
@@ -34,7 +33,7 @@ class PlotWindow:
         self.process.stdin.close()
 
     @classmethod
-    def plot_trefftz(cls, geometry: Geometry, run_file_data: dict[str, list[float]], case_number: int = 1):
+    def plot_trefftz(cls, geometry: Geometry, run_file_data: dict[str, list[float]], cwd: str | Path, case_number: int = 1):
         contents = AVLInterface.create_run_file_contents(geometry, run_file_data)
         temp_dir = TemporaryDirectory(prefix='gavl_')
         temp_dir_path = Path(temp_dir.name)
@@ -45,7 +44,7 @@ class PlotWindow:
         with open(run_file_path, 'w') as run_file: run_file.write(contents)
 
         command = f'OPER\n{case_number}\nX\nT\nH\n\n\nQ\n'
-        pw = cls(avl_file_path, command)
+        pw = cls(avl_file_path, command, cwd)
         sleep(.5)
         temp_dir.cleanup()
         return pw

@@ -10,6 +10,7 @@ the Free Software Foundation, either version 3 of the License, or
 
 from pathlib import Path
 from typing import Callable
+from tempfile import TemporaryDirectory
 from src.backend.geo_design import Geometry, GeometryGenerator
 from src.frontend import AskPopup
 
@@ -30,6 +31,7 @@ class App:
         set_appearance_mode("Dark")
         set_default_color_theme("blue")
         self.root = CTk()
+        self.work_dir = TemporaryDirectory(prefix='gavl_')
         self.scene = Scene(self)  # Placeholder
         self.geometry = GeometryGenerator.default()
         self.root.bind('<Configure>', self.update)
@@ -67,6 +69,7 @@ class App:
     def exit(self) -> None:
         App.destroy_all_children(self.root)
         self.root.destroy()
+        self.work_dir.cleanup()
 
     def set_scene(self, scene) -> None:
         """Sets the Scene instance as the new currently displayed scene."""

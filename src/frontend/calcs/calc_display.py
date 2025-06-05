@@ -6,8 +6,7 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 """
-
-
+from pathlib import Path
 from customtkinter import CTkFrame, CTkButton, CTkLabel
 from threading import Thread
 from .results_display import ResultsDisplay
@@ -19,8 +18,10 @@ from ..ask_popup import AskPopup
 
 
 class CalcDisplay(CTkFrame):
-    def __init__(self, parent):
+    def __init__(self, parent, cwd: str | Path):
         super().__init__(parent, fg_color='transparent')
+        self.cwd = Path(cwd)
+
         self.left_frame = CTkFrame(self, fg_color='transparent', border_width=3)
         self.right_frame = CTkFrame(self, fg_color='transparent', border_width=3)
         self.left_frame.grid(row=0, column=0, sticky='nsew', padx=20, pady=20)
@@ -29,7 +30,7 @@ class CalcDisplay(CTkFrame):
         self.exec_button = CTkButton(self.left_frame, text='Execute', command=self.run_case)
 
         controls_names = [c.name for c in self.geometry.get_controls()]
-        self.results_display = ResultsDisplay(self.right_frame, self, controls_names)
+        self.results_display = ResultsDisplay(self.right_frame, self, controls_names, cwd)
         self.oip = OperSeriesInputPanel(self.left_frame, controls_names)
         self.static_input = StaticInputPanel(self.left_frame, self.geometry.ref_pos.tuple())
 
@@ -88,7 +89,7 @@ class CalcDisplay(CTkFrame):
         abort_flag = AbortFlag()
 
         def task():
-            vals, errors = AVLInterface.run_series(self.geometry, data, abort_flag)
+            vals, errors = AVLInterface.run_series(self.geometry, data, abort_flag, self.cwd)
             self.after(0, on_task_done, *(vals, errors))
 
         def abort():

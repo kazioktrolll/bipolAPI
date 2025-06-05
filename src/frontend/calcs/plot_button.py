@@ -9,16 +9,18 @@ the Free Software Foundation, either version 3 of the License, or
 
 
 from customtkinter import CTkButton
+from pathlib import Path
 from src.backend import PlotWindow
 
 
 
 class PlotButton(CTkButton):
-    def __init__(self, parent, calc_display):
+    def __init__(self, parent, calc_display, cwd: str | Path):
         from ...backend import PlotWindow
         super().__init__(parent, text='Plot Trefftz', command=self.toggle)
         self.plot_window: PlotWindow | None = None
         self._calc_display = calc_display
+        self.cwd = cwd
 
     @property
     def calc_display(self):
@@ -38,9 +40,9 @@ class PlotButton(CTkButton):
 
     def plot(self):
         geometry = self.calc_display.geometry
-        run_file_data = self.calc_display.oip.get_run_file_data()[0]
-        case_number = self.current_page
-        self.plot_window = PlotWindow.plot_trefftz(geometry, run_file_data, case_number)
+        run_file_data: dict[str, list[float]] = self.calc_display.oip.get_run_file_data()[0]
+        case_number: int = self.current_page
+        self.plot_window = PlotWindow.plot_trefftz(geometry, run_file_data, self.cwd, case_number)
         self.configure(text='Close')
 
     def close(self):

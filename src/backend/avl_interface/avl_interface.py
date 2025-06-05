@@ -10,7 +10,7 @@ the Free Software Foundation, either version 3 of the License, or
 
 from ..geo_design import Geometry
 from pathlib import Path
-from tempfile import TemporaryDirectory
+import shutil
 from .results_parser import ResultsParser
 
 val_dict = dict[str, float]
@@ -57,7 +57,11 @@ class AVLInterface:
         return files
 
     @classmethod
-    def run_series(cls, geometry: Geometry, data: dict[str, list[float]], flag: 'AbortFlag') -> tuple[list[list[val_dict]], str]:
+    def run_series(cls,
+                   geometry: Geometry,
+                   data: dict[str, list[float]],
+                   flag: 'AbortFlag',
+                   app_work_dir: Path) -> tuple[list[list[val_dict]], str]:
         """
         Runs all cases using 'ST' and returns the results.
 
@@ -67,13 +71,19 @@ class AVLInterface:
         if flag: return [], 'Aborted'
         nof_cases = len(list(data.values())[0])
         contents = cls.create_run_file_contents(geometry, data)
-        temp_dir = TemporaryDirectory(prefix='gavl_')
-        temp_dir_path = Path(temp_dir.name)
+        i = 0
+        while True:
+            try:
+                work_dir = app_work_dir / f'series_{i}'
+                work_dir.mkdir()
+                break
+            except FileExistsError:
+                i += 1
 
-        files = cls.create_temp_files(temp_dir_path, nof_cases)
+        files = cls.create_temp_files(work_dir, nof_cases)
 
-        avl_file_path = temp_dir_path / 'plane.avl'
-        run_file_path = temp_dir_path / 'plane.run'
+        avl_file_path = work_dir / 'plane.avl'
+        run_file_path = work_dir / 'plane.run'
         with open(avl_file_path, 'w') as avl_file:
             avl_file.write(geometry.string())
         with open(run_file_path, 'w') as run_file:
@@ -88,7 +98,7 @@ class AVLInterface:
             errors = 'Aborted'
             vals = []
 
-        temp_dir.cleanup()
+        shutil.rmtree(work_dir)
         return vals, errors
 
 

@@ -16,7 +16,7 @@ from ..frontend import CalcDisplay
 class CalcScene(Scene):
     @cached_property
     def display(self):
-        return CalcDisplay(self)
+        return CalcDisplay(self, self.app.work_dir.name)
 
     def build(self) -> None:
         self.rowconfigure(0, weight=1)
