@@ -13,8 +13,17 @@ from pathlib import Path
 from time import sleep
 from threading import Thread
 import re
+import os
+import sys
 from .avl_interface import avl_exe_path, AVLInterface
 from ..geo_design import Geometry
+
+
+def get_gs_path() -> Path:
+    base_path = Path(getattr(sys, '_MEIPASS', os.path.abspath(".")))
+    gs_exe = base_path / "ghostscript" / "bin" / "gswin64.exe"
+    assert gs_exe.exists()
+    return gs_exe
 
 
 class ImageGetter:
@@ -104,7 +113,7 @@ class ImageGetter:
     def ps2png(cls, ps_path: str | Path, png_path: str | Path, add_background: bool = True):
         """Converts the given PostScript file to a PNG file."""
         run([
-            "gswin32c", #TODO: fix so it will work after packing to .exe
+            get_gs_path(),
             "-dSAFER", "-dBATCH", "-dNOPAUSE",
             f"-sDEVICE={"png16m" if add_background else "pngalpha"}",
             "-r300",
