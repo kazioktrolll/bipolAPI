@@ -8,7 +8,7 @@ the Free Software Foundation, either version 3 of the License, or
 """
 
 
-from subprocess import Popen, PIPE, TimeoutExpired, run
+from subprocess import Popen, PIPE, TimeoutExpired, run, DEVNULL
 from pathlib import Path
 from time import sleep
 from threading import Thread
@@ -28,7 +28,7 @@ class ImageGetter:
         :param app_wd: App working directory.
         :return: Path to the .png image.
         """
-        process = Popen([avl_exe_path, avl_file_path], stdin=PIPE, text=True, cwd=app_wd)
+        process = Popen([avl_exe_path, avl_file_path], stdin=PIPE, stdout=DEVNULL, text=True, cwd=app_wd)
         process.stdin.write(command)
         process.stdin.flush()
 
@@ -37,10 +37,10 @@ class ImageGetter:
         img_dir = Path(app_wd) / 'images'
         if not img_dir.exists(): img_dir.mkdir()
 
-        pattern = re.compile(r"img_(\d+)\.png")
+        pattern = re.compile(r"img_(?P<index>\d+)\.png")
         # Extract numbers from matching filenames
         numbers = [
-            int(match.group(1))
+            int(match.group("index"))
             for file in img_dir.iterdir()
             if (match := pattern.match(file.name))
         ]
