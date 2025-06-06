@@ -13,7 +13,7 @@ from pathlib import Path
 from .plot_button import PlotButton
 
 class ResultsDisplay(CTkFrame):
-    def __init__(self, parent, calc_display, controls_names: list[str], cwd: str | Path):
+    def __init__(self, parent, calc_display, controls_names: list[str], app_wd: str | Path):
         super().__init__(parent, fg_color=parent.cget('fg_color'))
         self.controls_names = controls_names
         self.results: list[list[dict[str, float]]] = [[{}, {}]]
@@ -24,7 +24,7 @@ class ResultsDisplay(CTkFrame):
         self.forces_label = FullDisplay(self, controls_names)
         self.stability_label = STDisplay(self, controls_names)
         self.current_label = self.forces_label
-        self.plot_button = PlotButton(self, calc_display, cwd)
+        self.plot_button = PlotButton(self, calc_display, app_wd)
         self.mode_button.set('Forces')
         self.build()
 

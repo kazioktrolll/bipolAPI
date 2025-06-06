@@ -10,17 +10,15 @@ the Free Software Foundation, either version 3 of the License, or
 
 from customtkinter import CTkButton
 from pathlib import Path
-from src.backend import PlotWindow
+from src.backend import ImageGetter
 
 
 
 class PlotButton(CTkButton):
-    def __init__(self, parent, calc_display, cwd: str | Path):
-        from ...backend import PlotWindow
-        super().__init__(parent, text='Plot Trefftz', command=self.toggle)
-        self.plot_window: PlotWindow | None = None
+    def __init__(self, parent, calc_display, app_wd: str | Path):
+        super().__init__(parent, text='Plot Trefftz', command=self.plot)
         self._calc_display = calc_display
-        self.cwd = cwd
+        self.app_wd = app_wd
 
     @property
     def calc_display(self):
@@ -32,20 +30,9 @@ class PlotButton(CTkButton):
     def current_page(self):
         return self.calc_display.results_display.page
 
-    def toggle(self):
-        if self.plot_window is None:
-            self.plot()
-        else:
-            self.close()
-
     def plot(self):
         geometry = self.calc_display.geometry
         run_file_data: dict[str, list[float]] = self.calc_display.oip.get_run_file_data()[0]
         case_number: int = self.current_page
-        self.plot_window = PlotWindow.plot_trefftz(geometry, run_file_data, self.cwd, case_number)
-        self.configure(text='Close')
-
-    def close(self):
-        self.plot_window.close()
-        self.configure(text='Plot Trefftz')
-        self.plot_window = None
+        png_path = ImageGetter.get_trefftz(geometry, run_file_data, case_number, self.app_wd)
+        #TODO: fix this so it displays the image on the path

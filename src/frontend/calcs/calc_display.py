@@ -18,9 +18,9 @@ from ..ask_popup import AskPopup
 
 
 class CalcDisplay(CTkFrame):
-    def __init__(self, parent, cwd: str | Path):
+    def __init__(self, parent, app_wd: str | Path):
         super().__init__(parent, fg_color='transparent')
-        self.cwd = Path(cwd)
+        self.app_wd = Path(app_wd)
 
         self.left_frame = CTkFrame(self, fg_color='transparent', border_width=3)
         self.right_frame = CTkFrame(self, fg_color='transparent', border_width=3)
@@ -30,7 +30,7 @@ class CalcDisplay(CTkFrame):
         self.exec_button = CTkButton(self.left_frame, text='Execute', command=self.run_case)
 
         controls_names = [c.name for c in self.geometry.get_controls()]
-        self.results_display = ResultsDisplay(self.right_frame, self, controls_names, cwd)
+        self.results_display = ResultsDisplay(self.right_frame, self, controls_names, app_wd)
         self.oip = OperSeriesInputPanel(self.left_frame, controls_names)
         self.static_input = StaticInputPanel(self.left_frame, self.geometry.ref_pos.tuple())
 
@@ -89,7 +89,7 @@ class CalcDisplay(CTkFrame):
         abort_flag = AbortFlag()
 
         def task():
-            vals, errors = AVLInterface.run_series(self.geometry, data, abort_flag, self.cwd)
+            vals, errors = AVLInterface.run_series(self.geometry, data, abort_flag, self.app_wd)
             self.after(0, on_task_done, *(vals, errors))
 
         def abort():

@@ -10,50 +10,101 @@ the Free Software Foundation, either version 3 of the License, or
 
 from subprocess import Popen, PIPE, TimeoutExpired, run
 from pathlib import Path
-from tempfile import TemporaryDirectory
 from time import sleep
+from threading import Thread
+import re
 from .avl_interface import avl_exe_path, AVLInterface
 from ..geo_design import Geometry
 
 
-class PlotWindow:
-    def __init__(self, file_path: str | Path, command: str, cwd: str | Path):
-        self.process = Popen([avl_exe_path, file_path], stdin=PIPE, text=True, cwd=cwd)
-        self.process.stdin.write(command)
-        self.process.stdin.flush()
+class ImageGetter:
+    @classmethod
+    def get_image(cls, avl_file_path: str | Path, command: str, app_wd: str | Path) -> Path:
+        """
+        Returns the path to a .png image created by the given command.
 
-    def close(self):
-        self.process.terminate()
+        :param avl_file_path: The path to the .avl file.
+        :param command: Full command that will create the image, including 'H', return to top level, and 'Q'.
+        :param app_wd: App working directory.
+        :return: Path to the .png image.
+        """
+        process = Popen([avl_exe_path, avl_file_path], stdin=PIPE, text=True, cwd=app_wd)
+        process.stdin.write(command)
+        process.stdin.flush()
+
+        sleep(1) # Wait for AVL to process
+
+        img_dir = Path(app_wd) / 'images'
+        if not img_dir.exists(): img_dir.mkdir()
+
+        pattern = re.compile(r"img_(\d+)\.png")
+        # Extract numbers from matching filenames
+        numbers = [
+            int(match.group(1))
+            for file in img_dir.iterdir()
+            if (match := pattern.match(file.name))
+        ]
+        next_number = max(numbers, default=0) + 1
+
+        png_path = img_dir/f'img_{next_number}.png'
+        ps_path = app_wd/'plot.ps'
+        cls.ps2png(ps_path, png_path)
+
+        Thread(target=cls.cleanup, args=(process, ps_path), daemon=True).start()
+        return png_path
+
+    @staticmethod
+    def cleanup(process: Popen, ps_path: Path, wait_time: float = 3):
+        sleep(wait_time)
+        process.terminate()
         try:
-            self.process.wait(timeout=5)
+            process.wait(timeout=5)
         except TimeoutExpired:
-            self.process.kill()
-            self.process.wait()
+            process.kill()
+            process.wait()
 
-        self.process.stdin.close()
+        process.stdin.close()
+        ps_path.unlink()
 
     @classmethod
-    def plot_trefftz(cls, geometry: Geometry, run_file_data: dict[str, list[float]], cwd: str | Path, case_number: int = 1):
-        contents = AVLInterface.create_run_file_contents(geometry, run_file_data)
-        temp_dir = TemporaryDirectory(prefix='gavl_')
-        temp_dir_path = Path(temp_dir.name)
+    def get_trefftz(cls,
+                    geometry: Geometry,
+                    run_file_data: dict[str, list[float]],
+                    case_number: int,
+                    app_wd: str | Path) -> Path:
+        """Returns a Trefftz plot of the given conditions.
 
-        avl_file_path = temp_dir_path.joinpath('plane.avl')
-        run_file_path = temp_dir_path.joinpath('plane.run')
+        :param geometry: The geometry of the aircraft.
+        :param run_file_data: Run-file type data.
+        :param case_number: The number of the case considered.
+        :param app_wd: App working directory.
+        """
+        contents = AVLInterface.create_run_file_contents(geometry, run_file_data)
+
+        work_dir = Path(app_wd) / 'trefftz'
+        if not work_dir.exists(): work_dir.mkdir()
+        avl_file_path = work_dir / 'plane.avl'
+        run_file_path = work_dir / 'plane.run'
+
         with open(avl_file_path, 'w') as avl_file: avl_file.write(geometry.string())
         with open(run_file_path, 'w') as run_file: run_file.write(contents)
 
-        command = f'OPER\n{case_number}\nX\nT\nH\n\n\nQ\n'
-        pw = cls(avl_file_path, command, cwd)
-        sleep(.5)
-        temp_dir.cleanup()
-        return pw
+        command = ('OPER\n'
+                   f'{case_number+1}\n'
+                   'X\n'
+                   'T\n'
+                   'H\n'
+                   '\n'
+                   '\n'
+                   'Q\n')
+        png_path = cls.get_image(avl_file_path, command, app_wd)
+        return png_path
 
     @classmethod
     def ps2png(cls, ps_path: str | Path, png_path: str | Path, add_background: bool = True):
         """Converts the given PostScript file to a PNG file."""
         run([
-            "gswin32c",  # Or "gswin32c" if you're using 32-bit
+            "gswin32c", #TODO: fix so it will work after packing to .exe
             "-dSAFER", "-dBATCH", "-dNOPAUSE",
             f"-sDEVICE={"png16m" if add_background else "pngalpha"}",
             "-r300",
