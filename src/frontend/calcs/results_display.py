@@ -10,7 +10,7 @@ the Free Software Foundation, either version 3 of the License, or
 
 from customtkinter import CTkFrame, CTkSegmentedButton, CTkLabel, CTkEntry, CTkButton
 from pathlib import Path
-from .plot_button import PlotButton
+from .plot_button import PlotTrefftz
 
 class ResultsDisplay(CTkFrame):
     def __init__(self, parent, calc_display, controls_names: list[str], app_wd: str | Path):
@@ -24,7 +24,7 @@ class ResultsDisplay(CTkFrame):
         self.forces_label = FullDisplay(self, controls_names)
         self.stability_label = STDisplay(self, controls_names)
         self.current_label = self.forces_label
-        self.plot_button = PlotButton(self, calc_display, app_wd)
+        self.plot_button = PlotTrefftz(self, app_wd, calc_display)
         self.mode_button.set('Forces')
         self.build()
 
