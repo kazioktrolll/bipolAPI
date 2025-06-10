@@ -9,7 +9,7 @@ the Free Software Foundation, either version 3 of the License, or
 
 
 from customtkinter import CTkFrame, CTkButton, CTkLabel
-from ..entry_with_instructions import EntryWithInstructionsBlock
+from ..entry_with_instructions import EntryWithInstructionsBlock, EntryWithInstructions
 from ..help_top_level import HelpTopLevel
 
 
@@ -19,9 +19,15 @@ class StaticInputPanel(CTkFrame):
         self.center_of_mass = center_of_mass
         self.mass_label = CTkLabel(self, width=120, anchor='e')
         self.mass_entry = EntryWithInstructionsBlock(self, ('x', 'y', 'z'), 40, 1, fg_color='transparent')
-        self.set_button = CTkButton(self, text='Set', width=40, command=self.set_mass)
+        self.mass_set_button = CTkButton(self, text='Set', width=40, command=self.set_mass)
+
+        self.height = 0
+        self.height_label = CTkLabel(self, width=120, anchor='e')
+        self.height_entry = EntryWithInstructions(self, 'height', width=120)
+        self.height_set_button = CTkButton(self, text='Set', width=40, command=self.set_height)
 
         self.set_mass(center_of_mass)
+        self.set_height(0)
         self.build()
 
     def build(self):
@@ -29,7 +35,12 @@ class StaticInputPanel(CTkFrame):
         self.columnconfigure(1, weight=1)
         self.mass_label.grid(column=2, row=0, padx=3)
         self.mass_entry.grid(column=3, row=0, padx=3)
-        self.set_button.grid(column=4, row=0, padx=3)
+        self.mass_set_button.grid(column=4, row=0, padx=3)
+
+        CTkLabel(self, text='Height', width=120, anchor='e').grid(column=0, row=1, padx=3)
+        self.height_label.grid(column=2, row=1, padx=3)
+        self.height_entry.grid(column=3, row=1, padx=3)
+        self.height_set_button.grid(column=4, row=1, padx=3)
 
     def set_mass(self, values: tuple[float, float, float] = None):
         if not values:
@@ -47,6 +58,20 @@ class StaticInputPanel(CTkFrame):
         self.focus_set()
         self.center_of_mass = (x, y, z)
         self.mass_label.configure(text=f'({round(x, 3)} , {round(y, 3)} , {round(z, 3)})')
+
+    def set_height(self, value: float = None):
+        if value is None:
+            try:
+                raw = self.height_entry.get()
+                if raw == '': return
+                self.set_height(float(raw))
+            except ValueError:
+                HelpTopLevel(None, 'Values must be numeric.')
+            return
+        self.height_entry.clear()
+        self.focus_set()
+        self.height = value
+        self.height_label.configure(text=str(value))
 
     def get_data(self, size: int):
         return {

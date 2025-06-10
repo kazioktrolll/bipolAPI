@@ -89,7 +89,7 @@ class CalcDisplay(CTkFrame):
         abort_flag = AbortFlag()
 
         def task():
-            vals, errors = AVLInterface.run_series(self.geometry, data, abort_flag, self.app_wd)
+            vals, errors = AVLInterface.run_series(self.geometry, data, self.static_input.height, abort_flag, self.app_wd)
             self.after(0, on_task_done, *(vals, errors))
 
         def abort():

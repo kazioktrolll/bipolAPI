@@ -80,6 +80,7 @@ class ImageGetter:
                     geometry: Geometry,
                     run_file_data: dict[str, list[float]],
                     case_number: int,
+                    height: float,
                     app_wd: str | Path) -> Path:
         """Returns a Trefftz plot of the given conditions.
 
@@ -88,7 +89,7 @@ class ImageGetter:
         :param case_number: The number of the case considered.
         :param app_wd: App working directory.
         """
-        contents = AVLInterface.create_run_file_contents(geometry, run_file_data)
+        contents = AVLInterface.create_run_file_contents(run_file_data, height)
 
         work_dir = Path(app_wd) / 'trefftz'
         if not work_dir.exists(): work_dir.mkdir()

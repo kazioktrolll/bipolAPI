@@ -12,6 +12,7 @@ from ..geo_design import Geometry
 from pathlib import Path
 import shutil
 from .results_parser import ResultsParser
+from .. import physics
 
 val_dict = dict[str, float]
 avl_exe_path = Path(__file__).parent.parent.parent / 'avl' / 'avl.exe'
@@ -19,7 +20,7 @@ avl_exe_path = Path(__file__).parent.parent.parent / 'avl' / 'avl.exe'
 
 class AVLInterface:
     @classmethod
-    def create_run_file_contents(cls, geometry: Geometry, run_file_data: dict[str, list[float]]) -> str:
+    def create_run_file_contents(cls, run_file_data: dict[str, list[float]], height: float) -> str:
         """Returns a string containing the input data transformed into a .run format."""
         no_of_runs = len(list(run_file_data.values())[0])
         _r = ''
@@ -29,7 +30,7 @@ class AVLInterface:
             _r += '\n\n'
 
         _r += ('grav.acc. = 9.80665 m/s^2\n'
-               'density = 1.225 kg/m^3\n')
+               f'density = {physics.get_density(height)} kg/m^3\n')
         return _r
 
     @classmethod
@@ -60,6 +61,7 @@ class AVLInterface:
     def run_series(cls,
                    geometry: Geometry,
                    data: dict[str, list[float]],
+                   height: float,
                    flag: 'AbortFlag',
                    app_work_dir: Path) -> tuple[list[list[val_dict]], str]:
         """
@@ -70,7 +72,7 @@ class AVLInterface:
         """
         if flag: return [], 'Aborted'
         nof_cases = len(list(data.values())[0])
-        contents = cls.create_run_file_contents(geometry, data)
+        contents = cls.create_run_file_contents(data, height)
         i = 0
         while True:
             try:
