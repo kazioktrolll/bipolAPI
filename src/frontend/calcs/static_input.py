@@ -68,6 +68,9 @@ class StaticInputPanel(CTkFrame):
             except ValueError:
                 HelpTopLevel(None, 'Values must be numeric.')
             return
+        if not 0 <= value <= 8e4:
+            HelpTopLevel(None, 'Altitude must be between 0 and 80,000 m.')
+            return
         self.height_entry.clear()
         self.focus_set()
         self.height = value
