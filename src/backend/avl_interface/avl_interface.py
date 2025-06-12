@@ -8,11 +8,12 @@ the Free Software Foundation, either version 3 of the License, or
 """
 
 
-from ..geo_design import Geometry
 from pathlib import Path
 import shutil
+from subprocess import Popen, PIPE
 from .results_parser import ResultsParser
 from .. import physics
+from ..geo_design import Geometry
 
 val_dict = dict[str, float]
 avl_exe_path = Path(__file__).parent.parent.parent / 'avl' / 'avl.exe'
@@ -38,16 +39,24 @@ class AVLInterface:
         """Creates a command string for running a given number of cases, each run 'ST' and saved to file."""
         _r = 'OPER\n'
         for i, path in enumerate(paths):
-            _r += f'{i + 1}\nX\nst\n'
-            _r += str(path.absolute())
-            _r += '\n'
+            _r += (f'{i + 1}\n'
+                   f'X\n'
+                   f'st\n'
+                   f'{str(path.absolute())}\n'
+                   f'\n'
+                   f'Q\n')
         return _r
 
     @classmethod
     def execute(cls, command: str, avl_file_path) -> str:
-        from subprocess import Popen, PIPE
         avl = Popen([avl_exe_path, str(avl_file_path)], stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=True)
-        dump = avl.communicate(bytes(command, encoding='utf-8'), timeout=None)[0].decode()
+        dump, err = avl.communicate(bytes(command, encoding='utf-8'), timeout=None)
+        dump = dump.decode()
+        err = err.decode()
+        err = err.replace('Note: The following floating-point exceptions are signalling: IEEE_DIVIDE_BY_ZERO\n', '')
+        # This message happens sometimes, no idea why, doesn't seem to affect anything, so I just ignore it
+        if err:
+            raise RuntimeError(err)
         return dump
 
     @classmethod

@@ -8,13 +8,11 @@ the Free Software Foundation, either version 3 of the License, or
 """
 
 
-from subprocess import Popen, PIPE, TimeoutExpired, run, DEVNULL
+from subprocess import Popen, PIPE, TimeoutExpired, run, DEVNULL, CalledProcessError
 from pathlib import Path
 from time import sleep
 from threading import Thread
 import re
-import os
-import sys
 from .avl_interface import avl_exe_path, AVLInterface
 from ..geo_design import Geometry
 
@@ -38,9 +36,10 @@ class ImageGetter:
         :param app_wd: App working directory.
         :return: Path to the .png image.
         """
-        process = Popen([avl_exe_path, avl_file_path], stdin=PIPE, stdout=DEVNULL, text=True, cwd=app_wd)
-        process.stdin.write(command)
-        process.stdin.flush()
+        process = Popen([avl_exe_path, avl_file_path], stdin=PIPE, stdout=PIPE, text=True, cwd=app_wd)
+        stdout, stderr = process.communicate(command)
+        if stderr:
+            raise RuntimeError(stderr)
 
         img_dir = Path(app_wd) / 'images'
         if not img_dir.exists(): img_dir.mkdir()
@@ -56,13 +55,8 @@ class ImageGetter:
 
         png_path = img_dir/f'img_{next_number}.png'
         ps_path = app_wd/'plot.ps'
-        for i in range(500):
-            if ps_path.exists():
-                break
-            else:
-                sleep(0.1)
-        else:
-            raise FileNotFoundError('AVL did not create plot.ps')
+        if not ps_path.exists():
+            raise FileNotFoundError('Cannot find plot.ps file')
 
         cls.ps2png(ps_path, png_path)
         Thread(target=cls.cleanup, args=(process, ps_path), daemon=True).start()
@@ -119,11 +113,14 @@ class ImageGetter:
     @classmethod
     def ps2png(cls, ps_path: str | Path, png_path: str | Path, add_background: bool = True):
         """Converts the given PostScript file to a PNG file."""
-        run([
-            get_gs_path(),
-            "-dSAFER", "-dBATCH", "-dNOPAUSE",
-            f"-sDEVICE={"png16m" if add_background else "pngalpha"}",
-            "-r300",
-            f"-sOutputFile={png_path}",
-            ps_path
-        ], check=True)
+        try:
+            run([
+                get_gs_path(),
+                "-dSAFER", "-dBATCH", "-dNOPAUSE",
+                f"-sDEVICE={"png16m" if add_background else "pngalpha"}",
+                "-r300",
+                f"-sOutputFile={png_path}",
+                ps_path
+            ], check=True)
+        except CalledProcessError as e:
+            raise RuntimeError(e)
