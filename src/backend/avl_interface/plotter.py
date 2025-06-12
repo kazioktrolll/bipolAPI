@@ -20,9 +20,10 @@ from ..geo_design import Geometry
 
 
 def get_gs_path() -> Path:
-    base_path = Path(getattr(sys, '_MEIPASS', os.path.abspath(".")))
+    base_path = Path(__file__).resolve().parent.parent.parent
     gs_exe = base_path / "ghostscript" / "bin" / "gswin64.exe"
-    assert gs_exe.exists()
+    if not gs_exe.exists():
+        raise FileNotFoundError('Cannot find GhostScript executable')
     return gs_exe
 
 
@@ -41,8 +42,6 @@ class ImageGetter:
         process.stdin.write(command)
         process.stdin.flush()
 
-        sleep(1) # Wait for AVL to process
-
         img_dir = Path(app_wd) / 'images'
         if not img_dir.exists(): img_dir.mkdir()
 
@@ -57,8 +56,15 @@ class ImageGetter:
 
         png_path = img_dir/f'img_{next_number}.png'
         ps_path = app_wd/'plot.ps'
-        cls.ps2png(ps_path, png_path)
+        for i in range(500):
+            if ps_path.exists():
+                break
+            else:
+                sleep(0.1)
+        else:
+            raise FileNotFoundError('AVL did not create plot.ps')
 
+        cls.ps2png(ps_path, png_path)
         Thread(target=cls.cleanup, args=(process, ps_path), daemon=True).start()
         return png_path
 
