@@ -78,7 +78,7 @@ class StaticInputPanel(CTkFrame):
 
     def get_data(self, size: int):
         return {
-            'X_cm': [self.center_of_mass[0]] * size,
-            'Y_cm': [self.center_of_mass[1]] * size,
-            'Z_cm': [self.center_of_mass[2]] * size,
+            'X_cg': [self.center_of_mass[0]] * size,
+            'Y_cg': [self.center_of_mass[1]] * size,
+            'Z_cg': [self.center_of_mass[2]] * size,
         }
