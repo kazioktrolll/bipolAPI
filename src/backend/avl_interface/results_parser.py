@@ -25,7 +25,11 @@ class ResultsParser:
     def loading_issues_from_dump(cls, dump: str) -> str | None:
         """Returns the issue part of the dump."""
         issues = cls._split_dump(dump)[2]
-        geom, mass, run = re.split(r'-{8,}', issues)
+        try:
+            geom, mass, run = re.split(r'-{8,}', issues)
+        except ValueError:
+            return issues
+        # TODO: fix for when AVL returns less values due to crash
         if '*' in geom: return '\n'.join([line for line in geom.splitlines() if '*' in line])
         return None
 
