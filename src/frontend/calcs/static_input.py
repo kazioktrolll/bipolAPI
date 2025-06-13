@@ -18,7 +18,7 @@ class StaticInputPanel(CTkFrame):
         super().__init__(parent)
         self.center_of_mass = center_of_mass
         self.mass_label = CTkLabel(self, width=120, anchor='e')
-        self.mass_entry = EntryWithInstructionsBlock(self, ('x', 'y', 'z'), 40, 1, fg_color='transparent')
+        self.mass_entry = EntryWithInstructionsBlock(self, ('x', 'y', 'z'), 38, 1, fg_color='transparent')
         self.mass_set_button = CTkButton(self, text='Set', width=40, command=self.set_mass)
 
         self.height = 0
@@ -33,14 +33,14 @@ class StaticInputPanel(CTkFrame):
     def build(self):
         CTkLabel(self, text='Center of Mass', width=120, anchor='e').grid(column=0, row=0, padx=3)
         self.columnconfigure(1, weight=1)
-        self.mass_label.grid(column=2, row=0, padx=3)
-        self.mass_entry.grid(column=3, row=0, padx=3)
-        self.mass_set_button.grid(column=4, row=0, padx=3)
+        self.mass_label.grid(column=2, row=0, padx=3, pady=3)
+        self.mass_entry.grid(column=3, row=0, padx=3, pady=3)
+        self.mass_set_button.grid(column=4, row=0, padx=3, pady=3)
 
-        CTkLabel(self, text='Height', width=120, anchor='e').grid(column=0, row=1, padx=3)
-        self.height_label.grid(column=2, row=1, padx=3)
-        self.height_entry.grid(column=3, row=1, padx=3)
-        self.height_set_button.grid(column=4, row=1, padx=3)
+        CTkLabel(self, text='Height', width=120, anchor='e').grid(column=0, row=1, padx=3, pady=3)
+        self.height_label.grid(column=2, row=1, padx=3, pady=3)
+        self.height_entry.grid(column=3, row=1, padx=3, pady=3)
+        self.height_set_button.grid(column=4, row=1, padx=3, pady=3)
 
     def set_mass(self, values: tuple[float, float, float] = None):
         if not values:

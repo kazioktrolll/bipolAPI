@@ -42,9 +42,9 @@ class AVLInterface:
             _r += (f'{i + 1}\n'
                    f'X\n'
                    f'st\n'
-                   f'{str(path.absolute())}\n'
-                   f'\n'
-                   f'Q\n')
+                   f'{str(path.absolute())}\n')
+        _r += ('\n'
+               'Q\n')
         return _r
 
     @classmethod

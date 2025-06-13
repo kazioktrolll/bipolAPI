@@ -15,6 +15,7 @@ from .static_input import StaticInputPanel
 from ..help_top_level import HelpTopLevel
 from ..popup import Popup
 from ..ask_popup import AskPopup
+from ...backend import AVLInterface, AbortFlag
 
 
 class CalcDisplay(CTkFrame):
@@ -77,13 +78,11 @@ class CalcDisplay(CTkFrame):
             return self.oip.get_run_file_data(forced=True)
 
     def run_case(self):
-        from ...backend import AVLInterface, AbortFlag
-
         self.exec_button.configure(state='disabled')
         popup = Popup(self)
-        CTkLabel(popup, text='Running...').grid(row=0, column=0)
+        CTkLabel(popup, text='Running...').grid(row=0, column=0, padx=5, pady=5, sticky='nsew')
         abort_button = CTkButton(popup, text='Cancel')
-        abort_button.grid(row=1, column=0)
+        abort_button.grid(row=1, column=0, padx=5, pady=5, sticky='news')
         popup.run()
         data = self.get_data()
         abort_flag = AbortFlag()

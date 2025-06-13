@@ -12,6 +12,7 @@ from customtkinter import CTkFrame, CTkSegmentedButton, CTkLabel, CTkEntry, CTkB
 from pathlib import Path
 from .plot_button import PlotTrefftz
 
+
 class ResultsDisplay(CTkFrame):
     def __init__(self, parent, calc_display, controls_names: list[str], app_wd: str | Path):
         super().__init__(parent, fg_color=parent.cget('fg_color'))
@@ -21,9 +22,9 @@ class ResultsDisplay(CTkFrame):
         self.page_button = PagesNumberStrip(self, command=self.switch_page)
         self.mode_button = CTkSegmentedButton(self, values=['Forces', 'Stability'], command=self.switch_mode)
         self.csv_button = CTkButton(self, text='Save to .csv', command=self.save_to_csv)
-        self.forces_label = FullDisplay(self, controls_names)
-        self.stability_label = STDisplay(self, controls_names)
-        self.current_label = self.forces_label
+        self.forces_display = ForcesDisplay(self, controls_names)
+        self.stability_display = STDisplay(self, controls_names)
+        self.current_display = self.forces_display
         self.plot_button = PlotTrefftz(self, app_wd, calc_display)
         self.mode_button.set('Forces')
         self.build()
@@ -40,27 +41,29 @@ class ResultsDisplay(CTkFrame):
         self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=0)
 
+        self.rowconfigure(0, minsize=30)
         self.page_button.grid(row=0, column=0, columnspan=2, sticky='nsew')
+        self.page_button.hide()
         self.mode_button.grid(row=1, column=0, sticky='nsew', padx=3, pady=6)
         self.csv_button.grid(row=1, column=1, sticky='nsew', padx=3, pady=6)
-        self.current_label.grid(row=2, column=0, columnspan=2, sticky='nsew')
-        self.plot_button.grid(row=3, column=0, columnspan=2, sticky='nsew')
+        self.current_display.grid(row=2, column=0, columnspan=2, sticky='nsew')
+        self.plot_button.grid(row=3, column=0, columnspan=2, sticky='nsew', pady=10, padx=5)
         self.update()
 
     def update(self):
-        self.forces_label.set(self.active_results[0])
-        self.stability_label.set(self.active_results[1])
+        self.forces_display.set(self.active_results[0])
+        self.stability_display.set(self.active_results[1])
 
-        self.stability_label.place(x=1e4, y=9366)
-        self.forces_label.place(x=1e4, y=5592)
-        self.current_label.grid(row=2, column=0, columnspan=2, sticky='nsew')
+        self.stability_display.place(x=1e4, y=9366)
+        self.forces_display.place(x=1e4, y=5592)
+        self.current_display.grid(row=2, column=0, columnspan=2, sticky='nsew')
 
     def switch_mode(self, mode: str):
         match mode:
             case 'Forces':
-                self.current_label = self.forces_label
+                self.current_display = self.forces_display
             case 'Stability':
-                self.current_label = self.stability_label
+                self.current_display = self.stability_display
         self.update()
 
     def set_results(self, results: list[list[dict[str, float]]]):
@@ -105,14 +108,15 @@ class TextBox(CTkFrame):
         self.build()
 
     def build(self):
-        if self.is_named: self.name_label.grid(row=0, column=0, sticky='nsew', padx=5, pady=5)
+        self.columnconfigure(0, weight=0, minsize=5)
+        if self.is_named: self.name_label.grid(row=0, column=1, sticky='nsew', padx=5, pady=5)
         for i, (key, value) in enumerate(self.dict.items()):
-            CTkLabel(self, text=key, anchor="e").grid(row=i + 1, column=0, padx=5, pady=2, sticky="e")
+            CTkLabel(self, text=key, anchor="e").grid(row=i + 1, column=1, padx=5, pady=2, sticky="e")
 
             entry = CTkEntry(self, width=100, border_width=0, fg_color='transparent')
             entry.insert(0, str(value))
             entry.configure(state="readonly")  # Make text selectable but not editable
-            entry.grid(row=i + 1, column=1, padx=5, pady=2, sticky="w")
+            entry.grid(row=i + 1, column=2, padx=5, pady=2, sticky="w")
 
     def set(self, data: dict[str, float]):
         self.dict = data
@@ -166,7 +170,7 @@ class STDisplay(CTkFrame):
         self.display_blocks(self.get_split_dict())
 
 
-class FullDisplay(CTkFrame):
+class ForcesDisplay(CTkFrame):
     def __init__(self, parent, controls_names: list[str]):
         super().__init__(parent, fg_color='transparent')
         self.controls = list(dict.fromkeys(controls_names))  # Remove duplicates
@@ -217,6 +221,7 @@ class PagesNumberStrip(CTkSegmentedButton):
     _size = 1
     _chapter_size = 20
     _current_chapter = 0
+    _grid_data = {}
 
     @property
     def current_pages(self):
@@ -226,6 +231,10 @@ class PagesNumberStrip(CTkSegmentedButton):
             return []
 
     def set_size(self, size: int):
+        if size == 1 and self.grid_info():
+            self.hide()
+        elif size > 1 and not self.grid_info():
+            self.show()
         self._size = size
         self.goto(1)
 
@@ -267,3 +276,13 @@ class PagesNumberStrip(CTkSegmentedButton):
             self.next()
         else:
             super().set(value, from_variable_callback, from_button_callback)
+
+    def grid(self, **kwargs):
+        self._grid_data = kwargs
+        super().grid(**kwargs)
+
+    def hide(self):
+        self.grid_forget()
+
+    def show(self):
+        self.grid(**self._grid_data)
