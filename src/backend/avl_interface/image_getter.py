@@ -101,7 +101,7 @@ class ImageGetter:
                     run_file_data: dict[str, list[float]],
                     case_number: int,
                     height: float,
-                    app_wd: str | Path) -> Path:
+                    app_wd: str | Path) -> Image.Image:
         """Returns a Trefftz plot of the given conditions.
 
         :param geometry: The geometry of the aircraft.
@@ -109,7 +109,7 @@ class ImageGetter:
         :param case_number: The number of the case considered.
         :param height: The altitude of the aircraft.
         :param app_wd: App working directory.
-        :return: Path to the Trefftz plot as a PNG file.
+        :return: The Trefftz plot as a PIL Image.
         """
         contents = AVLInterface.create_run_file_contents(run_file_data, height)
 
@@ -130,7 +130,7 @@ class ImageGetter:
                    '\n'
                    'Q\n')
         png_path = cls.get_image(avl_file_path, command, app_wd)
-        return png_path
+        return cls.image_from_path(png_path)
 
     @classmethod
     def get_geometry(cls,

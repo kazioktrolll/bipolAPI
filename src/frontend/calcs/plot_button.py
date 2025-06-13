@@ -40,11 +40,9 @@ class PlotTrefftz(PlotButton):
         geometry = self.calc_display.geometry
         run_file_data: dict[str, list[float]] = self.calc_display.oip.get_run_file_data()[0]
         case_number: int = self.current_page
-        png_path = ImageGetter.get_trefftz(
-            geometry, run_file_data, case_number,
-            self.calc_display.static_input.height, self.app_wd
-        )
-        return Image.open(png_path).rotate(-90, expand=True)
+        return ImageGetter.get_trefftz(geometry, run_file_data, case_number,
+                                       self.calc_display.static_input.height,
+                                       self.app_wd)
 
     @property
     def calc_display(self):
