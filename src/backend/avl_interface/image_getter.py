@@ -13,6 +13,7 @@ from pathlib import Path
 from time import sleep
 from threading import Thread
 import re
+from PIL import Image
 from .avl_interface import avl_exe_path, AVLInterface
 from ..geo_design import Geometry
 
@@ -76,6 +77,25 @@ class ImageGetter:
         ps_path.unlink()
 
     @classmethod
+    def ps2png(cls, ps_path: str | Path, png_path: str | Path, add_background: bool = True):
+        """Converts the given PostScript file to a PNG file."""
+        try:
+            run([
+                get_gs_path(),
+                "-dSAFER", "-dBATCH", "-dNOPAUSE",
+                f"-sDEVICE={"png16m" if add_background else "pngalpha"}",
+                "-r300",
+                f"-sOutputFile={png_path}",
+                ps_path
+            ], check=True)
+        except CalledProcessError as e:
+            raise RuntimeError(e)
+
+    @classmethod
+    def image_from_path(cls, path: Path) -> Image.Image:
+        return Image.open(path).rotate(-90, expand=True)
+
+    @classmethod
     def get_trefftz(cls,
                     geometry: Geometry,
                     run_file_data: dict[str, list[float]],
@@ -87,7 +107,9 @@ class ImageGetter:
         :param geometry: The geometry of the aircraft.
         :param run_file_data: Run-file type data.
         :param case_number: The number of the case considered.
+        :param height: The altitude of the aircraft.
         :param app_wd: App working directory.
+        :return: Path to the Trefftz plot as a PNG file.
         """
         contents = AVLInterface.create_run_file_contents(run_file_data, height)
 
@@ -111,16 +133,25 @@ class ImageGetter:
         return png_path
 
     @classmethod
-    def ps2png(cls, ps_path: str | Path, png_path: str | Path, add_background: bool = True):
-        """Converts the given PostScript file to a PNG file."""
-        try:
-            run([
-                get_gs_path(),
-                "-dSAFER", "-dBATCH", "-dNOPAUSE",
-                f"-sDEVICE={"png16m" if add_background else "pngalpha"}",
-                "-r300",
-                f"-sOutputFile={png_path}",
-                ps_path
-            ], check=True)
-        except CalledProcessError as e:
-            raise RuntimeError(e)
+    def get_geometry(cls,
+                     geometry: Geometry,
+                     app_wd: str | Path) -> Image.Image:
+        """Returns an image of the aircraft's geometry as seen by AVL.
+
+        :param geometry: The geometry of the aircraft.
+        :param app_wd: App working directory.
+        :return: The geometry image as a PIL.Image.Image."""
+
+        work_dir = Path(app_wd) / 'geometry'
+        if not work_dir.exists(): work_dir.mkdir()
+        avl_file_path = work_dir / 'plane.avl'
+        with open(avl_file_path, 'w') as avl_file: avl_file.write(geometry.string())
+
+        command = ('OPER\n'
+                   'G\n'
+                   'H\n'
+                   '\n'
+                   '\n'
+                   'Q\n')
+        png_path = cls.get_image(avl_file_path, command, app_wd)
+        return cls.image_from_path(png_path)

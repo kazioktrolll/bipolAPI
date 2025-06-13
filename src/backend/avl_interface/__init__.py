@@ -1,2 +1,2 @@
 from .avl_interface import AVLInterface, AbortFlag
-from .plotter import ImageGetter
+from .image_getter import ImageGetter
