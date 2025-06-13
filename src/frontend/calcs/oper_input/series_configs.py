@@ -24,7 +24,7 @@ class ConfigItem(CTkFrame, ABC):
     def __init__(self, parent):
         super().__init__(parent, fg_color='transparent')
         self.values: list[float] | float = []
-        self.value_label = CTkLabel(self, text='0', width=120, anchor='e')
+        self.value_label = CTkLabel(self, text='0.0', width=100, anchor='e')
         self.set_button = CTkButton(self, text='Set', width=40, command=self.set_value)
         self.nof_values_label = CTkLabel(self, text='(0)', width=30, anchor='e')
 
@@ -67,7 +67,10 @@ class ConstantConfig(ConfigItem):
             HelpTopLevel(None, 'Value must be numeric.')
             return
         self.values = val
-        self.value_label.configure(text=str(round(val, 3)))
+        if len(str(val)) > 12:
+            self.value_label.configure(text=f'{val:.3e}')
+        else:
+            self.value_label.configure(text=f'{val}')
 
 
 class RangeConfig(ConfigItem):
@@ -147,7 +150,7 @@ class FileConfig(ConfigItem):
 class SeriesConfig(CTkFrame):
     def __init__(self, parent, files_manager: FilesManager):
         super().__init__(parent)
-        self.mode_menu = CTkOptionMenu(self, values=['Constant', 'Range', 'From File'], command=self.switch_mode)
+        self.mode_menu = CTkOptionMenu(self, values=['Constant', 'Range', 'From File'], command=self.switch_mode, width=100)
         self.constant_entry = ConstantConfig(self)
         self.range_entry = RangeConfig(self)
         self.from_file_entry = FileConfig(self, files_manager)
@@ -160,6 +163,7 @@ class SeriesConfig(CTkFrame):
         return self.mode_menu.get()
 
     def build(self):
+        self.columnconfigure(0, minsize=100)
         self.update()
 
     def update(self):

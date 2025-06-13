@@ -44,7 +44,7 @@ class OperSeriesInput(RowManager):
         self.command_name = self.base_names[name][0]
         self.run_file_name = self.base_names[name][1]
 
-        self.name_label = CTkLabel(self.grid, text=self.display_name, anchor='e')
+        self.name_label = CTkLabel(self.grid, text=self.display_name.capitalize(), anchor='e')
         self.bind_menu = CTkOptionMenu(self.grid, width=120, values=list(self.bindable_names.keys()))
         self.series_config = SeriesConfig(self.grid, files_manager)
         self.bind_button = CTkButton(self.grid, text="Bind", width=20, command=self.bind_switch)
@@ -72,7 +72,7 @@ class OperSeriesInput(RowManager):
     def build(self):
         self.grid.columnconfigure(1, minsize=120)
         self.stack_spacing(0)
-        self.stack(self.name_label, sticky='e', pady=6)
+        self.stack(self.name_label, sticky='e', pady=6, padx=6)
         self.stack([
             self.bind_menu,
             self.series_config,
@@ -92,9 +92,9 @@ class OperSeriesInputPanel(CTkFrame):
         super().__init__(parent, fg_color='transparent', border_width=3)
         self.files_manager = FilesManager()
 
-        sb = CTkSegmentedButton(self, values=['Single', 'Series'], command=self.toggle_series)
+        sb = CTkSegmentedButton(self, values=['Single', 'Series'], command=self.toggle_series, width=100, dynamic_resizing=False)
         sb.set('Single')
-        sb.grid(row=0, column=2, sticky='w', pady=10)
+        sb.grid(row=0, column=3, sticky='w', pady=10)
         self.load_from_file_button = CTkButton(self, text='Add File', width=169, command=self.add_file)
         self.ois: list[OperSeriesInput] = [
             OperSeriesInput(grid=self, files_manager=self.files_manager, name='Alpha', master_row=1, control_surfaces=control_surfaces)
@@ -104,6 +104,9 @@ class OperSeriesInputPanel(CTkFrame):
             self.ois.append(
                 OperSeriesInput(grid=self, files_manager=self.files_manager, name=name, master_row=i + 1, control_surfaces=control_surfaces)
             )
+        # Add padding at ends
+        self.rowconfigure(20, minsize=10)
+        self.columnconfigure(20, minsize=10)
 
     def get_values(self, forced) -> tuple[list[list[float]], int]:
         vals = [item.get_value() for item in self.ois]
@@ -130,7 +133,7 @@ class OperSeriesInputPanel(CTkFrame):
         return size
 
     def toggle_series(self, mode: str):
-        match mode:
+        match mode:     # noqa
             case 'Single':
                 target = False
                 self.load_from_file_button.grid_forget()

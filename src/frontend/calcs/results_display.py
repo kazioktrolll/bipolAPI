@@ -152,7 +152,7 @@ class STDisplay(CTkFrame):
         if not blocks: return
         for i, block in enumerate(blocks):
             try:
-                name = self.controls[i].capitalize() + 's'
+                name = self.controls[i].capitalize()
             except IndexError:
                 name = None
             tb = TextBox(self, name)
