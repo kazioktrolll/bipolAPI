@@ -8,12 +8,13 @@ the Free Software Foundation, either version 3 of the License, or
 """
 
 
-from customtkinter import CTkButton, CTkToplevel, CTkImage, CTkLabel
+from customtkinter import CTkButton, CTkToplevel
 from pathlib import Path
 from PIL import Image
 from tkinter.filedialog import asksaveasfilename
 from abc import ABC, abstractmethod
-from src.backend import ImageGetter
+from ..image_frame import ImageFrame
+from ...backend import ImageGetter
 
 
 
@@ -60,37 +61,16 @@ class PlotWindow(CTkToplevel):
     def __init__(self, img: Image.Image):
         super().__init__(None)
         self.title('Image')
-        self._image = img
-        self.img_ar = self._image.size[0] / self._image.size[1]
-        self.image = CTkImage(self._image, size=(800, 800))
-        self.image_label = CTkLabel(self, image=self.image, text='')
-        self.image_label.pack(fill='both', expand=True)
+        self.image_frame = ImageFrame(self, img)
+        self.image_frame.pack(fill='both', expand=True)
 
         self.save_button = CTkButton(self, text='Save', command=self.save)
         self.save_button.place(x=0, y=0)
 
-        self.bind("<Configure>", self.resize_image)
         self.geometry("800x800")
 
         self.after(50, self.lift,) # noqa
         self.focus_force()
-
-    def resize_image(self, event):
-        container_width = event.width
-        container_height = event.height
-
-        # Calculate new size preserving aspect ratio
-        if container_width / self.img_ar <= container_height:
-            new_width = container_width
-            new_height = int(container_width / self.img_ar)
-        else:
-            new_height = container_height
-            new_width = int(container_height * self.img_ar)
-
-        # Create a new CTkImage with resized PIL image
-        resized_ctk_image = CTkImage(self._image, size=(new_width, new_height))
-        self.image_label.configure(image=resized_ctk_image)
-        self.image_label.image = resized_ctk_image  # Prevent garbage collection
 
     def save(self):
         path = Path(asksaveasfilename(
@@ -98,4 +78,4 @@ class PlotWindow(CTkToplevel):
             filetypes=[('PNG File', ['.png'])],
             title='Save Image',
         ))
-        self._image.save(path)
+        self.image_frame.pil_image.save(path)
