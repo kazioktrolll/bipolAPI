@@ -11,6 +11,8 @@ the Free Software Foundation, either version 3 of the License, or
 from pathlib import Path
 from typing import Callable
 from tempfile import TemporaryDirectory
+from tkinter.filedialog import askopenfilename
+import pickle
 from src.backend.geo_design import Geometry, GeometryGenerator
 from src.frontend import AskPopup
 
@@ -101,6 +103,8 @@ class App:
             filetypes=[('GAVL File', ['*.gavl'])],
             title=self.geometry.name
         ))
+        if path == Path('.'):
+            return
         import pickle
         with open(path, 'wb') as f:
             pickle.dump(self.geometry, f)  # noqa
@@ -108,11 +112,11 @@ class App:
     def load(self, path: str | Path = None) -> None:
         """Loads the geometry from a .gavl file."""
         self.top_bar.collapse_all()
-        from tkinter.filedialog import askopenfilename
         path = path or Path(askopenfilename(
             filetypes=[('GAVL File', ['*.gavl']), ('All Files', ['*.*'])]
         ))
-        import pickle
+        if path == Path('.'):
+            return
         with open(path, 'rb') as f:
             self.set_geometry(pickle.load(f))
 
@@ -140,12 +144,13 @@ class App:
     def import_from_avl(self, path: str | Path = None) -> None:
         """Imports the current geometry from an .avl file."""
         from src.backend.geo_design import GeometryGenerator
-        from tkinter.filedialog import askopenfilename
         self.top_bar.collapse_all()
         path = path or Path(askopenfilename(
             defaultextension='.avl',
             filetypes=[('AVL File', ['*.avl'])]
         ))
+        if path == Path('.'):
+            return
 
         geom = GeometryGenerator.from_avl(path)
         self.set_geometry(geom)
