@@ -157,25 +157,26 @@ class App:
 
 
 from customtkinter import CTkFrame
+from src.frontend import TopBarItem, TopBarButton
 
 
 class TopBar(CTkFrame):
     def __init__(self, app: App):
         super().__init__(app.root, height=20)
-        from src.frontend import TopBarItem, TopBarButton
         TopBarItem(self, app.root, 'File', [
             ('Save', app.save_as),
-            ('Load', app.load),
-            ('New Empty', app.new_empty),
-            ('New Default', app.new_default),
+            ('New', app.new_default),
+            ('Open', app.load),
             ('Export', app.export_to_avl),
             ('Import', app.import_from_avl)
         ]).grid(column=0, row=0, sticky='nsew')
-        from .scenes import GeoDesignScene, CalcScene
+        from .scenes import GeoDesignScene, CalcScene, ValidationScene
         TopBarButton(self, 'GeoDesign', lambda: app.set_scene(GeoDesignScene(app))
                      ).grid(column=1, row=0, sticky='nsew')
-        TopBarButton(self, 'Analysis', lambda: app.set_scene(CalcScene(app))
+        TopBarButton(self, 'Validation', lambda: app.set_scene(ValidationScene(app))
                      ).grid(column=2, row=0, sticky='nsew')
+        TopBarButton(self, 'Analysis', lambda: app.set_scene(CalcScene(app))
+                     ).grid(column=3, row=0, sticky='nsew')
 
     def collapse_all(self):
         for child in self.children.values():
