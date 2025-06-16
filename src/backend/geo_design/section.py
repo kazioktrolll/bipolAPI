@@ -102,16 +102,16 @@ class Control:
     class_name: str
     """Class representing a control surface attached to a section."""
 
-    def __init__(self, x_hinge: float, SgnDup: bool,
+    def __init__(self, x_hinge: float, SgnDup: str = '',
                  gain: float = 1, color: str = 'green', instance_name: str = None) -> None:
         """
         Parameters:
-            name (str): The name of the control surface.
             x_hinge (float): The x/c position of the hinge. If negative, the surface is on the leading edge.
             SgnDup (bool): The sign of the sign of the hinge.
-                ``True`` for symmetric deflection, ``False`` for antisymmetric defection.
+                ``+1`` for symmetric deflection, ``-1`` for antisymmetric defection.
             gain (float): The gain of the control surface. Defaults to 1.
             color (str): The color of the control surface. Defaults to 'green'.
+            instance_name (str): The name of the control surface.
         """
         assert -1 < x_hinge < 1
 
@@ -131,7 +131,7 @@ class Control:
     def string(self) -> str:
         """Returns the current geometry as a .avl type string."""
         return ("CONTROL\n"
-                f"{self.name} {self.gain} {self.x_hinge} 0. 0. 0. {"+1" if self.SgnDup else "-1"}\n")
+                f"{self.name} {self.gain} {self.x_hinge} 0. 0. 0. {self.SgnDup}\n")
 
     def is_equal_to(self, other) -> bool:
         """Returns True if the two control surfaces are of the same type and should be connected."""
@@ -158,7 +158,7 @@ class Control:
 class PreDefControl(Control):
     """An interface for pre-defined types of control surfaces."""
 
-    def __init__(self, x_hinge: float, SgnDup: bool,
+    def __init__(self, x_hinge: float, SgnDup: str,
                  gain: float = 1, color: str = 'green') -> None:
         super().__init__(x_hinge, SgnDup, gain, color)
         assert self.class_name is not None
@@ -176,7 +176,7 @@ class Flap(PreDefControl):
             x_hinge (float): The x/c position of the hinge.
         """
         assert 0 < x_hinge < 1
-        super().__init__(x_hinge=x_hinge, SgnDup=True, color='yellow')
+        super().__init__(x_hinge=x_hinge, SgnDup='+1', color='yellow')
 
 
 class Aileron(PreDefControl):
@@ -188,7 +188,7 @@ class Aileron(PreDefControl):
             x_hinge (float): The x/c position of the hinge.
         """
         assert 0 < x_hinge < 1
-        super().__init__(x_hinge=x_hinge, SgnDup=False)
+        super().__init__(x_hinge=x_hinge, SgnDup='-1')
 
 
 class Elevator(PreDefControl):
@@ -200,4 +200,4 @@ class Elevator(PreDefControl):
             x_hinge (float): The x/c position of the hinge.
         """
         assert 0 <= x_hinge <= 1
-        super().__init__(x_hinge=x_hinge, SgnDup=True, color='green3')
+        super().__init__(x_hinge=x_hinge, SgnDup='+1', color='green3')

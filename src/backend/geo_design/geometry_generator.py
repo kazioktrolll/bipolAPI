@@ -62,18 +62,19 @@ class FromAvl:
     @classmethod
     def load(cls, path: Path | str) -> Geometry:
         """Creates a Geometry object based on .avl file."""
-        if isinstance(path, str): path = Path(path)
+        path = Path(path)
         with open(path) as f: raw_lines = f.readlines()
         lines = cls.format_lines(raw_lines)
-        return cls.handle_top_level(lines)
+        return cls.handle_top_level(lines, path)
 
     @classmethod
     def format_lines(cls, raw_lines: list[str]) -> list[str]:
         """Returns a list of lines after formatting."""
         lines = []
         for line in raw_lines:
-            if '#' in line or '!' in line: continue
-            if '|' in line: line = line.split('|')[0]
+            if '#' in line: line = line.split('#')[0]
+            elif '!' in line: line = line.split('!')[0]
+            elif '|' in line: line = line.split('|')[0]
             line = line.strip()
             if not line: continue
             lines.append(line)
@@ -102,7 +103,7 @@ class FromAvl:
         return blocks
 
     @classmethod
-    def handle_top_level(cls, lines: list[str]) -> Geometry:
+    def handle_top_level(cls, lines: list[str], path: Path) -> Geometry:
         """Returns a Geometry object based on .avl file."""
         # Reading
         name = lines.pop(0)
@@ -128,13 +129,16 @@ class FromAvl:
 
         blocks = cls.split_into_blocks(lines, ('SURFACE', 'BODY'))
         for keyword, lines in blocks:
-            if keyword == 'SURFACE': geometry_data['surfaces'].append(cls.handle_surface_level(lines[1:]))
+            if keyword == 'SURFACE':
+                geometry_data['surfaces'].append(
+                    cls.handle_surface_level(lines[1:], path)
+                )
             if keyword == 'BODY': cls.error('GAVL does not support BODY. The block is being skipped.')
 
         return Geometry(**geometry_data)
 
     @classmethod
-    def handle_surface_level(cls, block: list[str]) -> Surface:
+    def handle_surface_level(cls, block: list[str], path: Path) -> Surface:
         """Returns a Surface based on .avl description lines."""
         surface_data: dict[str, Any] = {
             'name': None,
@@ -185,13 +189,15 @@ class FromAvl:
                 case 'CDCL':
                     cls.error("CDCL")
                 case 'SECTION':
-                    surface_data['sections'].append(cls.handle_section_level(lines[1:], scale, angle))
+                    surface_data['sections'].append(
+                        cls.handle_section_level(lines[1:], path, scale, angle)
+                    )
 
         surface_data['airfoil'] = surface_data['sections'][0].airfoil
         return SurfaceCreator.UnknownSurface(**surface_data)
 
     @classmethod
-    def handle_section_level(cls, block: list[str], scale=(1, 1, 1), angle=0) -> Section:
+    def handle_section_level(cls, block: list[str], path: Path, scale=(1, 1, 1), angle=0) -> Section:
         """Returns a Section based on .avl description lines."""
         vals = list(map(float, block.pop(0).split()))
         section_data: dict[str, Any] = {
@@ -217,7 +223,10 @@ class FromAvl:
                     points_float = [(float(x), float(y)) for x, y in points_str]
                     section_data['airfoil'] = Airfoil.from_points(name=name, points=points_float)
                 case 'AFILE':
-                    section_data['airfoil'] = Airfoil.from_file(path=lines[1])
+                    afile_path = Path(lines[1])
+                    if not afile_path.exists():
+                        afile_path = path.parent / afile_path
+                    section_data['airfoil'] = Airfoil.from_file(afile_path)
                 case 'CONTROL':
                     section_data['control'] = cls.handle_control_level(lines[1:])
                 case 'DESIGN':
@@ -233,9 +242,10 @@ class FromAvl:
         control_data = {
             'instance_name': name,
             'gain': vals[0],
-            'x_hinge': vals[1],
-            'SgnDup': vals[5]
+            'x_hinge': vals[1]
         }
+        if len(vals) == 6:
+            control_data['SgnDup'] = str(vals[5])
         return Control(**control_data)
 
     @classmethod

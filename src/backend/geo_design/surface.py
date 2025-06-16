@@ -178,7 +178,7 @@ class Surface(ABC):
         """Returns the current geometry as a .avl type string."""
         _r = (f"SURFACE\n"
               f"{self.name}\n"
-              f"{int(self.mac() * 8)} 1.0 {int(self.span() * 4)} 1.0\n"
+              f"{int(self.mac() * 4)} 1.0 {int(self.span() * 2)} 1.0\n"
               f"{'YDUPLICATE\n0.0' if self.y_duplicate else ''}\n"
               f"SCALE\n"
               f"1.0 1.0 1.0\n"
