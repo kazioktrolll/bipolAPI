@@ -48,8 +48,8 @@ class AVLInterface:
         return _r
 
     @classmethod
-    def execute(cls, command: str, avl_file_path) -> str:
-        avl = Popen([avl_exe_path, str(avl_file_path)], stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=True)
+    def execute(cls, command: str, avl_file_path, app_wd: Path) -> str:
+        avl = Popen([avl_exe_path, str(avl_file_path)], stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=True, cwd=app_wd)
         dump, err = avl.communicate(bytes(command, encoding='utf-8'), timeout=None)
         dump = dump.decode()
         err = err.decode()
@@ -57,6 +57,13 @@ class AVLInterface:
         # This message happens sometimes, no idea why, doesn't seem to affect anything, so I just ignore it
         if err:
             raise RuntimeError(err)
+        if '***' in dump:
+            err_line = [line for line in dump.split('\n') if '***' in line]
+            raise RuntimeError('\n'.join(err_line))
+        if 'SINVRT' in dump:
+            raise RuntimeError('SINVRT - geometry too complex')
+        if 'SDUPL' in dump:
+            raise RuntimeError('SDUPL - geometry resolution too high')
         return dump
 
     @classmethod
@@ -101,7 +108,7 @@ class AVLInterface:
             run_file.write(contents)
         if not flag:
             command = cls.create_st_command(files)
-            dump = cls.execute(command, avl_file_path)
+            dump = cls.execute(command, avl_file_path, app_work_dir)
         if not flag:
             errors = ResultsParser.loading_issues_from_dump(dump)
             vals = ResultsParser.all_sts_to_data(files)

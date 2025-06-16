@@ -8,13 +8,13 @@ the Free Software Foundation, either version 3 of the License, or
 """
 
 
-from subprocess import Popen, PIPE, TimeoutExpired, run, DEVNULL, CalledProcessError
+from subprocess import run, CalledProcessError
 from pathlib import Path
 from time import sleep
 from threading import Thread
 import re
 from PIL import Image
-from .avl_interface import avl_exe_path, AVLInterface
+from .avl_interface import AVLInterface
 from ..geo_design import Geometry
 
 
@@ -37,10 +37,7 @@ class ImageGetter:
         :param app_wd: App working directory.
         :return: Path to the .png image.
         """
-        process = Popen([avl_exe_path, avl_file_path], stdin=PIPE, stdout=PIPE, text=True, cwd=app_wd)
-        stdout, stderr = process.communicate(command)
-        if stderr:
-            raise RuntimeError(stderr)
+        dump = AVLInterface.execute(command, avl_file_path, app_wd)
 
         img_dir = Path(app_wd) / 'images'
         if not img_dir.exists(): img_dir.mkdir()
@@ -60,20 +57,12 @@ class ImageGetter:
             raise FileNotFoundError('Cannot find plot.ps file')
 
         cls.ps2png(ps_path, png_path)
-        Thread(target=cls.cleanup, args=(process, ps_path), daemon=True).start()
+        Thread(target=cls.cleanup, args=(ps_path,), daemon=True).start()
         return png_path
 
     @staticmethod
-    def cleanup(process: Popen, ps_path: Path, wait_time: float = 3):
+    def cleanup(ps_path: Path, wait_time: float = 3):
         sleep(wait_time)
-        process.terminate()
-        try:
-            process.wait(timeout=5)
-        except TimeoutExpired:
-            process.kill()
-            process.wait()
-
-        process.stdin.close()
         ps_path.unlink()
 
     @classmethod
