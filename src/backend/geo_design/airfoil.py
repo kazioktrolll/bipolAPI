@@ -136,5 +136,5 @@ class Airfoil:
 
         _r = f"AIRFOIL {self.active_range[0]} {self.active_range[1]} #{self.name}\n"
         for x, y in self.points:
-            _r += f"{x} {y}\n"
+            _r += f"{x:.8f} {y:.8f}\n"
         return _r
