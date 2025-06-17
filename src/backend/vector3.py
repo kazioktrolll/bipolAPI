@@ -64,6 +64,14 @@ class Vector3:
         other = Vector3(*other)
         return Vector3(self.x * other.x, self.y * other.y, self.z * other.z)
 
+    def cross_product(self, other: AnyVector3) -> 'Vector3':
+        """Returns cross-product of two vectors."""
+        return Vector3(self.y * other.z - self.z * other.y, self.z * other.x - self.x * other.z, self.x * other.y - self.y * other.x)
+
+    def length(self) -> float:
+        """Returns the length of the vector."""
+        return (self.x**2 + self.y**2 + self.z**2)**0.5
+
     @property
     def avl_string(self) -> str:
         """Returns a string 'x y z'."""
