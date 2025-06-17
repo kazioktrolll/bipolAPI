@@ -53,10 +53,10 @@ class AVLInterface:
         dump, err = avl.communicate(bytes(command, encoding='utf-8'), timeout=None)
         dump = dump.decode()
         err = err.decode()
-        err = err.replace('Note: The following floating-point exceptions are signalling: IEEE_DIVIDE_BY_ZERO\n', '')
-        # This message happens sometimes, no idea why, doesn't seem to affect anything, so I just ignore it
         if err:
-            raise RuntimeError(err)
+            # Ignore 'Notes' - non critical notifications
+            err = '\n'.join([line for line in err.split('\n') if 'Note' not in line])
+            if err: raise RuntimeError(err)
         if '***' in dump:
             err_line = [line for line in dump.split('\n') if '***' in line]
             raise RuntimeError('\n'.join(err_line))
