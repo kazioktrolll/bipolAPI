@@ -38,3 +38,18 @@ def distribute_units(total_units: int, weights: list[float]) -> list[int]:
         allocations[remainders[i][0]] += 1
 
     return allocations
+
+def sort_loop(points):
+    cx = sum(x for x, y in points) / len(points)
+    cy = sum(y for x, y in points) / len(points)
+
+    def angle(p):
+        x, y = p
+        return math.atan2(y - cy, x - cx)
+
+    # Sort counterclockwise by angle
+    sorted_points = sorted(points, key=angle)
+
+    # Rotate so it starts from point with max x
+    max_x_index = max(range(len(sorted_points)), key=lambda i: sorted_points[i][0])
+    return sorted_points[max_x_index:] + sorted_points[:max_x_index]

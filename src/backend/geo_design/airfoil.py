@@ -10,6 +10,7 @@ the Free Software Foundation, either version 3 of the License, or
 
 from pathlib import Path
 import re
+from ..math_functions import sort_loop
 
 
 def is_number(s: str):
@@ -45,10 +46,6 @@ class Airfoil:
             naca (str): The NACA code of the airfoil. ``None`` if the airfoil is not defined using NACA code.
             active_range (tuple[float, float]): The active range of the airfoil.
     """
-    points: list[tuple[float, float]] | None
-    naca: str | None
-    name: str
-    active_range: tuple[float, float]
 
     def __init__(self, name: str, points: list[tuple[float, float]] | None, naca: str | None, active_range: tuple[float, float]):
         """
@@ -91,11 +88,7 @@ class Airfoil:
             if not (-1 < new_line[0] < 1) or not (-1 < new_line[1] < 1): continue
             data.append(new_line)
 
-        positive = [(x, y) for x, y in data if y >= 0]
-        positive.sort(key=lambda p: -p[0])
-        negative = [(x, y) for x, y in data if y < 0]
-        negative.sort(key=lambda p: p[0])
-        sorted_data = positive + negative
+        sorted_data = sort_loop(data)
 
         if len(sorted_data) < 3: raise ValueError("Incorrect input file!")
 
