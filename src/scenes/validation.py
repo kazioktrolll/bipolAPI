@@ -14,4 +14,5 @@ from ..frontend.validation import ValidationDisplay
 
 class ValidationScene(Scene):
     def build(self) -> None:
+        self.app.geometry.distribute_points()
         ValidationDisplay(self).pack(fill='both', expand=True)

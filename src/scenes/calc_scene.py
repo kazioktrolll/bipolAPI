@@ -20,6 +20,7 @@ class CalcScene(Scene):
         return CalcDisplay(self, Path(self.app.work_dir.name))
 
     def build(self) -> None:
+        self.app.geometry.distribute_points()
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
         self.display.grid(row=0, column=0, sticky='news')

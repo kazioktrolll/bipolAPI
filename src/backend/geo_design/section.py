@@ -45,6 +45,7 @@ class Section:
         self.inclination = inclination
         self.airfoil = airfoil or Airfoil.empty()
         self.control = control
+        self.spanwise_points = 1
 
     def __repr__(self) -> str:
         return f"Section at: {self.leading_edge_position.tuple()} x {self.chord}, control: {self.control.__repr__()}"
@@ -91,7 +92,7 @@ class Section:
         """Returns the current geometry as a .avl type string."""
         _r = (f"\n"
               f"SECTION\n"
-              f"{self.leading_edge_position.avl_string} {self.chord} {self.inclination}\n")
+              f"{self.leading_edge_position.avl_string} {self.chord} {self.inclination} {self.spanwise_points} {1.0}\n")
         _r += self.airfoil.string()
         if self.has_control:
             _r += self.control.string()

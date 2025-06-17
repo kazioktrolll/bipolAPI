@@ -12,6 +12,7 @@ from .section import Section, Flap, Aileron, Elevator, Control
 from .airfoil import Airfoil
 from ..to_re_docstring_decorator import to_re_docstring
 from ..vector3 import Vector3, AnyVector3
+from ..math_functions import best_factor_pair, distribute_units
 from abc import ABC, abstractmethod
 from math import atan, degrees
 from typing import Optional
@@ -55,6 +56,7 @@ class Surface(ABC):
         if not len(sections) >= 2: raise ValueError("Cannot create a surface with less than two sections.")
         self.sections = sections
         self.sort_sections()
+        self.chord_points = 1
 
     def __repr__(self) -> str:
         return self.name
@@ -82,14 +84,24 @@ class Surface(ABC):
     def span(self) -> float:
         """Returns the span of the surface."""
 
-    def mac(self) -> float:
+    def area(self) -> float:
+        """Returns the area of the surface."""
+        # For each section, A = 1/2 * ||(B-A)x(C-A)|| + 1/2 * ||(C-A)x(D-A)||
+        # Where ABCD are tips of the section: A=prev.le, B=prev.te, C=next.te, D=next.le
         area = 0
-        for i in range(1, len(self.sections)):
-            prev = self.sections[i - 1]
-            curr = self.sections[i]
-            area += (prev.chord + curr.chord) * (curr.y - prev.y) / 2
-        if self.y_duplicate: area *= 2
-        return area / self.span()
+        for i in range(len(self.sections) - 1):
+            prev = self.sections[i]
+            next = self.sections[i + 1]
+            A = prev.leading_edge_position
+            B = A + (prev.chord, 0, 0)
+            D = next.leading_edge_position
+            C = D + (next.chord, 0, 0)
+            sect_area = 0.5 * ((B-A).cross_product(C-A)).length() + 0.5 * ((C-A).cross_product(D-A)).length()
+            area += sect_area
+        return area
+
+    def mac(self) -> float:
+        return self.area() / self.span()
 
     def sort_sections(self) -> None:
         """Sorts the sections along the major axis of the surface."""
@@ -174,11 +186,30 @@ class Surface(ABC):
 
         return secs
 
+    def min_points(self) -> int:
+        """Returns the minimal number of vortex points required for this surface. """
+        return len(self.sections) - 1
+
+    def distribute_points(self, nof_points: int) -> None:
+        chord_points, span_points = best_factor_pair(nof_points)
+        self.chord_points = chord_points
+        span_points -= len(self.sections) - 1 # Each section requires at least a point, except for the last one.
+        lengths = []
+        for i in range(len(self.sections) - 1):
+            prev = self.sections[i]
+            next = self.sections[i + 1]
+            lengths.append((self.major_axis(prev) - self.major_axis(next)))
+
+        spanwise_distribution = distribute_units(span_points, lengths)
+        spanwise_distribution.append(-1) # For the last section, with the later '+1' will give 0
+        for section, distribution in zip(self.sections, spanwise_distribution):
+            section.spanwise_points = distribution + 1
+
     def string(self) -> str:
         """Returns the current geometry as a .avl type string."""
         _r = (f"SURFACE\n"
               f"{self.name}\n"
-              f"{int(self.mac() * 4)} 1.0 {int(self.span() * 2)} 1.0\n"
+              f"{self.chord_points} 1.0\n" # Spanwise points are distributed per section.
               f"{'YDUPLICATE\n0.0' if self.y_duplicate else ''}\n"
               f"SCALE\n"
               f"1.0 1.0 1.0\n"
