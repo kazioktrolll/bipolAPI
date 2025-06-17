@@ -9,6 +9,7 @@ the Free Software Foundation, either version 3 of the License, or
 
 
 from customtkinter import CTk, CTkTextbox, CTkLabel
+import sys
 
 
 class CrashWindow(CTk):
@@ -18,12 +19,17 @@ class CrashWindow(CTk):
                  text='A critical error has occurred.\nPlease send the error message along with your .gavl file\nto Support at issues.gavl@gmail.com\n'
                  ).pack(padx=10, pady=10)
         # Create a read-only textbox that looks like a label
-        scrollable_label = CTkTextbox(self, width=380, height=180, wrap="word")
+        scrollable_label = CTkTextbox(self, width=1000, height=400, wrap="word")
         scrollable_label.pack(padx=10, pady=10, fill="both", expand=True)
 
         scrollable_label.insert("0.0", error)
         scrollable_label.configure(state="disabled")  # Make it read-only
 
+        self.protocol("WM_DELETE_WINDOW", self.exit)
         self.update()
         self.after(100, self.geometry, "")
         self.mainloop()
+
+    def exit(self):
+        self.destroy()
+        sys.exit(1)

@@ -106,14 +106,15 @@ class FromAvl:
     def handle_top_level(cls, lines: list[str], path: Path) -> Geometry:
         """Returns a Geometry object based on .avl file."""
         # Reading
+        readable = '\n'.join(lines)
         name = lines.pop(0)
-        mach = float(lines.pop(0))
-        syms = tuple(map(float, lines.pop(0).split()))
-        refs = tuple(map(float, lines.pop(0).split()))
-        ref_pos = tuple(map(float, lines.pop(0).split()))
+        mach = float(lines.pop(0).split()[0])
+        syms = tuple(map(float, lines.pop(0).split()[:3]))
+        refs = tuple(map(float, lines.pop(0).split()[:3]))
+        ref_pos = tuple(map(float, lines.pop(0).split()[:3]))
         next_line = lines.pop(0)
         try:
-            CDp = float(next_line)
+            CDp = float(next_line.split()[0])
         except ValueError:
             CDp = 0
             lines.insert(0, next_line)
@@ -144,7 +145,7 @@ class FromAvl:
             'name': None,
             'sections': [],
             'y_duplicate': False,
-            'origin_position': None,
+            'origin_position': (0, 0, 0),
             'airfoil': None,
         }
         name = block.pop(0)
@@ -223,7 +224,12 @@ class FromAvl:
                     points_float = [(float(x), float(y)) for x, y in points_str]
                     section_data['airfoil'] = Airfoil.from_points(name=name, points=points_float)
                 case 'AFILE':
-                    afile_path = Path(lines[1])
+                    _path = lines[1]
+                    if '"' in _path:
+                        start = _path.find('"') + 1
+                        end = _path.rfind('"')
+                        _path = _path[start:end]
+                    afile_path = Path(_path)
                     if not afile_path.exists():
                         afile_path = path.parent / afile_path
                     section_data['airfoil'] = Airfoil.from_file(afile_path)

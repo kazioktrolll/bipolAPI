@@ -428,7 +428,7 @@ class HorizontalSimpleSurface(HorizontalSurface):
         return surf
 
     @classmethod
-    def from_complex(cls, surface: HorizontalSurface, accuracy=.05) -> Optional['HorizontalSimpleSurface']:
+    def from_complex(cls, surface: HorizontalSurface, accuracy=.05, searching = False) -> Optional['HorizontalSimpleSurface']:
         root = surface.sections[0]
         tip = surface.sections[-1]
 
@@ -459,8 +459,13 @@ class HorizontalSimpleSurface(HorizontalSurface):
         ## Set Mechanization
 
         # Add the mechanization
-        controls = HorizontalSimpleSurface._read_controls_from_complex(surface)
-        simplified.set_mechanization(**controls)
+        try:
+            controls = HorizontalSimpleSurface._read_controls_from_complex(surface)
+            simplified.set_mechanization(**controls)
+        except Exception as e:
+            if searching:
+                return None
+            raise e
 
         return simplified
 

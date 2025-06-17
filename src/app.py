@@ -141,7 +141,7 @@ class App:
         ))
         self.geometry.save_to_avl(path=path)
 
-    def import_from_avl(self, path: str | Path = None) -> None:
+    def import_from_avl(self, path: str | Path = None, find_simples = True) -> None:
         """Imports the current geometry from an .avl file."""
         from src.backend.geo_design import GeometryGenerator
         self.top_bar.collapse_all()
@@ -155,9 +155,10 @@ class App:
         geom = GeometryGenerator.from_avl(path)
         self.set_geometry(geom)
 
-        for surf in geom.find_possible_simples():
-            a = AskPopup.ask(f'Convert {surf.name} to Simple Surface?', ['Y', 'N'], 'N')
-            if a == 'Y': geom.replace_surface(surf)
+        if find_simples:
+            for surf in geom.find_possible_simples():
+                a = AskPopup.ask(f'Convert {surf.name} to Simple Surface?', ['Y', 'N'], 'N')
+                if a == 'Y': geom.replace_surface(surf)
         self.set_geometry(geom)
 
 

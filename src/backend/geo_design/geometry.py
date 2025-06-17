@@ -102,7 +102,7 @@ class Geometry:
         _r: list[HorizontalSimpleSurface] = []
         for surf in self.surfaces.values():
             if not isinstance(surf, HorizontalSurface): continue
-            simple = HorizontalSimpleSurface.from_complex(surf)
+            simple = HorizontalSimpleSurface.from_complex(surf, searching=True)
             if simple is None: continue
             _r.append(simple)
         return _r
