@@ -61,9 +61,10 @@ class AVLInterface:
             err_line = [line for line in dump.split('\n') if '***' in line]
             raise RuntimeError('\n'.join(err_line))
         if 'SINVRT' in dump:
-            raise RuntimeError('SINVRT - geometry too complex')
+            pass
+            # raise RuntimeError('SINVRT - geometry too complex, cannot construct a spline.')
         if 'SDUPL' in dump:
-            raise RuntimeError('SDUPL - geometry resolution too high')
+            raise RuntimeError('SDUPL - geometry resolution too high, decrease mesh density.')
         return dump
 
     @classmethod
