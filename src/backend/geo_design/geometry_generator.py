@@ -174,17 +174,17 @@ class FromAvl:
                 case kw if kw in ('COMPONENT', 'INDEX'):
                     cls.error(f"{kw}")
                 case 'YDUPLICATE':
-                    if float(lines[1]) == 0.0:
+                    if float(lines[1].split()[0]) == 0.0:
                         surface_data['y_duplicate'] = True
                     else:
                         cls.error(f"YDUPLICATE cannot be non-zero!")  # TODO: fix?
                 case 'SCALE':
-                    scale = tuple(map(float, lines[1].split()))
+                    scale = tuple(map(float, lines[1].split()[:3]))
                 case 'TRANSLATE':
-                    vals = map(float, lines[1].split())
+                    vals = map(float, lines[1].split()[:3])
                     surface_data['origin_position'] = Vector3(*vals)
                 case 'ANGLE':
-                    angle = float(lines[1])
+                    angle = float(lines[1].split()[0])
                 case kw if kw in ('NOWA', 'NOAL', 'NOLO'):
                     cls.error(f"{kw}")
                 case 'CDCL':
@@ -213,7 +213,7 @@ class FromAvl:
         for keyword, lines in blocks:
             match keyword:
                 case 'NACA':
-                    section_data['airfoil'] = Airfoil.from_naca(naca=lines[1])
+                    section_data['airfoil'] = Airfoil.from_naca(naca=' '.join(lines[1].split()[:2]))
                 case 'AIRFOIL':
                     if '#' in lines[0]:
                         name = lines[0].split('#')[1]
@@ -229,6 +229,8 @@ class FromAvl:
                         start = _path.find('"') + 1
                         end = _path.rfind('"')
                         _path = _path[start:end]
+                    else:
+                        _path = _path.split()[0]
                     afile_path = Path(_path)
                     if not afile_path.exists():
                         afile_path = path.parent / afile_path
