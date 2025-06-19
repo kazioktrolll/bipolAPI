@@ -59,6 +59,12 @@ class Vector3:
         assert isinstance(other, Vector3)
         return self.__add__(other * -1)
 
+    def __eq__(self, other: AnyVector3) -> bool:
+        if is_tuple3(other): other = Vector3(*other)
+        if not isinstance(other, Vector3):
+            return NotImplemented
+        return self.x == other.x and self.y == other.y and self.z == other.z
+
     def scale(self, other: AnyVector3) -> 'Vector3':
         """Returns a copy of self scaled by the vector so that new.x = self.x * scale.x etc."""
         other = Vector3(*other)

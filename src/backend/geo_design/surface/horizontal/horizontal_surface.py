@@ -3,6 +3,7 @@ from ...section import Section, Flap, Aileron, Elevator
 from ...airfoil import Airfoil
 from ....vector3 import Vector3, AnyVector3
 from math import degrees, atan
+from typing import Literal
 
 
 class HorizontalSurface(Surface):
@@ -105,7 +106,19 @@ class HorizontalSurface(Surface):
                       root_chord: float, mid_chord: float, tip_chord: float,
                       mid_offset: AnyVector3, tip_offset: AnyVector3, origin_position: AnyVector3 = Vector3.zero(),
                       inclination_angle: float = 0, airfoil: Airfoil = None) -> 'HorizontalSurface':
+        """
+        Creates a ``HorizontalSurface`` based on parameters of a double trapezoidal wing.
 
+        :param name: Name of the surface.
+        :param root_chord: Aerodynamic root chord of the surface in meters.
+        :param mid_chord: Aerodynamic mid-chord of the surface in meters.
+        :param tip_chord: Aerodynamic tip chord of the surface in meters.
+        :param mid_offset: Offset between the mid-chord-le and the root-chord-le of the surface in meters.
+        :param tip_offset: Offset between the tip-chord-le and the root-chord-le of the surface in meters.
+        :param origin_position: Position of the root-chord-le of the surface in meters.
+        :param inclination_angle: Inclination angle of the surface in degrees.
+        :param airfoil: Airfoil object.
+        """
         root = Section(
             leading_edge_position=(0, 0, 0),
             chord=root_chord,
@@ -127,6 +140,52 @@ class HorizontalSurface(Surface):
 
         surf = cls(name=name, y_duplicate=True, origin_position=origin_position, airfoil=airfoil, sections=[root, mid, tip])
         return surf
+
+    def get_type(self, accuracy = 0.05) -> None | Literal['tapered', 'delta', 'double_trapez']:
+        tapered = HorizontalSurface.is_simple_tapered(self, accuracy)
+        delta = HorizontalSurface.is_delta(self, accuracy)
+        # double_trapez = HorizontalSurface.is_double_trapez(self, accuracy)
+        double_trapez = False
+
+        if delta: return 'delta'
+        if tapered and not delta: return 'tapered'
+        if double_trapez: return 'double_trapez'
+        return None
+
+    @staticmethod
+    def is_simple_tapered(surface: 'HorizontalSurface', accuracy = .05) -> bool:
+        root = surface.sections[0]
+        tip = surface.sections[-1]
+
+        leading_edge_x_equation = lambda _y: root.x + _y / tip.y * (tip.x - root.x)
+        leading_edge_z_equation = lambda _y: root.z + _y / tip.y * (tip.z - root.z)
+        chord_equation = lambda _y: root.chord + _y / tip.y * (tip.chord - root.chord)
+        inc = root.inclination
+
+        # Check if the surface is of correct shape
+        for section in surface.sections:
+            y = section.y
+            le = section.leading_edge_position
+            c = section.chord
+            if abs((le.x - leading_edge_x_equation(y)) / c) > accuracy: return False
+            if abs((le.z - leading_edge_z_equation(y)) / c) > accuracy: return False
+            if abs((c - chord_equation(y)) / c) > accuracy: return False
+            if section.inclination != inc: return False
+        return True
+
+    @classmethod
+    def is_delta(cls, surface: 'HorizontalSurface', accuracy = .05) -> bool:
+        if not cls.is_simple_tapered(surface, accuracy):
+            return False
+        root = surface.sections[0]
+        tip = surface.sections[-1]
+        if tip.chord != 0: return False
+        if not tip.trailing_edge_position == root.trailing_edge_position: return False
+        return True
+
+    @staticmethod
+    def is_double_trapez(surface: 'HorizontalSurface', accuracy = .05) -> bool:
+        raise NotImplementedError
 
     def major_axis(self, section: Section) -> float:
         return section.y
