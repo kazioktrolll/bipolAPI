@@ -12,10 +12,10 @@ from customtkinter import CTkFrame, CTkLabel
 from typing import Callable, final
 from abc import ABC, abstractmethod
 
-from .airfoil_chooser import AirfoilChooser
-from .mechanization_chooser import MechanizationChooser
-from ..parameter_field import ParameterField
-from ...backend.geo_design import Surface, Geometry
+from ..airfoil_chooser import AirfoilChooser
+from ..mechanization_chooser import MechanizationChooser
+from ...parameter_field import ParameterField
+from ....backend.geo_design import Surface, Geometry
 
 
 class LeftMenuItem(CTkFrame, ABC):

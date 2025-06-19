@@ -9,7 +9,7 @@ the Free Software Foundation, either version 3 of the License, or
 
 
 from .left_menu_item import LeftMenuItem
-from ...backend.geo_design import VerticalSimpleSurface, Section
+from ....backend.geo_design import VerticalSimpleSurface, Section
 
 
 class LeftMenuVerticalSurface(LeftMenuItem):

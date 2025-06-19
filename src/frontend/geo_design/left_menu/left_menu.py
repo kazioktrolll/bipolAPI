@@ -14,7 +14,7 @@ from typing import Callable
 from .left_menu_item import LeftMenuItem, LeftMenuNotImplemented
 from .left_menu_simple_surface import LeftMenuSimpleSurface
 from .left_menu_vertical_surface import LeftMenuVerticalSurface
-from ...backend.geo_design import Geometry, HorizontalSimpleSurface, VerticalSimpleSurface
+from ....backend.geo_design import Geometry, HorizontalSimpleSurface, VerticalSimpleSurface
 
 
 class LeftMenu(CTkFrame):
@@ -55,7 +55,7 @@ class LeftMenu(CTkFrame):
 
     @property
     def geometry(self) -> Geometry:
-        from ...scenes import GeoDesignScene
+        from ....scenes import GeoDesignScene
         assert isinstance(self.master, GeoDesignScene)
         return self.master.geometry
 

@@ -10,9 +10,9 @@ the Free Software Foundation, either version 3 of the License, or
 
 from customtkinter import StringVar
 from .left_menu_item import LeftMenuItem
-from .mechanization_chooser import ControlTypeItem
-from .. import FlapItem
-from ...backend.geo_design import HorizontalSimpleSurface
+from ..mechanization_chooser import ControlTypeItem
+from ... import FlapItem
+from ....backend.geo_design import HorizontalSimpleSurface
 
 
 class LeftMenuSimpleSurface(LeftMenuItem):
