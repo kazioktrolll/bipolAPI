@@ -99,7 +99,7 @@ class Geometry:
 
     def find_possible_simples(self):
         from .surface import HorizontalSurface, HorizontalSimpleSurface
-        _r: list[HorizontalSimpleSurface] = []
+        _r: list[HorizontalSurface] = []
         for surf in self.surfaces.values():
             if not isinstance(surf, HorizontalSurface): continue
             simple = HorizontalSimpleSurface.from_complex(surf, searching=True)

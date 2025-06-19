@@ -11,7 +11,7 @@ the Free Software Foundation, either version 3 of the License, or
 from pathlib import Path
 from typing import Any
 from .geometry import Geometry
-from .surface import Surface, SurfaceCreator, HorizontalSimpleSurface, VerticalSimpleSurface
+from .surface import Surface, SurfaceCreator, HorizontalSurface, VerticalSimpleSurface
 from .section import Section, Control
 from .airfoil import Airfoil
 from ..vector3 import Vector3
@@ -29,9 +29,9 @@ class GeometryGenerator:
 
     @classmethod
     def default(cls) -> Geometry:
-        wing = HorizontalSimpleSurface(name='Wing', span=8, chord_length=1, airfoil=Airfoil.from_naca('2415'))
+        wing = HorizontalSurface.simple_tapered(name='Wing', span=8, chord_length=1, airfoil=Airfoil.from_naca('2415'))
         wing.set_mechanization(ailerons=[(3, 4, .8)], flaps=[(2.3, 2.8, .6)])
-        h_tail = HorizontalSimpleSurface(name='H Tail', span=2, chord_length=1, origin_position=(4, 0, 1), airfoil=Airfoil.from_naca('0012'))
+        h_tail = HorizontalSurface.simple_tapered(name='H Tail', span=2, chord_length=1, origin_position=(4, 0, 1), airfoil=Airfoil.from_naca('0012'))
         h_tail.set_mechanization(elevators=[(0, 1, .8)])
         v_tail = VerticalSimpleSurface(
             name='V Tail',

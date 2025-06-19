@@ -22,9 +22,9 @@ class LeftMenuItem(CTkFrame, ABC):
     def __init__(self, parent, surface: Surface):
         CTkFrame.__init__(self, parent)
         ABC.__init__(self)
-        self.pfs: dict[str, ParameterField] = {}
-        self.initialized = False
         self.surface = surface
+        self.initialized = False
+        self.pfs: dict[str, ParameterField] = {}
 
         self.pf_frame = CTkFrame(self, fg_color='transparent')
         self.pf_frame.columnconfigure(0, weight=1)
@@ -36,9 +36,11 @@ class LeftMenuItem(CTkFrame, ABC):
         self.init_pfs()
         self.init_mechanization()
 
+    @final
     def __repr__(self) -> str:
         return self.surface.name
 
+    @final
     def build(self) -> None:
         self.columnconfigure(0, weight=1)
 
