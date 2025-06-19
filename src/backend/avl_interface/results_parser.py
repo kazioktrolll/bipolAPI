@@ -54,7 +54,7 @@ class ResultsParser:
     @classmethod
     def st_file_to_dict(cls, st_str: str) -> val_dict:
         """Takes the raw contents of the 'ST' file and converts it to a name-value dict."""
-        st_str = re.sub(r'\s+=\s+', '=', st_str)
+        st_str = re.sub(r'\s*=\s*', '=', st_str)
         st_str = re.sub(r'\n', '', st_str)
         st_str = re.sub(r'Clb Cnr / Clr Cnb', 'Clb_Cnr/Clr_Cnb', st_str)
         vals = st_str.split()
