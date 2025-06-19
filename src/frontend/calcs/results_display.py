@@ -114,13 +114,26 @@ class TextBox(CTkFrame):
             CTkLabel(self, text=key, anchor="e").grid(row=i + 1, column=1, padx=5, pady=2, sticky="e")
 
             entry = CTkEntry(self, width=100, border_width=0, fg_color='transparent')
-            entry.insert(0, str(value))
+            entry.insert(0, self._format(value))
             entry.configure(state="readonly")  # Make text selectable but not editable
             entry.grid(row=i + 1, column=2, padx=5, pady=2, sticky="w")
 
     def set(self, data: dict[str, float]):
         self.dict = data
         self.build()
+
+    @staticmethod
+    def _format(val: float) -> str:
+        f = f'{val:.4f}'
+        e = f'{val:.2e}'
+        g = f'{val:.4g}'
+        if val == 0.0:
+            return g
+        if abs(val) < 1.0e-02 and e[-2:] != '02':
+            return e
+        if abs(val) > 10:
+            return g
+        return f
 
 
 class STDisplay(CTkFrame):
