@@ -11,10 +11,8 @@ the Free Software Foundation, either version 3 of the License, or
 from customtkinter import CTkFrame, CTkSegmentedButton
 from typing import Callable
 
-from .left_menu_item import LeftMenuItem, LeftMenuNotImplemented
-from .left_menu_simple_surface import LeftMenuSimpleSurface
-from .left_menu_vertical_surface import LeftMenuVerticalSurface
-from ....backend.geo_design import Geometry, HorizontalSimpleSurface, VerticalSimpleSurface
+from .left_menu_surface import LeftMenuSurface, LeftMenuHorizontal, LeftMenuVertical, LeftMenuOblique
+from ....backend.geo_design import Geometry, HorizontalSurface, VerticalSimpleSurface
 
 
 class LeftMenu(CTkFrame):
@@ -22,7 +20,7 @@ class LeftMenu(CTkFrame):
         super().__init__(parent)
 
         self._do_on_update = do_on_update
-        self.items: dict[str, LeftMenuItem] = {}
+        self.items: dict[str, LeftMenuSurface] = {}
         self.items_button = CTkSegmentedButton(self, command=lambda c: self.show_item(name=c))
 
         self.update_items()
@@ -42,14 +40,14 @@ class LeftMenu(CTkFrame):
         self.show_first()
 
     def update_items(self) -> None:
-        menu_item = {HorizontalSimpleSurface: LeftMenuSimpleSurface,
-                     VerticalSimpleSurface: LeftMenuVerticalSurface}
+        menu_item = {HorizontalSurface: LeftMenuHorizontal,
+                     VerticalSimpleSurface: LeftMenuVertical}
         self.items.clear()
         for name, surface in self.geometry.surfaces.items():
             try:
                 item_type = menu_item[type(surface)]
             except KeyError:
-                item_type = LeftMenuNotImplemented
+                item_type = LeftMenuOblique
             self.items[name] = item_type(self, surface)
         self.items_button.configure(values=[item.name for item in self.items.values()])
 
@@ -62,7 +60,7 @@ class LeftMenu(CTkFrame):
     def do_on_update(self) -> None:
         self._do_on_update()
 
-    def show_item(self, clicked: LeftMenuItem = None, name: str = None) -> None:
+    def show_item(self, clicked: LeftMenuSurface = None, name: str = None) -> None:
         clicked = clicked or self.items[name]
 
         for i, item in enumerate(self.items.values()):
