@@ -17,7 +17,6 @@ try:
     app = App()
     app.set_scene(InitialScene(app))
     app.scene.goto_geodesign()
-    app.load(r"C:\Users\kazio\Downloads\supergee.gavl")
     app.run()
 except Exception as e:
     error_msg = traceback.format_exc()
