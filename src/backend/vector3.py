@@ -7,7 +7,6 @@ the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 """
 
-
 from typing import Union
 
 Tuple3 = tuple[float, float, float]
@@ -76,7 +75,7 @@ class Vector3:
 
     def length(self) -> float:
         """Returns the length of the vector."""
-        return (self.x**2 + self.y**2 + self.z**2)**0.5
+        return (self.x ** 2 + self.y ** 2 + self.z ** 2) ** 0.5
 
     @property
     def avl_string(self) -> str:

@@ -7,13 +7,14 @@ the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 """
 
-
-from subprocess import run, CalledProcessError
-from pathlib import Path
-from time import sleep
-from threading import Thread
 import re
+from pathlib import Path
+from subprocess import run, CalledProcessError
+from threading import Thread
+from time import sleep
+
 from PIL import Image
+
 from .avl_interface import AVLInterface
 from ..geo_design import Geometry
 
@@ -51,8 +52,8 @@ class ImageGetter:
         ]
         next_number = max(numbers, default=0) + 1
 
-        png_path = img_dir/f'img_{next_number}.png'
-        ps_path = app_wd/'plot.ps'
+        png_path = img_dir / f'img_{next_number}.png'
+        ps_path = app_wd / 'plot.ps'
         if not ps_path.exists():
             raise FileNotFoundError('Cannot find plot.ps file')
 
@@ -111,7 +112,7 @@ class ImageGetter:
         with open(run_file_path, 'w') as run_file: run_file.write(contents)
 
         command = ('OPER\n'
-                   f'{case_number+1}\n'
+                   f'{case_number + 1}\n'
                    'X\n'
                    'T\n'
                    'H\n'

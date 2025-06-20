@@ -7,13 +7,13 @@ the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 """
 
-
 from pathlib import Path
 from typing import Any
-from .geometry import Geometry
-from .surface import Surface, SurfaceCreator, HorizontalSurface, VerticalSimpleSurface
-from .section import Section, Control
+
 from .airfoil import Airfoil
+from .geometry import Geometry
+from .section import Section, Control
+from .surface import Surface, SurfaceCreator, HorizontalSurface, VerticalSimpleSurface
 from ..vector3 import Vector3
 
 
@@ -72,9 +72,12 @@ class FromAvl:
         """Returns a list of lines after formatting."""
         lines = []
         for line in raw_lines:
-            if '#' in line: line = line.split('#')[0]
-            elif '!' in line: line = line.split('!')[0]
-            elif '|' in line: line = line.split('|')[0]
+            if '#' in line:
+                line = line.split('#')[0]
+            elif '!' in line:
+                line = line.split('!')[0]
+            elif '|' in line:
+                line = line.split('|')[0]
             line = line.strip()
             if not line: continue
             lines.append(line)

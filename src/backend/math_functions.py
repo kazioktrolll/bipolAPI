@@ -1,3 +1,12 @@
+"""
+Copyright (c) 2025 Wojciech Kwiatkowski
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+"""
+
 import math
 
 
@@ -21,6 +30,7 @@ def best_factor_pair(n: int) -> tuple[int, int]:
 
     return best_a, best_b
 
+
 def distribute_units(total_units: int, weights: list[float]) -> list[int]:
     """Returns a distribution of given number of units, according to given weights."""
     total_weight = sum(weights)
@@ -38,6 +48,7 @@ def distribute_units(total_units: int, weights: list[float]) -> list[int]:
         allocations[remainders[i][0]] += 1
 
     return allocations
+
 
 def sort_loop(points):
     cx = sum(x for x, y in points) / len(points)

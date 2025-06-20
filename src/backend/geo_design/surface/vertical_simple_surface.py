@@ -1,6 +1,6 @@
 from .surface import Surface
-from ..section import Section
 from ..airfoil import Airfoil
+from ..section import Section
 from ...vector3 import Vector3, AnyVector3
 
 

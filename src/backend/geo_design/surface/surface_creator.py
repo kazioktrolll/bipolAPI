@@ -1,7 +1,7 @@
 from .horizontal import HorizontalSurface
 from .vertical_simple_surface import VerticalSimpleSurface
-from ..section import Section
 from ..airfoil import Airfoil
+from ..section import Section
 from ...vector3 import AnyVector3
 
 

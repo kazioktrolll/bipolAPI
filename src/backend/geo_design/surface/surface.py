@@ -7,13 +7,13 @@ the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 """
 
+from abc import ABC, abstractmethod
 
-from ..section import Section, Control
 from ..airfoil import Airfoil
+from ..section import Section, Control
+from ...math_functions import best_factor_pair, distribute_units
 from ...to_re_docstring_decorator import to_re_docstring
 from ...vector3 import Vector3, AnyVector3
-from ...math_functions import best_factor_pair, distribute_units
-from abc import ABC, abstractmethod
 
 
 class Surface(ABC):
@@ -94,7 +94,7 @@ class Surface(ABC):
             B = A + (prev.chord, 0, 0)
             D = next.leading_edge_position
             C = D + (next.chord, 0, 0)
-            sect_area = 0.5 * ((B-A).cross_product(C-A)).length() + 0.5 * ((C-A).cross_product(D-A)).length()
+            sect_area = 0.5 * ((B - A).cross_product(C - A)).length() + 0.5 * ((C - A).cross_product(D - A)).length()
             area += sect_area
         if self.y_duplicate:
             area *= 2
@@ -193,7 +193,7 @@ class Surface(ABC):
     def distribute_points(self, nof_points: int) -> None:
         chord_points, span_points = best_factor_pair(nof_points)
         self.chord_points = chord_points
-        span_points -= len(self.sections) - 1 # Each section requires at least a point, except for the last one.
+        span_points -= len(self.sections) - 1  # Each section requires at least a point, except for the last one.
         lengths = []
         for i in range(len(self.sections) - 1):
             prev = self.sections[i]
@@ -201,7 +201,7 @@ class Surface(ABC):
             lengths.append((self.major_axis(prev) - self.major_axis(next)))
 
         spanwise_distribution = distribute_units(span_points, lengths)
-        spanwise_distribution.append(-1) # For the last section, with the later '+1' will give 0
+        spanwise_distribution.append(-1)  # For the last section, with the later '+1' will give 0
         for section, distribution in zip(self.sections, spanwise_distribution):
             section.spanwise_points = distribution + 1
 
@@ -209,7 +209,7 @@ class Surface(ABC):
         """Returns the current geometry as a .avl type string."""
         _r = (f"SURFACE\n"
               f"{self.name}\n"
-              f"{self.chord_points} 1.0\n" # Spanwise points are distributed per section.
+              f"{self.chord_points} 1.0\n"  # Spanwise points are distributed per section.
               f"{'YDUPLICATE\n0.0' if self.y_duplicate else ''}\n"
               f"SCALE\n"
               f"1.0 1.0 1.0\n"

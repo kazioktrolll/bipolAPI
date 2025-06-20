@@ -7,12 +7,12 @@ the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 """
 
-
-from typing import TextIO
 from pathlib import Path
+from typing import TextIO
+
 from .surface import Surface
-from ..vector3 import Vector3, AnyVector3
 from ..math_functions import distribute_units
+from ..vector3 import Vector3, AnyVector3
 
 
 class Geometry:
@@ -107,12 +107,12 @@ class Geometry:
             _r.append(simple)
         return _r
 
-    def distribute_points(self, nof_points = 500) -> None:
+    def distribute_points(self, nof_points=500) -> None:
         """Distributes the given number of AVL calculation points over all surfaces. Must not be higher than 3000."""
         if nof_points > 3000:
             raise AttributeError("The number of points cannot be greater than 3000.")
         min_points = [surf.min_points() for surf in self.surfaces.values()]
-        areas = [surf.area()**0.5 for surf in self.surfaces.values()]
+        areas = [surf.area() ** 0.5 for surf in self.surfaces.values()]
         distribution = distribute_units(nof_points - sum(min_points), areas)
         for surf, points in zip(self.surfaces.values(), distribution):
             surf.distribute_points(surf.min_points() + points)

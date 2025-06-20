@@ -1,9 +1,10 @@
-from ..surface import Surface
-from ...section import Section, Flap, Aileron, Elevator
-from ...airfoil import Airfoil
-from ....vector3 import Vector3, AnyVector3
 from math import degrees, atan
 from typing import Literal
+
+from ..surface import Surface
+from ...airfoil import Airfoil
+from ...section import Section, Flap, Aileron, Elevator
+from ....vector3 import Vector3, AnyVector3
 
 
 class HorizontalSurface(Surface):
@@ -45,7 +46,7 @@ class HorizontalSurface(Surface):
                        sweep_angle: float = 0,
                        origin_position: AnyVector3 = Vector3.zero(),
                        inclination_angle: float = 0,
-                       airfoil=None,) -> 'HorizontalSurface':
+                       airfoil=None, ) -> 'HorizontalSurface':
         """
         Creates a ``HorizontalSurface`` based on parameters of a simple tapered wing.
 
@@ -141,7 +142,7 @@ class HorizontalSurface(Surface):
         surf = cls(name=name, y_duplicate=True, origin_position=origin_position, airfoil=airfoil, sections=[root, mid, tip])
         return surf
 
-    def get_type(self, accuracy = 0.05) -> None | Literal['Rectangular', 'Delta', 'Simple Tapered', 'Double Trapez']:
+    def get_type(self, accuracy=0.05) -> None | Literal['Rectangular', 'Delta', 'Simple Tapered', 'Double Trapez']:
         tapered = HorizontalSurface.is_simple_tapered(self, accuracy)
         delta = HorizontalSurface.is_delta(self, accuracy)
         # double_trapez = HorizontalSurface.is_double_trapez(self, accuracy)
@@ -154,7 +155,7 @@ class HorizontalSurface(Surface):
         return None
 
     @staticmethod
-    def is_simple_tapered(surface: 'HorizontalSurface', accuracy = .05) -> bool:
+    def is_simple_tapered(surface: 'HorizontalSurface', accuracy=.05) -> bool:
         root = surface.sections[0]
         tip = surface.sections[-1]
 
@@ -175,7 +176,7 @@ class HorizontalSurface(Surface):
         return True
 
     @classmethod
-    def is_delta(cls, surface: 'HorizontalSurface', accuracy = .05) -> bool:
+    def is_delta(cls, surface: 'HorizontalSurface', accuracy=.05) -> bool:
         if not cls.is_simple_tapered(surface, accuracy):
             return False
         root = surface.sections[0]
@@ -185,7 +186,7 @@ class HorizontalSurface(Surface):
         return True
 
     @staticmethod
-    def is_double_trapez(surface: 'HorizontalSurface', accuracy = .05) -> bool:
+    def is_double_trapez(surface: 'HorizontalSurface', accuracy=.05) -> bool:
         raise NotImplementedError
 
     def taper_ratio(self) -> float:

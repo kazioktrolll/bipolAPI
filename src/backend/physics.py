@@ -7,25 +7,24 @@ the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 """
 
-
 import math
 
 # Constants
-g0 = 9.80665          # m/s^2
-R_star = 8.31432      # J/(mol·K)
-M = 0.0289644         # kg/mol
-R = R_star / M        # Specific gas constant for air, J/(kg·K)
+g0 = 9.80665  # m/s^2
+R_star = 8.31432  # J/(mol·K)
+M = 0.0289644  # kg/mol
+R = R_star / M  # Specific gas constant for air, J/(kg·K)
 
 # Define atmospheric layers (base altitude in km, base temperature in K, base pressure in Pa, lapse rate in K/km)
 layers = [
-    (0,     288.15, 101325.0, -6.5),
-    (11,    216.65, 22632.06, 0.0),
-    (20,    216.65, 5474.889, 1.0),
-    (32,    228.65, 868.0187, 2.8),
-    (47,    270.65, 110.9063, 0.0),
-    (51,    270.65, 66.93887, -2.8),
-    (71,    214.65, 3.956420, -2.0),
-    (84.852,186.946, 0.3734, 0.0)  # Up to 84.852 km
+    (0, 288.15, 101325.0, -6.5),
+    (11, 216.65, 22632.06, 0.0),
+    (20, 216.65, 5474.889, 1.0),
+    (32, 228.65, 868.0187, 2.8),
+    (47, 270.65, 110.9063, 0.0),
+    (51, 270.65, 66.93887, -2.8),
+    (71, 214.65, 3.956420, -2.0),
+    (84.852, 186.946, 0.3734, 0.0)  # Up to 84.852 km
 ]
 
 

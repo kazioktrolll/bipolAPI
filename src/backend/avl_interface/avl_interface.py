@@ -7,10 +7,10 @@ the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 """
 
-
-from pathlib import Path
 import shutil
+from pathlib import Path
 from subprocess import Popen, PIPE
+
 from .results_parser import ResultsParser
 from .. import physics
 from ..geo_design import Geometry

@@ -1,15 +1,16 @@
-from .horizontal_surface import HorizontalSurface
-from ...section import Section
-from ...section import Control
 from math import degrees, atan
 from typing import Optional
+
+from .horizontal_surface import HorizontalSurface
+from ...section import Control
+from ...section import Section
 
 
 class HorizontalSimpleSurface:
     """ A subclass of the ``Surface`` representing a simple, horizontal, trapezoidal lifting surface. """
 
     @staticmethod
-    def from_complex(surface: HorizontalSurface, accuracy=.05, searching = False) -> Optional['HorizontalSurface']:
+    def from_complex(surface: HorizontalSurface, accuracy=.05, searching=False) -> Optional['HorizontalSurface']:
         root = surface.sections[0]
         tip = surface.sections[-1]
 
@@ -67,7 +68,7 @@ class HorizontalSimpleSurface:
             if name not in ranges.keys(): ranges[name] = []
             # Append the dict by this block.
             if None in current_range: raise ValueError
-            ranges[name].append((current_range[0], current_range[1], previous_control.x_hinge)) # noqa
+            ranges[name].append((current_range[0], current_range[1], previous_control.x_hinge))  # noqa
 
         for section in complex_surf.sections:
             # If this section has the same control as the previous, extend block and continue.

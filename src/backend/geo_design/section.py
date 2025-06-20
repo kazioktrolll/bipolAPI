@@ -7,9 +7,9 @@ the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 """
 
-
-from typing import TypeVar
 from math import tan, radians
+from typing import TypeVar
+
 from .airfoil import Airfoil
 from ..vector3 import Vector3, AnyVector3
 
