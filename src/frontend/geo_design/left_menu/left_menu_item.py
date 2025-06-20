@@ -9,8 +9,9 @@ the Free Software Foundation, either version 3 of the License, or
 
 
 from customtkinter import CTkFrame, CTkLabel
-from typing import Callable, final
+from typing import Callable, final, Any
 from abc import ABC, abstractmethod
+from functools import cached_property
 
 from ..airfoil_chooser import AirfoilChooser
 from ..mechanization_chooser import MechanizationChooser
@@ -22,7 +23,7 @@ class LeftMenuItem(CTkFrame, ABC):
     def __init__(self, parent, surface: Surface):
         CTkFrame.__init__(self, parent)
         ABC.__init__(self)
-        self.surface = surface
+        self.name = surface.name
         self.initialized = False
         self.pfs: dict[str, ParameterField] = {}
 
@@ -35,10 +36,11 @@ class LeftMenuItem(CTkFrame, ABC):
 
         self.init_pfs()
         self.init_mechanization()
+        self.build()
 
     @final
     def __repr__(self) -> str:
-        return self.surface.name
+        return self.name
 
     @final
     def build(self) -> None:
@@ -52,9 +54,15 @@ class LeftMenuItem(CTkFrame, ABC):
     def init_mechanization(self):
         ...
 
+    @cached_property
     @abstractmethod
+    def pfs_params(self) -> list[tuple[str, str, str, Callable[[Any], bool], Any]]:
+        """keyword, name, message, assert, initial"""
+        pass
+
+    @final
     def init_pfs(self) -> None:
-        """Should define all needed pfs and init them using super()._init_pf(**kwargs), then call super().init_pfs()."""
+        for pf_params in self.pfs_params: self._init_pf(*pf_params)
         for pf in self.pfs.values(): pf.name_label.configure(width=100)
         self.initialized = True
 
@@ -85,12 +93,13 @@ class LeftMenuItem(CTkFrame, ABC):
     @final
     def parent(self):
         from .left_menu import LeftMenu
-        assert isinstance(self.master, LeftMenu)
-        return self.master
+        assert isinstance(self.master.master, LeftMenu)
+        return self.master.master
 
     @property
-    def name(self) -> str:
-        return self.surface.name
+    @final
+    def surface(self) -> Surface:
+        return self.geometry.surfaces[self.name]
 
     @property
     @final
@@ -98,14 +107,18 @@ class LeftMenuItem(CTkFrame, ABC):
         return self.parent.geometry
 
 
-class LeftMenuNotImplemented(LeftMenuItem):
-    def __init__(self, parent, surface: Surface) -> None:
-        super().__init__(parent, surface)
-        self.columnconfigure(0, weight=1)
-        CTkLabel(self, text='NOT EDITABLE').grid(row=0, column=0, sticky='nsew')
-
-    def init_pfs(self) -> None: ...
+class LMEmpty(LeftMenuItem):
+    @cached_property
+    def pfs_params(self) -> list[tuple[str, str, str, Callable[[Any], bool], Any]]:
+        return []
 
     def update_surface(self, _=None) -> None: ...
 
     def init_mechanization(self): ...
+
+
+class LMOblique(LMEmpty):
+    def __init__(self, parent, surface: Surface) -> None:
+        super().__init__(parent, surface)
+        self.columnconfigure(0, weight=1)
+        CTkLabel(self, text='NOT EDITABLE').grid(row=0, column=0, sticky='nsew')

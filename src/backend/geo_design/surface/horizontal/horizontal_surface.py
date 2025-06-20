@@ -95,7 +95,7 @@ class HorizontalSurface(Surface):
         :param airfoil: Airfoil object.
         """
         chord = surface_area / span
-        sweep = degrees(atan(3 / 2 * chord / span))
+        sweep = degrees(atan(3 * chord / span))
         surf = cls.simple_tapered(name=name, span=span, origin_position=origin_position,
                                   airfoil=airfoil, inclination_angle=inclination_angle,
                                   taper_ratio=0, chord_length=chord, sweep_angle=sweep)
@@ -141,15 +141,16 @@ class HorizontalSurface(Surface):
         surf = cls(name=name, y_duplicate=True, origin_position=origin_position, airfoil=airfoil, sections=[root, mid, tip])
         return surf
 
-    def get_type(self, accuracy = 0.05) -> None | Literal['tapered', 'delta', 'double_trapez']:
+    def get_type(self, accuracy = 0.05) -> None | Literal['Rectangular', 'Delta', 'Simple Tapered', 'Double Trapez']:
         tapered = HorizontalSurface.is_simple_tapered(self, accuracy)
         delta = HorizontalSurface.is_delta(self, accuracy)
         # double_trapez = HorizontalSurface.is_double_trapez(self, accuracy)
         double_trapez = False
 
-        if delta: return 'delta'
-        if tapered and not delta: return 'tapered'
-        if double_trapez: return 'double_trapez'
+        if delta: return 'Delta'
+        if tapered and self.taper_ratio() == 1 and self.sweep_angle() == 0: return 'Rectangular'
+        if tapered and not delta: return 'Simple Tapered'
+        if double_trapez: return 'Double Trapez'
         return None
 
     @staticmethod
@@ -186,6 +187,19 @@ class HorizontalSurface(Surface):
     @staticmethod
     def is_double_trapez(surface: 'HorizontalSurface', accuracy = .05) -> bool:
         raise NotImplementedError
+
+    def taper_ratio(self) -> float:
+        if not HorizontalSurface.is_simple_tapered(self, 0.05):
+            raise ValueError('Surface is too complex')
+        return self.sections[-1].chord / self.sections[0].chord
+
+    def sweep_angle(self) -> float:
+        if not HorizontalSurface.is_simple_tapered(self, 0.05):
+            raise ValueError('Surface is too complex')
+        root = self.sections[0].get_position_at_xc(.25)
+        tip = self.sections[-1].get_position_at_xc(.25)
+        sweep = degrees(atan((tip.x - root.x) / (tip.y - root.y)))
+        return sweep
 
     def major_axis(self, section: Section) -> float:
         return section.y

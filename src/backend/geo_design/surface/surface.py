@@ -96,6 +96,8 @@ class Surface(ABC):
             C = D + (next.chord, 0, 0)
             sect_area = 0.5 * ((B-A).cross_product(C-A)).length() + 0.5 * ((C-A).cross_product(D-A)).length()
             area += sect_area
+        if self.y_duplicate:
+            area *= 2
         return area
 
     def mac(self) -> float:
