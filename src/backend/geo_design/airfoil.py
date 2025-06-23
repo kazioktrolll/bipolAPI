@@ -85,7 +85,7 @@ class Airfoil:
             if not are_numbers(line) or len(line) != 2: continue
 
             new_line = (float(line[0]), float(line[1]))
-            if not (-1 < new_line[0] < 1) or not (-1 < new_line[1] < 1): continue
+            if not (0 <= new_line[0] <= 1) or not (-1 < new_line[1] < 1): continue
             data.append(new_line)
 
         sorted_data = sort_loop(data)
@@ -109,6 +109,7 @@ class Airfoil:
     def from_naca(cls, naca: str, active_range=(0.0, 1.0)) -> 'Airfoil':
         """Creates an Airfoil object from NACA code."""
         if not valid_naca(naca): raise ValueError("Wrong NACA code")
+        if naca == '0000': return cls.empty()
         af = Airfoil(name=naca, points=None, naca=naca, active_range=active_range)
         return af
 

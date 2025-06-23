@@ -1,4 +1,4 @@
-from .horizontal import HorizontalSurface
+from .horizontal_surface import HorizontalSurface
 from .vertical_simple_surface import VerticalSimpleSurface
 from ..airfoil import Airfoil
 from ..section import Section

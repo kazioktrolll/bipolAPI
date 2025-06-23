@@ -1,10 +1,10 @@
 from math import degrees, atan
 from typing import Literal
 
-from ..surface import Surface
-from ...airfoil import Airfoil
-from ...section import Section, Flap, Aileron, Elevator
-from ....vector3 import Vector3, AnyVector3
+from .surface import Surface
+from ..airfoil import Airfoil
+from ..section import Section, Flap, Aileron, Elevator
+from ...vector3 import Vector3, AnyVector3
 
 
 class HorizontalSurface(Surface):
@@ -52,7 +52,7 @@ class HorizontalSurface(Surface):
 
         Parameters:
             name (str): The name of the lifting surface.
-            span (float): The span of the surface.
+            span (float): The span of the whole surface.
             chord_length (float): The mean aerodynamic chord length of the surface.
             origin_position (AnyVector3): Position of the leading edge of the root chord.
             inclination_angle (float): The inclination of the surface, in degrees.
@@ -89,8 +89,8 @@ class HorizontalSurface(Surface):
         Creates a ``HorizontalSurface`` based on parameters of a delta wing.
 
         :param name: Name of the surface.
-        :param span: Span of the surface in meters.
-        :param surface_area: Surface area of the surface in meters squared.
+        :param span: Span of the whole surface in meters.
+        :param surface_area: Surface area of the whole surface in meters squared.
         :param origin_position: Origin position of the surface in meters.
         :param inclination_angle: Inclination angle of the surface in degrees.
         :param airfoil: Airfoil object.
