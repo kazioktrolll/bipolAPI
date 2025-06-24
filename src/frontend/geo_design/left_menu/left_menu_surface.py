@@ -1,5 +1,5 @@
 from .left_menu_item import LeftMenuItem, LMOblique, LMEmpty
-from .left_menu_items_horizontal import LMTapered, LMRectangular, LMDelta
+from .left_menu_items_horizontal import LMTapered, LMRectangular, LMDelta, LMDoubleTrapez
 from ....backend.geo_design import Surface, HorizontalSurface, Geometry
 from ....backend import handle_crash
 from customtkinter import CTkFrame, CTkOptionMenu
@@ -44,7 +44,7 @@ class LeftMenuHorizontal(LeftMenuSurface):
         types = {
             'Rectangular': LMRectangular,
             'Simple Tapered': LMTapered,
-            'Double Trapez': ...,
+            'Double Trapez': LMDoubleTrapez,
             'Delta': LMDelta,
             'V-Shape': ...,
             'Canard': ...,

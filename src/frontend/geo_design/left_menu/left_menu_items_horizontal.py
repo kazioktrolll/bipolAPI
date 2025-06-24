@@ -156,3 +156,88 @@ class LMDelta(LMTapered):
         )
         do_with_surface = lambda surface: surface.set_mechanization(**self.mechanizations.get_values())
         super()._update_surface(surface_generator, do_with_surface)
+
+
+class LMDoubleTrapez(LeftMenuItem):
+    @cached_property
+    def pfs_params(self) -> list[tuple[str, str, str, Callable[[Any], bool], Any]]:
+        surf = self.surface
+        assert isinstance(surf, HorizontalSurface)
+        pfs_params = [
+            ('x', 'X', 'The X-axis position of the tip of the root section.',
+             lambda x: True, surf.origin_position.x),
+
+            ('z', 'Z', 'The Z-axis position of the tip of the root section.',
+             lambda z: True, surf.origin_position.z),
+
+            ('root_chord', 'Root Chord', "The chord of the surface at its root section.",
+             lambda c: c > 0, surf.sections[0].chord),
+
+            ('mid_chord', 'Mid Chord', "The chord of the surface at the section where it changes the geometry.",
+             lambda c: c > 0, surf.mac()),#TODO fill
+
+            ('tip_chord', 'Tip Chord', "The chord of the surface at its tip section.",
+             lambda c: c > 0, surf.sections[-1].chord),
+
+            ('mox', 'Mid Offset X', '',
+             lambda x: True, 0), #TODO fill
+
+            ('moy', 'Mid Offset Y', '',
+             lambda x: True, 1), #TODO fill
+
+            ('moz', 'Mid Offset Z', '',
+             lambda x: True, 0), #TODO fill
+
+            ('tox', 'Tip Offset X', '',
+             lambda x: True, surf.sections[-1].x),
+
+            ('toy', 'Tip Offset Y', '',
+             lambda x: True, surf.sections[-1].y),
+
+            ('toz', 'Tip Offset Z', '',
+             lambda x: True, surf.sections[-1].z),
+
+            ('inclination', 'Inclination', "The inclination of the surface, in degrees\n.",
+             lambda i: True, surf.sections[0].inclination)
+        ]
+        return pfs_params
+
+    def update_surface(self, _=None) -> None:
+        surface_generator = lambda: HorizontalSurface.double_trapez(
+            name=self.name,
+            root_chord=self.pfs['root_chord'].value,
+            mid_chord=self.pfs['mid_chord'].value,
+            tip_chord=self.pfs['tip_chord'].value,
+            mid_offset=(
+                self.pfs['mox'].value,
+                self.pfs['moy'].value,
+                self.pfs['moz'].value
+            ),
+            tip_offset=(
+                self.pfs['tox'].value,
+                self.pfs['toy'].value,
+                self.pfs['toz'].value
+            ),
+            origin_position=(
+                self.pfs['x'].value,
+                0,
+                self.pfs['z'].value
+            ),
+            inclination_angle=self.pfs['inclination'].value,
+            airfoil=self.airfoil_chooser.airfoil
+        )
+        do_with_surface = lambda surface: surface.set_mechanization(**self.mechanizations.get_values())
+        super()._update_surface(surface_generator, do_with_surface)
+
+    def init_mechanization(self):
+        assert isinstance(self.surface, HorizontalSurface)
+        if not self.surface.mechanization: return
+        for key, list_of_ranges in self.surface.mechanization.items():
+            key = key.capitalize()
+            list_preset = ControlTypeItem(key, self.update_surface, True)
+            for start, stop, xc in list_of_ranges:
+                item = FlapItem()
+                item.set_values(StringVar(value=f'{start}'), StringVar(value=f'{stop}'), StringVar(value=f'{xc}'))
+                list_preset.add_position(item)
+            self.mechanizations.add_position(list_preset)
+
