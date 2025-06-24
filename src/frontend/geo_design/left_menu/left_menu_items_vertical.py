@@ -71,12 +71,12 @@ class LMSimpleTaperedV(LeftMenuItem):
              lambda c: c > 0, surf.mac()),
 
             ('taper', 'Taper Ratio', "The taper ratio of the surface - c_tip / c_root.\nHas to be between 0 and 1.",
-             lambda tr: 0 <= tr <= 1, 1),
+             lambda tr: 0 <= tr <= 1, (surf.taper_ratio() if surf.taper_ratio() is not None else 1)),
 
             ('sweep', 'Sweep Angle', "Sweep angle of the wing, in degrees.\n"
                                      "The angle between Y-axis and the 25%MAC line. Positive means wing deflected backwards.\n"
                                      "Has to be between -90 and 90.",
-             lambda sa: -90 < sa < 90, 0),
+             lambda sa: -90 < sa < 90, (surf.sweep_angle() if surf.sweep_angle() is not None else 0)),
         ]
         return pfs_params
 
@@ -119,12 +119,12 @@ class LMTwinV(LeftMenuItem):
              lambda c: c > 0, surf.mac()),
 
             ('taper', 'Taper Ratio', "The taper ratio of the surface - c_tip / c_root.\nHas to be between 0 and 1.",
-             lambda tr: 0 <= tr <= 1, 1),
+             lambda tr: 0 <= tr <= 1, (surf.taper_ratio() if surf.taper_ratio() is not None else 1)),
 
             ('sweep', 'Sweep Angle', "Sweep angle of the wing, in degrees.\n"
                                      "The angle between Y-axis and the 25%MAC line. Positive means wing deflected backwards.\n"
                                      "Has to be between -90 and 90.",
-             lambda sa: -90 < sa < 90, 0),
+             lambda sa: -90 < sa < 90, (surf.sweep_angle() if surf.sweep_angle() is not None else 0)),
 
             ('gap', 'Gap', "The gap between the two parts of the surface in meters.\n Has to be positive.",
              lambda g: g > 0, surf.sections[0].y * 2),

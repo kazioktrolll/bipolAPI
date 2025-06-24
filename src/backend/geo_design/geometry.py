@@ -97,16 +97,6 @@ class Geometry:
             controls += [c for c in ctrls if c not in controls]
         return controls
 
-    def find_possible_simples(self):
-        from .surface import HorizontalSurface, HorizontalSimpleSurface
-        _r: list[HorizontalSurface] = []
-        for surf in self.surfaces.values():
-            if not isinstance(surf, HorizontalSurface): continue
-            simple = HorizontalSimpleSurface.from_complex(surf, searching=True)
-            if simple is None: continue
-            _r.append(simple)
-        return _r
-
     def distribute_points(self, nof_points=500) -> None:
         """Distributes the given number of AVL calculation points over all surfaces. Must not be higher than 3000."""
         if nof_points > 3000:

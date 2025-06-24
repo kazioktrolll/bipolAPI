@@ -159,10 +159,6 @@ class App:
         geom = GeometryGenerator.from_avl(path)
         self.set_geometry(geom)
 
-        if find_simples:
-            for surf in geom.find_possible_simples():
-                a = AskPopup.ask(f'Convert {surf.name} to Simple Surface?', ['Y', 'N'], 'N')
-                if a == 'Y': geom.replace_surface(surf)
         self.set_geometry(geom)
 
 
