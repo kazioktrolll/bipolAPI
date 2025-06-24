@@ -68,7 +68,7 @@ class Geometry:
 
     def string(self) -> str:
         """Returns the current geometry as a .avl type string."""
-        _r = (f"{self.name} +  | Case Name\n"
+        _r = (f"{self.name}\n"
               f"0.0 | Mach\n"
               f"0 0 0 | iYsym iZsym Zsym\n"
               f"{self.surface_area} {self.chord_length} {self.span_length} | Sref Cref Bref\n"

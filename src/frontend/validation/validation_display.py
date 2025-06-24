@@ -12,8 +12,8 @@ class ValidationDisplay(CTkFrame):
         self.data_display = TextBox(self)
         g = self.app.geometry
         self.data_display.set({
-            'Reference Area\tS   =': g.surface_area * 2,
-            'Reference Span\tb   =': g.span_length * 2,
+            'Reference Area\tS   =': g.surface_area,
+            'Reference Span\tb   =': g.span_length,
             'Reference Chord\tc   =': g.chord_length,
         })
         self.build()
