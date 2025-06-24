@@ -13,6 +13,7 @@ from typing import Callable
 
 from .left_menu_surface import LeftMenuSurface, LeftMenuHorizontal, LeftMenuVertical, LeftMenuOblique
 from ....backend.geo_design import Geometry, HorizontalSurface, VerticalSimpleSurface
+from ....backend import handle_crash
 
 
 class LeftMenu(CTkFrame):
@@ -34,6 +35,7 @@ class LeftMenu(CTkFrame):
         self.rowconfigure(1, minsize=4)
         self.rowconfigure(2, weight=1)
 
+    @handle_crash
     def update(self) -> None:
         self.update_items()
         self.build()
@@ -57,6 +59,7 @@ class LeftMenu(CTkFrame):
         assert isinstance(self.master, GeoDesignScene)
         return self.master.geometry
 
+    @handle_crash
     def do_on_update(self) -> None:
         self._do_on_update()
 

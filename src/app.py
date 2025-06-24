@@ -15,6 +15,7 @@ from tkinter.filedialog import askopenfilename
 import pickle
 from src.backend.geo_design import Geometry, GeometryGenerator
 from src.frontend import AskPopup
+from src.backend import handle_crash
 
 
 class App:
@@ -42,6 +43,7 @@ class App:
         self.root.protocol("WM_DELETE_WINDOW", self.exit)
         self.build()
 
+    @handle_crash
     def build(self) -> None:
         """Builds the display upon app start."""
         self.root.title("G-AVL")
@@ -50,10 +52,12 @@ class App:
         self.root.columnconfigure(0, weight=1)
         self.scene.grid(row=1, column=0, sticky="nsew")
 
+    @handle_crash
     def update(self, _=None) -> None:
         """Updates the display."""
         self.scene.update()
 
+    @handle_crash
     def run(self) -> None:
         """Runs the app."""
         self.after(0, self.root.state, 'zoomed')

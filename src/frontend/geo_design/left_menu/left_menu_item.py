@@ -17,6 +17,7 @@ from ..airfoil_chooser import AirfoilChooser
 from ..mechanization_chooser import MechanizationChooser
 from ...parameter_field import ParameterField
 from ....backend.geo_design import Surface, Geometry
+from ....backend import handle_crash
 
 
 class LeftMenuItem(CTkFrame, ABC):
@@ -60,6 +61,7 @@ class LeftMenuItem(CTkFrame, ABC):
         """keyword, name, message, assert, initial"""
         pass
 
+    @handle_crash
     @final
     def init_pfs(self) -> None:
         for pf_params in self.pfs_params: self._init_pf(*pf_params)
@@ -77,6 +79,7 @@ class LeftMenuItem(CTkFrame, ABC):
     def update_surface(self, _=None) -> None:
         """Should run super()._update_surface(**kwargs)."""
 
+    @handle_crash
     @final
     def _update_surface(self,
                         surface_creator: Callable[[], Surface],

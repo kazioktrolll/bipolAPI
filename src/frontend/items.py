@@ -13,7 +13,7 @@ from customtkinter import CTkFrame, CTkLabel, DoubleVar, StringVar, CTkEntry, CT
 from abc import ABC, abstractmethod
 from .parameter_field import HelpTopLevel
 from .popup import Popup
-from ..backend import Vector3
+from ..backend import Vector3, handle_crash
 from ..backend.geo_design import Control, Section
 
 T = TypeVar('T', bound=tuple)
@@ -92,6 +92,7 @@ class FlapItem(Item[tuple[float, float, float]]):
 
         window.run()
 
+    @handle_crash
     def set_values(self, start: StringVar, end: StringVar, xc: StringVar) -> None:
         try:
             if self.ranged:
@@ -185,7 +186,7 @@ class SectionItem(Item[tuple[Vector3, float, float, Control | None]]):
 
     @property
     def left_menu(self):
-        from .geo_design.left_menu_item import LeftMenuItem
+        from .geo_design.left_menu.left_menu_item import LeftMenuItem
         assert isinstance(self._left_menu, LeftMenuItem)
         return self._left_menu
 

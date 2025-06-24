@@ -12,7 +12,7 @@ from customtkinter import CTkCanvas, CTkFrame, CTkButton
 from tkinter import Event
 from enum import IntEnum
 from ...backend.geo_design import Section, Surface, Geometry
-from ...backend import Vector3
+from ...backend import Vector3, handle_crash
 
 
 class GeometryDisplay(CTkFrame):
@@ -281,6 +281,7 @@ class GeometryDisplay(CTkFrame):
         self.drag_offset = (event.x - self.drag_origin[0], event.y - self.drag_origin[1])
         self.update()
 
+    @handle_crash
     def reset_camera(self) -> None:
         self.scale = 100
         self.drag_offset = (0, 0)

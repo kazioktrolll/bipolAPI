@@ -11,6 +11,7 @@ the Free Software Foundation, either version 3 of the License, or
 from typing import Callable
 from customtkinter import CTkFrame, CTkLabel, CTkButton
 from .items import Item
+from ..backend import handle_crash
 
 
 class ListPreset:
@@ -63,6 +64,7 @@ class ListPreset:
             item_frame.grid_forget()
             item_frame.grid(column=0, row=i, sticky="nsew")
 
+    @handle_crash
     def add_position(self, item: Item = None) -> None:
         needs_init = item is None
         item = item or self.item_class()

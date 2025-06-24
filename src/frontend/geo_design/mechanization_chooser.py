@@ -14,6 +14,7 @@ from ..list_preset import ListPreset
 from ..items import Item, FlapItem
 from ..popup import Popup
 from ...backend.geo_design import Control
+from ...backend import handle_crash
 
 
 class MechanizationChooser(ListPreset):
@@ -66,6 +67,7 @@ class MechanizationChooser(ListPreset):
         om = CTkOptionMenu(window.frame, values=vals)
         om.grid(column=1, row=1)
 
+        @handle_crash
         def confirm():
             val = om.get()
             window.destroy()

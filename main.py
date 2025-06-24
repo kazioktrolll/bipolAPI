@@ -8,16 +8,11 @@ the Free Software Foundation, either version 3 of the License, or
 """
 
 
-import traceback
 from src.app import App
 from src.scenes import InitialScene
-from src.frontend.crash_window import CrashWindow
 
-try:
-    app = App()
-    app.set_scene(InitialScene(app))
-    app.scene.goto_geodesign()
-    app.run()
-except Exception as e:
-    error_msg = traceback.format_exc()
-    CrashWindow(error_msg)
+
+app = App()
+app.set_scene(InitialScene(app))
+app.scene.goto_geodesign()
+app.run()

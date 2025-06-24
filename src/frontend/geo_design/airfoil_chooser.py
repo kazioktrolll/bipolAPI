@@ -15,6 +15,7 @@ from pathlib import Path
 from ..popup import Popup
 from ..help_top_level import HelpTopLevel
 from ...backend.geo_design import Airfoil
+from ...backend import handle_crash
 
 
 class AirfoilChooser(CTkFrame):
@@ -36,11 +37,13 @@ class AirfoilChooser(CTkFrame):
         CTkButton(self, text="NACA", command=self.load_naca
                   ).grid(row=2, column=2, sticky="nse", padx=5, pady=5)
 
+    @handle_crash
     def load_naca(self):
         window = Popup(self)
         entry = CTkEntry(window.frame)
         entry.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
 
+        @handle_crash
         def get_airfoil():
             try:
                 self.airfoil = Airfoil.from_naca(entry.get())
@@ -57,6 +60,7 @@ class AirfoilChooser(CTkFrame):
 
         window.run()
 
+    @handle_crash
     def load_from_file(self):
         path = Path(filedialog.askopenfilename(title="Select File",
                                                filetypes=(("DAT, CSV, TXT Files", ".dat .csv .txt"),

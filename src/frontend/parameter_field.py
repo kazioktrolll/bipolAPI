@@ -10,6 +10,7 @@ the Free Software Foundation, either version 3 of the License, or
 
 from customtkinter import CTkFrame, CTkLabel, CTkEntry, CTkButton, CTkCheckBox
 from .help_top_level import HelpTopLevel
+from ..backend import handle_crash
 from typing import Callable
 
 
@@ -105,6 +106,7 @@ class ParameterField(CTkFrame):
         self.on_set(self.value)
         return True
 
+    @handle_crash
     def set(self, value: float = None) -> bool:
         """Sets the value in the entry as the new value of the parameter. Returns True if changed successfully."""
         if isinstance(self.entry, CTkCheckBox):

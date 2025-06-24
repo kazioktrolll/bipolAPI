@@ -10,6 +10,7 @@ the Free Software Foundation, either version 3 of the License, or
 
 from customtkinter import CTkFrame, CTkButton
 from typing import Callable
+from ..backend import handle_crash
 
 
 class TopBarItem(CTkButton):
@@ -31,6 +32,7 @@ class TopBarItem(CTkButton):
                       command=func,
                       fg_color=self.dropdown.cget("fg_color")).pack()
 
+    @handle_crash
     def toggle_menu(self):
         if self.dropdown.winfo_ismapped():
             self.dropdown.place_forget()

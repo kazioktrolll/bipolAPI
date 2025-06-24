@@ -11,6 +11,7 @@ the Free Software Foundation, either version 3 of the License, or
 from customtkinter import CTkFrame, CTkButton, CTkLabel
 from ..entry_with_instructions import EntryWithInstructionsBlock, EntryWithInstructions
 from ..help_top_level import HelpTopLevel
+from ...backend import handle_crash
 
 
 class StaticInputPanel(CTkFrame):
@@ -42,6 +43,7 @@ class StaticInputPanel(CTkFrame):
         self.height_entry.grid(column=3, row=1, padx=3, pady=3)
         self.height_set_button.grid(column=4, row=1, padx=3, pady=3)
 
+    @handle_crash
     def set_mass(self, values: tuple[float, float, float] = None):
         if not values:
             try:
@@ -59,6 +61,7 @@ class StaticInputPanel(CTkFrame):
         self.center_of_mass = (x, y, z)
         self.mass_label.configure(text=f'({round(x, 3)} , {round(y, 3)} , {round(z, 3)})')
 
+    @handle_crash
     def set_height(self, value: float = None):
         if value is None:
             try:

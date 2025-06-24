@@ -1,10 +1,12 @@
 from .left_menu_item import LeftMenuItem, LMOblique, LMEmpty
 from .left_menu_items_horizontal import LMTapered, LMRectangular, LMDelta
 from ....backend.geo_design import Surface, HorizontalSurface, Geometry
+from ....backend import handle_crash
 from customtkinter import CTkFrame, CTkOptionMenu
 
 
 class LeftMenuSurface(CTkFrame):
+    @handle_crash
     def __init__(self, parent: CTkFrame, surface: Surface, types: dict[str, type[LeftMenuItem]]):
         super().__init__(parent)
         self.name = surface.name
@@ -17,6 +19,7 @@ class LeftMenuSurface(CTkFrame):
         self.rowconfigure(1, weight=1)
         self.set_lm(LMEmpty)
 
+    @handle_crash
     def set_lm(self, lm: type[LeftMenuItem]) -> None:
         _lm = lm(self, self.surface)
         self.lm.grid_forget()
@@ -36,6 +39,7 @@ class LeftMenuSurface(CTkFrame):
 
 
 class LeftMenuHorizontal(LeftMenuSurface):
+    @handle_crash
     def __init__(self, parent: CTkFrame, surface: Surface):
         types = {
             'Rectangular': LMRectangular,
@@ -62,6 +66,7 @@ class LeftMenuHorizontal(LeftMenuSurface):
 
 
 class LeftMenuVertical(LeftMenuSurface):
+    @handle_crash
     def __init__(self, parent: CTkFrame, surface: Surface):
         types = {
             'Rectangular': ...,
@@ -73,6 +78,7 @@ class LeftMenuVertical(LeftMenuSurface):
 
 
 class LeftMenuOblique(LeftMenuSurface):
+    @handle_crash
     def __init__(self, parent: CTkFrame, surface: Surface):
         types = {'Oblique': LMOblique}
         super().__init__(parent=parent, surface=surface, types=types)
