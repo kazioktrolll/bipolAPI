@@ -46,7 +46,9 @@ class HorizontalSurface(Surface):
                        sweep_angle: float = 0,
                        origin_position: AnyVector3 = Vector3.zero(),
                        inclination_angle: float = 0,
-                       airfoil=None, ) -> 'HorizontalSurface':
+                       dihedral_angle: float = 0,
+                       airfoil=None,
+                       mid_gap: float = 0) -> 'HorizontalSurface':
         """
         Creates a ``HorizontalSurface`` based on parameters of a simple tapered wing.
 
@@ -60,6 +62,8 @@ class HorizontalSurface(Surface):
             airfoil (Airfoil): The airfoil of the surface.
             taper_ratio (float): The taper ratio of the surface.
             sweep_angle (float): The sweep angle of the surface in degrees.
+            dihedral_angle (float): Dihedral angle of the surface, positive means tips up.
+            mid_gap (float): The horizontal gap between the surface's halves' root sections in meters.
         """
 
         # Calculate position and chord for both root and tip sections.
@@ -68,9 +72,10 @@ class HorizontalSurface(Surface):
         from math import radians, tan
         mac025 = lambda y: root_chord * .25 + y * tan(radians(sweep_angle))
         leading_edge_y = lambda y: mac025(y) - chord(y) * .25
+        leading_edge_z = lambda y: atan(radians(dihedral_angle)) * y
 
-        root = Section((0, 0, 0), chord(0), inclination_angle, airfoil)
-        tip = Section((leading_edge_y(span / 2), span / 2, 0.0), chord(span / 2),
+        root = Section((0, mid_gap/2, 0), chord(0), inclination_angle, airfoil)
+        tip = Section((leading_edge_y(span / 2), span / 2, leading_edge_z(span)), chord(span / 2),
                       inclination_angle, airfoil)
 
         surf = cls(name=name,

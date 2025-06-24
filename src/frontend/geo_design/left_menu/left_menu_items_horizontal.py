@@ -43,7 +43,10 @@ class LMTapered(LeftMenuItem):
              lambda sa: -90 < sa < 90, (surf.sweep_angle() if surf.sweep_angle() is not None else 0)),
 
             ('inclination', 'Inclination', "The inclination of the surface, in degrees\n.",
-             lambda i: True, surf.sections[0].inclination)
+             lambda i: True, surf.sections[0].inclination),
+
+            ('dihedral', 'Dihedral', "The dihedral of the surface, in degrees\n.",
+             lambda d: -90 < d < 90, surf.sections[0].inclination)
         ]
         return pfs_params
 
@@ -60,6 +63,7 @@ class LMTapered(LeftMenuItem):
                 self.pfs['z'].value
             ),
             inclination_angle=self.pfs['inclination'].value,
+            dihedral_angle=self.pfs['dihedral'].value,
             airfoil=self.airfoil_chooser.airfoil
         )
         do_with_surface = lambda surface: surface.set_mechanization(**self.mechanizations.get_values())
