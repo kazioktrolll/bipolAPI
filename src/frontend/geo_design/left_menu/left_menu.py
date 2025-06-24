@@ -12,7 +12,7 @@ from customtkinter import CTkFrame, CTkSegmentedButton
 from typing import Callable
 
 from .left_menu_surface import LeftMenuSurface, LeftMenuHorizontal, LeftMenuVertical, LeftMenuOblique
-from ....backend.geo_design import Geometry, HorizontalSurface, VerticalSimpleSurface
+from ....backend.geo_design import Geometry, HorizontalSurface, VerticalSurface
 from ....backend import handle_crash
 
 
@@ -43,7 +43,7 @@ class LeftMenu(CTkFrame):
 
     def update_items(self) -> None:
         menu_item = {HorizontalSurface: LeftMenuHorizontal,
-                     VerticalSimpleSurface: LeftMenuVertical}
+                     VerticalSurface: LeftMenuVertical}
         self.items.clear()
         for name, surface in self.geometry.surfaces.items():
             try:

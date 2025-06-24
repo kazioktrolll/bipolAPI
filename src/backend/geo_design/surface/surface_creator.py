@@ -1,5 +1,5 @@
 from .horizontal_surface import HorizontalSurface
-from .vertical_simple_surface import VerticalSimpleSurface
+from .vertical_surface import VerticalSurface
 from ..airfoil import Airfoil
 from ..section import Section
 from ...vector3 import AnyVector3
@@ -13,7 +13,7 @@ class SurfaceCreator:
                        y_duplicate: bool,
                        origin_position: AnyVector3,
                        airfoil: Airfoil = None
-                       ) -> HorizontalSurface | VerticalSimpleSurface:
+                       ) -> HorizontalSurface | VerticalSurface:
         """Returns a HorizontalSurface or VerticalSurface based on input geometry."""
         sections.sort(key=lambda section: section.y)
         dy = sections[-1].y - sections[0].y
@@ -25,5 +25,5 @@ class SurfaceCreator:
             return HorizontalSurface(name=name, sections=sections,
                                      y_duplicate=y_duplicate, origin_position=origin_position, airfoil=airfoil)
         else:
-            return VerticalSimpleSurface(name=name, sections=sections,
-                                         y_duplicate=y_duplicate, origin_position=origin_position, airfoil=airfoil)
+            return VerticalSurface(name=name, sections=sections,
+                                   y_duplicate=y_duplicate, origin_position=origin_position, airfoil=airfoil)

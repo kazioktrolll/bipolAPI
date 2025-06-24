@@ -2,11 +2,12 @@ from .surface import Surface
 from ..airfoil import Airfoil
 from ..section import Section
 from ...vector3 import Vector3, AnyVector3
+from math import tan, radians
 
 
-class VerticalSimpleSurface(Surface):
+class VerticalSurface(Surface):
     """
-    A class representing a single lifting surface of the aircraft, oriented more-or-less vertically.
+    A class representing a single lifting surface of the aircraft, oriented vertically.
 
     Attributes:
         name (str): The name of the lifting surface.
@@ -32,6 +33,30 @@ class VerticalSimpleSurface(Surface):
             airfoil (Airfoil): The airfoil of the surface.
         """
         super().__init__(name=name, sections=sections, y_duplicate=y_duplicate, origin_position=origin_position, airfoil=airfoil)
+
+    @classmethod
+    def simple_tapered(cls, name: str, height: float, mac: float,
+                       origin_position: AnyVector3,
+                       taper_ratio: float = 1, sweep_angle: float = 0,
+                       airfoil: Airfoil = None, gap: float = 0) -> 'VerticalSurface':
+        """Creates a simple tapered vertical surface.
+
+        Parameters:
+            name (str): The name of the surface.
+            height (float): The height of the surface.
+            mac (float): The mean aerodynamic chord of the surface.
+            origin_position (AnyVector3): Position of the leading edge of the root chord.
+            taper_ratio (float): The ratio the tip cord to the root chord.
+            sweep_angle (float): The sweep angle of the surface.
+            airfoil (Airfoil): An Airfoil object.
+            gap (float): horizontal gap between the surface's halves in meters."""
+        r_chord = 2 * mac / (1 + taper_ratio)
+        t_chord = r_chord * taper_ratio
+        tip_y = r_chord * .25 + height * tan(radians(sweep_angle)) - t_chord * 0.25
+        root = Section((0, gap/2, 0), r_chord, 0)
+        tip = Section((tip_y, gap/2, height), t_chord, 0)
+        surf = cls(name=name, y_duplicate=(gap != 0), origin_position=origin_position, sections=[root, tip], airfoil=airfoil)
+        return surf
 
     def major_axis(self, section: Section) -> float:
         return section.z

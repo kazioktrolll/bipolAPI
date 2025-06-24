@@ -1,5 +1,6 @@
 from .left_menu_item import LeftMenuItem, LMOblique, LMEmpty
 from .left_menu_items_horizontal import LMTapered, LMRectangular, LMDelta, LMDoubleTrapez
+from .left_menu_items_vertical import LMRectangularV, LMSimpleTaperedV, LMTwinV
 from ....backend.geo_design import Surface, HorizontalSurface, Geometry
 from ....backend import handle_crash
 from customtkinter import CTkFrame, CTkOptionMenu
@@ -46,17 +47,10 @@ class LeftMenuHorizontal(LeftMenuSurface):
             'Simple Tapered': LMTapered,
             'Double Trapez': LMDoubleTrapez,
             'Delta': LMDelta,
-            'V-Shape': ...,
-            'Canard': ...,
-            'None': ...,
+            'None': LMEmpty,
         }
         if surface.name == 'Wing':
-            del types['V-Shape']
-            del types['Canard']
             del types['None']
-        elif surface.name == 'H Tail':
-            del types['Double Trapez']
-            del types['Delta']
         super().__init__(parent=parent, surface=surface, types=types)
         assert isinstance(surface, HorizontalSurface)
         _t = surface.get_type()
@@ -69,10 +63,10 @@ class LeftMenuVertical(LeftMenuSurface):
     @handle_crash
     def __init__(self, parent: CTkFrame, surface: Surface):
         types = {
-            'Rectangular': ...,
-            'Simple Tapered': ...,
-            'Twin': ...,
-            'None': ...,
+            'Rectangular': LMRectangularV,
+            'Simple Tapered': LMSimpleTaperedV,
+            'Twin': LMTwinV,
+            'None': LMEmpty,
         }
         super().__init__(parent=parent, surface=surface, types=types)
 
