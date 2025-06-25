@@ -122,7 +122,6 @@ class Airfoil:
     def string(self) -> str:
         """Returns the current geometry as a .avl type string."""
         if self.points is None and self.naca is None:
-            print("Empty Airfoil is converted to a string!")
             return ""
 
         if self.naca:

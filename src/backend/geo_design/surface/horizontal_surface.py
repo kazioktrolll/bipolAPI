@@ -148,14 +148,14 @@ class HorizontalSurface(Surface):
         return surf
 
     def get_type(self, accuracy=0.05) -> None | Literal['Rectangular', 'Delta', 'Simple Tapered', 'Double Trapez']:
+        if HorizontalSurface.is_delta(self, accuracy):
+            return 'Delta'
         tapered = HorizontalSurface.is_simple_tapered(self, accuracy)
-        delta = HorizontalSurface.is_delta(self, accuracy)
         # double_trapez = HorizontalSurface.is_double_trapez(self, accuracy)
         double_trapez = False
 
-        if delta: return 'Delta'
         if tapered and self.taper_ratio() == 1 and self.sweep_angle() == 0: return 'Rectangular'
-        if tapered and not delta: return 'Simple Tapered'
+        if tapered: return 'Simple Tapered'
         if double_trapez: return 'Double Trapez'
         return None
 
@@ -164,19 +164,20 @@ class HorizontalSurface(Surface):
         root = surface.sections[0]
         tip = surface.sections[-1]
 
-        leading_edge_x_equation = lambda _y: root.x + _y / tip.y * (tip.x - root.x)
-        leading_edge_z_equation = lambda _y: root.z + _y / tip.y * (tip.z - root.z)
-        chord_equation = lambda _y: root.chord + _y / tip.y * (tip.chord - root.chord)
+        x_eq = lambda _y: root.x + _y / tip.y * (tip.x - root.x)
+        z_eq = lambda _y: root.z + _y / tip.y * (tip.z - root.z)
+        c_eq = lambda _y: root.chord + _y / tip.y * (tip.chord - root.chord)
         inc = root.inclination
 
         # Check if the surface is of correct shape
         for section in surface.sections:
+            if section is root or section is tip: continue
             y = section.y
             le = section.leading_edge_position
             c = section.chord
-            if abs((le.x - leading_edge_x_equation(y)) / c) > accuracy: return False
-            if abs((le.z - leading_edge_z_equation(y)) / c) > accuracy: return False
-            if abs((c - chord_equation(y)) / c) > accuracy: return False
+            if abs((le.x - x_eq(y)) / c) > accuracy: return False
+            if abs((le.z - z_eq(y)) / c) > accuracy: return False
+            if abs((c - c_eq(y)) / c) > accuracy: return False
             if section.inclination != inc: return False
         return True
 

@@ -9,10 +9,9 @@ the Free Software Foundation, either version 3 of the License, or
 
 
 from src.app import App
-from src.scenes import InitialScene
+from src.scenes import GeoDesignScene
 
 
 app = App()
-app.set_scene(InitialScene(app))
-app.scene.goto_geodesign()
+app.set_scene(GeoDesignScene(app))
 app.run()

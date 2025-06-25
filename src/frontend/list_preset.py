@@ -87,9 +87,11 @@ class ItemFrame(CTkFrame):
         self.item = item
         self.locked = False
         self.columnconfigure(0, weight=1)
+        self.columnconfigure(1, minsize=35)
+        self.columnconfigure(2, minsize=35)
 
         display = item.display(self)
-        display.grid(column=0, row=0, sticky='nsw', padx=5, pady=5)
+        display.grid(column=0, row=0, sticky='nswe', padx=5, pady=5)
         CTkButton(self, text='E', width=25, height=25,
                   command=edit_item
                   ).grid(column=1, row=0, sticky="e", padx=5, pady=5)

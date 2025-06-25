@@ -14,7 +14,6 @@ from tempfile import TemporaryDirectory
 from tkinter.filedialog import askopenfilename
 import pickle
 from src.backend.geo_design import Geometry, GeometryGenerator
-from src.frontend import AskPopup
 from src.backend import handle_crash
 
 
@@ -36,7 +35,7 @@ class App:
         self.root = CTk()
         self.work_dir = TemporaryDirectory(prefix='gavl_')
         self.scene = Scene(self)  # Placeholder
-        self.geometry = GeometryGenerator.default()
+        self.geometry = GeometryGenerator.empty()
         self.root.bind('<Configure>', self.update)
         self.top_bar = TopBar(self)
 
@@ -145,7 +144,7 @@ class App:
         ))
         self.geometry.save_to_avl(path=path)
 
-    def import_from_avl(self, path: str | Path = None, find_simples = True) -> None:
+    def import_from_avl(self, path: str | Path = None) -> None:
         """Imports the current geometry from an .avl file."""
         from src.backend.geo_design import GeometryGenerator
         self.top_bar.collapse_all()
@@ -181,7 +180,7 @@ class TopBar(CTkFrame):
                      ).grid(column=1, row=0, sticky='nsew')
         TopBarButton(self, 'Validation', lambda: app.set_scene(ValidationScene(app))
                      ).grid(column=2, row=0, sticky='nsew')
-        TopBarButton(self, 'Analysis', lambda: app.set_scene(CalcScene(app))
+        TopBarButton(self, 'Calculations', lambda: app.set_scene(CalcScene(app))
                      ).grid(column=3, row=0, sticky='nsew')
 
     def collapse_all(self):

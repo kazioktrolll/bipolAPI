@@ -113,7 +113,7 @@ class TextBox(CTkFrame):
         for i, (key, value) in enumerate(self.dict.items()):
             CTkLabel(self, text=key, anchor="e").grid(row=i + 1, column=1, padx=5, pady=2, sticky="e")
 
-            entry = CTkEntry(self, width=100, border_width=0, fg_color='transparent')
+            entry = CTkEntry(self, width=80, border_width=0, fg_color='transparent')
             entry.insert(0, self._format(value))
             entry.configure(state="readonly")  # Make text selectable but not editable
             entry.grid(row=i + 1, column=2, padx=5, pady=2, sticky="w")
@@ -128,7 +128,7 @@ class TextBox(CTkFrame):
         e = f'{val:.2e}'
         g = f'{val:.4g}'
         if val == 0.0:
-            return g
+            return '0'
         if abs(val) < 1.0e-02 and e[-2:] != '02':
             return e
         if abs(val) > 10:

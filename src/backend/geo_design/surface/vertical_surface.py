@@ -76,7 +76,7 @@ class VerticalSurface(Surface):
 
         # Check if the surface is of correct shape
         for section in surface.sections:
-            if section is surface.sections[0]: continue
+            if section is root or section is tip: continue
             z = section.z
             x = section.leading_edge_position.x
             c = section.chord

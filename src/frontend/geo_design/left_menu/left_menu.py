@@ -8,7 +8,7 @@ the Free Software Foundation, either version 3 of the License, or
 """
 
 
-from customtkinter import CTkFrame, CTkSegmentedButton
+from customtkinter import CTkFrame, CTkSegmentedButton, CTkButton
 from typing import Callable
 
 from .left_menu_surface import LeftMenuSurface, LeftMenuHorizontal, LeftMenuVertical, LeftMenuOblique
@@ -23,13 +23,21 @@ class LeftMenu(CTkFrame):
         self._do_on_update = do_on_update
         self.items: dict[str, LeftMenuSurface] = {}
         self.items_button = CTkSegmentedButton(self, command=lambda c: self.show_item(name=c))
+        self.empty_menu_buttons = CTkFrame(self, fg_color='transparent')
+        self.empty_menu_buttons.columnconfigure(0, weight=1)
+        CTkButton(self.empty_menu_buttons, text='Open', command=self.app.load
+                  ).grid(column=0, row=0, sticky='nswe', padx=5, pady=5)
+        CTkButton(self.empty_menu_buttons, text='New', command=self.app.new_default
+                  ).grid(column=0, row=1, sticky='nswe', padx=5, pady=5)
+        CTkButton(self.empty_menu_buttons, text='Import', command=self.app.import_from_avl
+                  ).grid(column=0, row=2, sticky='nswe', padx=5, pady=5)
 
-        self.update_items()
         self.build()
+        self.update()
         self.show_first()
 
     def build(self) -> None:
-        self.columnconfigure(0, weight=1)
+        self.columnconfigure(0, weight=1, minsize=400)
 
         self.items_button.grid(row=0, column=0, sticky='nsew')
         self.rowconfigure(1, minsize=4)
@@ -38,7 +46,7 @@ class LeftMenu(CTkFrame):
     @handle_crash
     def update(self) -> None:
         self.update_items()
-        self.build()
+        self.update_empty_buttons()
         self.show_first()
 
     def update_items(self) -> None:
@@ -59,6 +67,12 @@ class LeftMenu(CTkFrame):
         assert isinstance(self.master, GeoDesignScene)
         return self.master.geometry
 
+    @property
+    def app(self):
+        from ....scenes import GeoDesignScene
+        assert isinstance(self.master, GeoDesignScene)
+        return self.master.app
+
     @handle_crash
     def do_on_update(self) -> None:
         self._do_on_update()
@@ -77,3 +91,9 @@ class LeftMenu(CTkFrame):
             first = list(self.items.values())[0]
             self.show_item(clicked=first)
             self.items_button.set(first.name)
+
+    def update_empty_buttons(self):
+        if len(self.items.values()) > 0:
+            self.empty_menu_buttons.grid_forget()
+        else:
+            self.empty_menu_buttons.grid(row=1, column=0, sticky='nsew')
