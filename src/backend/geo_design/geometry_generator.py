@@ -46,9 +46,9 @@ class GeometryGenerator:
         g = Geometry(
             name="default",
             chord_length=wing.mac(),
-            span_length=wing.span(),
+            span_length=wing.span,
             surfaces=[wing, h_tail, v_tail],
-            surface_area=wing.mac() * wing.span(),
+            surface_area=wing.mac() * wing.span,
         )
         return g
 

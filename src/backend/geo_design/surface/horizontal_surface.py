@@ -3,7 +3,7 @@ from typing import Literal
 
 from .surface import Surface
 from ..airfoil import Airfoil
-from ..section import Section, Flap, Aileron, Elevator
+from ..section import Section
 from ...vector3 import Vector3, AnyVector3
 
 
@@ -207,93 +207,3 @@ class HorizontalSurface(Surface):
         tip = self.sections[-1].get_position_at_xc(.25)
         sweep = degrees(atan((tip.x - root.x) / (tip.y - root.y)))
         return sweep
-
-    def major_axis(self, section: Section) -> float:
-        return section.y
-
-    def minor_axis(self, section: Section) -> float:
-        return section.z
-
-    def xmamina_to_xyz(self, x: float, ma: float, mina: float) -> Vector3:
-        return Vector3(x, ma, mina)
-
-    def span(self) -> float:
-        span = self.sections[-1].y - self.sections[0].y
-        if self.y_duplicate: span *= 2
-        return span
-
-    def add_section_gentle(self, y: float | list[float]) -> None:
-        super().add_section_gentle(ma=y)
-
-    def has_section_at(self, y: float) -> bool:
-        """Returns ``True`` if the surface has a section at given ``y``."""
-        return super().has_section_at(ma=y)
-
-    def get_section_at(self, y: float) -> Section | None:
-        """Returns the section at given ``y``, if exists, else returns ``None``."""
-        return super().get_section_at(ma=y)
-
-    def get_sections_between(self, y_start: float, y_end: float,
-                             include_start: bool = True, include_end: bool = False) -> list[Section]:
-        """Returns a list of sections between ``y_start`` and ``y_end``."""
-        return super().get_sections_between(ma_start=y_start, ma_end=y_end,
-                                            include_start=include_start, include_end=include_end)
-
-    def set_mechanization(self,
-                          **kwargs: list[tuple[float, float, float]]
-                          ) -> None:
-        """Sets the mechanization of the surface.
-
-        Parameters:
-            **kwargs (list[tuple[float, float, float]]): For each type of control a tuple (y_start, y_stop, x_hinge).
-
-        Usage:
-            surface_instance.set_mechanization(ailerons=[(1, 2, .7), (3, 3.5, .6)], flaps=[(2.1, 2.9, .6)])
-
-            This will create **ailerons** for ``y`` = <1 : 2> ``hinge`` 0.7 x/c and ``y`` = <3 : 3.5> ``hinge`` 0.6 x/c,
-            and **flaps** for ``y`` = <2.1 : 2.9> ``hinge`` 0.6 x/c.
-        """
-        if self.mechanization:
-            raise ValueError("The surface {} already has mechanization!".format(self.name))
-        self.mechanization = kwargs
-
-        for key, value in kwargs.items():
-            key = key.lower()
-            for mech_type in [Flap, Aileron, Elevator]:
-                if mech_type.is_alias(key):
-                    break
-            else:
-                raise ValueError(f"Unknown mechanism type: {key}")
-            # To add a control surface in AVL, you add a control surface to a section,
-            # and it is valid up to the next section.
-            for start, end, hinge_x in value:
-                # Ensure there is a ``Section`` at 'y' == 'start' and 'end'.
-                if not self.has_section_at(start): self.add_section_gentle(start)
-                if not self.has_section_at(end): self.add_section_gentle(end)
-                # Add ``Control`` to every Section between 'start' and 'end'.
-                sections = self.get_sections_between(start, end, include_end=True)
-                control_instance = mech_type(x_hinge=hinge_x)
-                for section in sections:
-                    if section.has_control: raise Exception("A section already has a control surface!")
-                    section.control = control_instance
-
-            # Check if there are blocks with the same control next to each other,
-            # and if so, add a section in between.
-            for i, section in enumerate(self.sections):
-                if i == 0: continue
-                prev_section = self.sections[i - 1]
-                if section.control is None: continue
-                if section.control.is_equal_to(prev_section.control) and section.control is not prev_section.control:
-                    self.add_section_gentle(prev_section.y + 0.01)
-
-    def get_symmetric(self) -> 'HorizontalSurface':
-        """Returns a new instance of HorizontalSurface reflected about the y-axis."""
-        surf = super().get_symmetric()
-        assert isinstance(surf, HorizontalSurface)
-        surf.clear_controls()
-        surf.mechanization = {}
-        sym_controls = {}
-        for k, list_of_ranges in self.mechanization.items():
-            sym_controls[k] = [(-e, -s, xc) for s, e, xc in list_of_ranges]
-        surf.set_mechanization(**sym_controls)
-        return surf

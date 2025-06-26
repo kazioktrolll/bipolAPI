@@ -98,33 +98,3 @@ class VerticalSurface(Surface):
         tip = self.sections[-1].get_position_at_xc(.25)
         sweep = degrees(atan((tip.x - root.x) / (tip.z - root.z)))
         return sweep
-
-    def major_axis(self, section: Section) -> float:
-        return section.z
-
-    def minor_axis(self, section: Section) -> float:
-        return section.y
-
-    def xmamina_to_xyz(self, x: float, ma: float, mina: float) -> Vector3:
-        return Vector3(x, mina, ma)
-
-    def span(self) -> float:
-        span = self.sections[-1].z - self.sections[0].z
-        return span
-
-    def add_section_gentle(self, z: float | list[float]) -> None:
-        super().add_section_gentle(ma=z)
-
-    def has_section_at(self, z: float) -> bool:
-        """Returns ``True`` if the surface has a section at given ``z``."""
-        return super().has_section_at(ma=z)
-
-    def get_section_at(self, z: float) -> Section | None:
-        """Returns the section at given ``z``, if exists, else returns ``None``."""
-        return super().get_section_at(ma=z)
-
-    def get_sections_between(self, z_start: float, z_end: float,
-                             include_start: bool = True, include_end: bool = False) -> list[Section]:
-        """Returns a list of sections between ``z_start`` and ``z_end``."""
-        return super().get_sections_between(ma_start=z_start, ma_end=z_end,
-                                            include_start=include_start, include_end=include_end)

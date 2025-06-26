@@ -202,3 +202,6 @@ class Elevator(PreDefControl):
         """
         assert 0 <= x_hinge <= 1
         super().__init__(x_hinge=x_hinge, SgnDup='+1', color='green3')
+
+
+control_types = [Flap, Aileron, Elevator]

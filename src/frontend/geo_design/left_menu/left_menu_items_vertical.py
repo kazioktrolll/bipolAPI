@@ -27,7 +27,7 @@ class LMRectangularV(LeftMenuItem):
              lambda z: True, surf.origin_position.z),
 
             ('height', 'Height', "The height of the vertical tail.\nHas to be positive.",
-             lambda h: h > 0, surf.span()),
+             lambda h: h > 0, surf.span),
 
             ('chord', 'MAC', "The mean aerodynamic chord of the surface.\nHas to be positive.",
              lambda c: c > 0, surf.mac()),
@@ -65,7 +65,7 @@ class LMSimpleTaperedV(LeftMenuItem):
              lambda z: True, surf.origin_position.z),
 
             ('height', 'Height', "The height of the vertical tail.\nHas to be positive.",
-             lambda h: h > 0, surf.span()),
+             lambda h: h > 0, surf.span),
 
             ('chord', 'MAC', "The mean aerodynamic chord of the surface.\nHas to be positive.",
              lambda c: c > 0, surf.mac()),
@@ -113,7 +113,7 @@ class LMTwinV(LeftMenuItem):
              lambda z: True, surf.origin_position.z),
 
             ('height', 'Height', "The height of the vertical tail.\nHas to be positive.",
-             lambda h: h > 0, surf.span()),
+             lambda h: h > 0, surf.span),
 
             ('chord', 'MAC', "The mean aerodynamic chord of the surface.\nHas to be positive.",
              lambda c: c > 0, surf.mac()),

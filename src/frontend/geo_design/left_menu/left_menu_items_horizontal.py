@@ -26,7 +26,7 @@ class LMTapered(LeftMenuItem):
              lambda tup: True, (surf.origin_position.x, surf.origin_position.z), 'Vector2'),
 
             ('span', 'Span', "The span of the horizontal tail.\nHas to be positive.",
-             lambda w: w > 0, surf.span()),
+             lambda w: w > 0, surf.span),
 
             ('chord', 'MAC', "The mean aerodynamic chord of the surface.\nHas to be positive.",
              lambda c: c > 0, surf.mac()),
@@ -89,7 +89,7 @@ class LMRectangular(LMTapered):
              lambda tup: True, (surf.origin_position.x, surf.origin_position.z), 'Vector2'),
 
             ('span', 'Span', "The span of the horizontal tail.\nHas to be positive.",
-             lambda w: w > 0, surf.span()),
+             lambda w: w > 0, surf.span),
 
             ('chord', 'MAC', "The mean aerodynamic chord of the surface.\nHas to be positive.",
              lambda c: c > 0, surf.mac()),
@@ -126,7 +126,7 @@ class LMDelta(LMTapered):
              lambda tup: True, (surf.origin_position.x, surf.origin_position.z), 'Vector2'),
 
             ('span', 'Span', "The span of the horizontal tail.\nHas to be positive.",
-             lambda b: b > 0, surf.span()),
+             lambda b: b > 0, surf.span),
 
             ('surface_area', 'Surface Area', "The area of the surface.\nHas to be positive.",
              lambda s: s > 0, surf.area()),
