@@ -9,7 +9,7 @@ the Free Software Foundation, either version 3 of the License, or
 
 
 from customtkinter import CTkFrame, CTkLabel
-from typing import Callable, final, Any
+from typing import Callable, final, Any, Literal
 from abc import ABC, abstractmethod
 from functools import cached_property
 
@@ -58,7 +58,7 @@ class LeftMenuItem(CTkFrame, ABC):
     @cached_property
     @abstractmethod
     def pfs_params(self) -> list[tuple[str, str, str, Callable[[Any], bool], Any]]:
-        """keyword, name, message, assert, initial"""
+        """keyword, name, message, assert, initial, mode? """
         pass
 
     @handle_crash
@@ -69,7 +69,9 @@ class LeftMenuItem(CTkFrame, ABC):
         self.initialized = True
 
     @final
-    def _init_pf(self, keyword: str, name: str, message: str, assert_test: Callable[[float], bool], initial_value: float, mode: str = 'val') -> None:
+    def _init_pf(self, keyword: str, name: str, message: str, assert_test: Callable[[float], bool], initial_value: float,
+                 mode: Literal['bool', 'float', 'Vector2', 'Vector3'] = 'float') -> None:
+
         if keyword in self.pfs: raise ValueError(f'{keyword} already initialized')
         self.pfs[keyword] = ParameterField(self.pf_frame, name=name, help_message=message, on_set=self.update_surface, assert_test=assert_test, mode=mode)
         self.pfs[keyword].set(initial_value)

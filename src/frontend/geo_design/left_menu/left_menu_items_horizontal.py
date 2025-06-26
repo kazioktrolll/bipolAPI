@@ -22,11 +22,8 @@ class LMTapered(LeftMenuItem):
         surf = self.surface
         assert isinstance(surf, HorizontalSurface)
         pfs_params = [
-            ('x', 'X', 'The X-axis position of the tip of the root section.',
-             lambda x: True, surf.origin_position.x),
-
-            ('z', 'Z', 'The Z-axis position of the tip of the root section.',
-             lambda z: True, surf.origin_position.z),
+            ('pos', 'Position XZ', 'The X and Z positions of the tip of the root section.',
+             lambda tup: True, (surf.origin_position.x, surf.origin_position.z), 'Vector2'),
 
             ('span', 'Span', "The span of the horizontal tail.\nHas to be positive.",
              lambda w: w > 0, surf.span()),
@@ -58,9 +55,9 @@ class LMTapered(LeftMenuItem):
             taper_ratio=self.pfs['taper'].value,
             sweep_angle=self.pfs['sweep'].value,
             origin_position=(
-                self.pfs['x'].value,
+                self.pfs['pos'].value[0],
                 0,
-                self.pfs['z'].value
+                self.pfs['pos'].value[1]
             ),
             inclination_angle=self.pfs['inclination'].value,
             dihedral_angle=self.pfs['dihedral'].value,
@@ -88,11 +85,8 @@ class LMRectangular(LMTapered):
         surf = self.surface
         assert isinstance(surf, HorizontalSurface)
         pfs_params = [
-            ('x', 'X', 'The X-axis position of the tip of the root section.',
-             lambda x: True, surf.origin_position.x),
-
-            ('z', 'Z', 'The Z-axis position of the tip of the root section.',
-             lambda z: True, surf.origin_position.z),
+            ('pos', 'Position XZ', 'The X and Z positions of the tip of the root section.',
+             lambda tup: True, (surf.origin_position.x, surf.origin_position.z), 'Vector2'),
 
             ('span', 'Span', "The span of the horizontal tail.\nHas to be positive.",
              lambda w: w > 0, surf.span()),
@@ -111,9 +105,9 @@ class LMRectangular(LMTapered):
             span=self.pfs['span'].value,
             chord_length=self.pfs['chord'].value,
             origin_position=(
-                self.pfs['x'].value,
+                self.pfs['pos'].value[0],
                 0,
-                self.pfs['z'].value
+                self.pfs['pos'].value[1]
             ),
             inclination_angle=self.pfs['inclination'].value,
             airfoil=self.airfoil_chooser.airfoil
@@ -128,11 +122,8 @@ class LMDelta(LMTapered):
         surf = self.surface
         assert isinstance(surf, HorizontalSurface)
         pfs_params = [
-            ('x', 'X', 'The X-axis position of the tip of the root section.',
-             lambda x: True, surf.origin_position.x),
-
-            ('z', 'Z', 'The Z-axis position of the tip of the root section.',
-             lambda z: True, surf.origin_position.z),
+            ('pos', 'Position XZ', 'The X and Z positions of the tip of the root section.',
+             lambda tup: True, (surf.origin_position.x, surf.origin_position.z), 'Vector2'),
 
             ('span', 'Span', "The span of the horizontal tail.\nHas to be positive.",
              lambda b: b > 0, surf.span()),
@@ -151,9 +142,9 @@ class LMDelta(LMTapered):
             span=self.pfs['span'].value,
             surface_area=self.pfs['surface_area'].value,
             origin_position=(
-                self.pfs['x'].value,
+                self.pfs['pos'].value[0],
                 0,
-                self.pfs['z'].value
+                self.pfs['pos'].value[1]
             ),
             inclination_angle=self.pfs['inclination'].value,
             airfoil=self.airfoil_chooser.airfoil
@@ -168,11 +159,8 @@ class LMDoubleTrapez(LeftMenuItem):
         surf = self.surface
         assert isinstance(surf, HorizontalSurface)
         pfs_params = [
-            ('x', 'X', 'The X-axis position of the tip of the root section.',
-             lambda x: True, surf.origin_position.x),
-
-            ('z', 'Z', 'The Z-axis position of the tip of the root section.',
-             lambda z: True, surf.origin_position.z),
+            ('pos', 'Position XZ', 'The X and Z positions of the tip of the root section.',
+             lambda tup: True, (surf.origin_position.x, surf.origin_position.z), 'Vector2'),
 
             ('root_chord', 'Root Chord', "The chord of the surface at its root section.",
              lambda c: c > 0, surf.sections[0].chord),
@@ -183,23 +171,11 @@ class LMDoubleTrapez(LeftMenuItem):
             ('tip_chord', 'Tip Chord', "The chord of the surface at its tip section.",
              lambda c: c > 0, surf.sections[-1].chord),
 
-            ('mox', 'Mid Offset X', '',
-             lambda x: True, 0), #TODO fill
+            ('mo', 'Middle Offset XYZ', '',
+             lambda tup: True, (0, 1, 0), 'Vector3'), #TODO fill
 
-            ('moy', 'Mid Offset Y', '',
-             lambda x: True, 1), #TODO fill
-
-            ('moz', 'Mid Offset Z', '',
-             lambda x: True, 0), #TODO fill
-
-            ('tox', 'Tip Offset X', '',
-             lambda x: True, surf.sections[-1].x),
-
-            ('toy', 'Tip Offset Y', '',
-             lambda x: True, surf.sections[-1].y),
-
-            ('toz', 'Tip Offset Z', '',
-             lambda x: True, surf.sections[-1].z),
+            ('to', 'Tip Offset XYZ', '',
+             lambda tup: True, (surf.sections[-1].leading_edge_position.tuple()), 'Vector3'),
 
             ('inclination', 'Inclination', "The inclination of the surface, in degrees\n.",
              lambda i: True, surf.sections[0].inclination)
@@ -212,20 +188,12 @@ class LMDoubleTrapez(LeftMenuItem):
             root_chord=self.pfs['root_chord'].value,
             mid_chord=self.pfs['mid_chord'].value,
             tip_chord=self.pfs['tip_chord'].value,
-            mid_offset=(
-                self.pfs['mox'].value,
-                self.pfs['moy'].value,
-                self.pfs['moz'].value
-            ),
-            tip_offset=(
-                self.pfs['tox'].value,
-                self.pfs['toy'].value,
-                self.pfs['toz'].value
-            ),
+            mid_offset=self.pfs['mo'].value,
+            tip_offset=self.pfs['to'].value,
             origin_position=(
-                self.pfs['x'].value,
+                self.pfs['pos'].value[0],
                 0,
-                self.pfs['z'].value
+                self.pfs['pos'].value[1]
             ),
             inclination_angle=self.pfs['inclination'].value,
             airfoil=self.airfoil_chooser.airfoil

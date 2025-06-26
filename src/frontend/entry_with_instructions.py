@@ -52,5 +52,11 @@ class EntryWithInstructionsBlock(CTkFrame):
     def get(self):
         return [e.get() for e in self.entries]
 
+    def set(self, values: tuple[str, ...]):
+        if not len(values) == len(self.entries):
+            raise ValueError
+        for v, e in zip(values, self.entries):
+            e.configure(text=v)
+
     def clear(self):
         for e in self.entries: e.clear()

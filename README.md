@@ -3,10 +3,6 @@
 This is G-AVL - a GUI overlay for Mark Drela's Athena Vortex Lattice software.
 For more information about the original software, go to https://web.mit.edu/drela/Public/web/avl/.
 
-## How to install
-Download just the attached `GAVL.exe` file and run it. Ignore the other attached files if you are not a developer and
-are only using this for aircraft design / calculations.
-
 ## Software contents
 
 The G-AVL software consists of two independent parts:
