@@ -127,7 +127,7 @@ class LMTwinV(LeftMenuItem):
              lambda sa: -90 < sa < 90, (surf.sweep_angle() if surf.sweep_angle() is not None else 0)),
 
             ('gap', 'Gap', "The gap between the two parts of the surface in meters.\n Has to be positive.",
-             lambda g: g > 0, surf.sections[0].y * 2),
+             lambda g: g > 0, 1),
         ]
         return pfs_params
 

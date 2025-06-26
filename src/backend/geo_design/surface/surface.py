@@ -55,6 +55,7 @@ class Surface(ABC):
         self.sections = sections
         self.sort_sections()
         self.chord_points = 1
+        self.disabled = False
 
     def __repr__(self) -> str:
         return self.name

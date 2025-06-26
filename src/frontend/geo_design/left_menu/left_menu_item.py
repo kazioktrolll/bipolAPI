@@ -27,6 +27,7 @@ class LeftMenuItem(CTkFrame, ABC):
         self.name = surface.name
         self.initialized = False
         self.pfs: dict[str, ParameterField] = {}
+        self.disabled = False
 
         self.pf_frame = CTkFrame(self, fg_color='transparent')
         self.pf_frame.columnconfigure(0, weight=1)
@@ -84,13 +85,17 @@ class LeftMenuItem(CTkFrame, ABC):
     @handle_crash
     @final
     def _update_surface(self,
-                        surface_creator: Callable[[], Surface],
+                        surface_creator: Callable[[], Surface] = None,
                         do_with_surface: Callable[[Surface], None] = None
                         ) -> None:
+        if surface_creator is None:
+            surface_creator = lambda: self.surface
+
         if not self.initialized: return
 
         surface = surface_creator()
         if do_with_surface is not None: do_with_surface(surface)
+        surface.disabled = self.disabled
         self.geometry.replace_surface(surface)
         self.parent.do_on_update()
 
@@ -113,11 +118,18 @@ class LeftMenuItem(CTkFrame, ABC):
 
 
 class LMEmpty(LeftMenuItem):
+    def __init__(self, parent, surface: Surface):
+        super().__init__(parent, surface)
+        self.disabled = True
+        self.mechanizations.grid_forget()
+        self.airfoil_chooser.grid_forget()
+
     @cached_property
     def pfs_params(self) -> list[tuple[str, str, str, Callable[[Any], bool], Any]]:
         return []
 
-    def update_surface(self, _=None) -> None: ...
+    def update_surface(self, _=None) -> None:
+        super()._update_surface()
 
     def init_mechanization(self): ...
 

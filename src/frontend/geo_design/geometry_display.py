@@ -160,6 +160,7 @@ class GeometryDisplay(CTkFrame):
 
     def display_wing(self, wing: Surface | list[Surface]) -> None:
         """Displays a ``Surface``. If given a list of Surfaces, displays all."""
+        if wing.disabled: return
         if isinstance(wing, list):
             for w in wing: self.display_wing(w)
             return
@@ -179,8 +180,7 @@ class GeometryDisplay(CTkFrame):
         for i in range(1, len(sections)):
             curr_sec = sections[i]
             prev_sec = sections[i - 1]
-            if abs(curr_sec.y - prev_sec.y) > 0.01:
-                self.display_section(curr_sec, wing)
+            self.display_section(curr_sec, wing)
 
             def globalize(pos: Vector3) -> Vector3:
                 return pos + wing.origin_position
