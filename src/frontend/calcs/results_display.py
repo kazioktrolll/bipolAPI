@@ -37,7 +37,7 @@ class ResultsDisplay(CTkFrame):
         self.set_results([[{}, {}]])
 
         self.rowconfigure(0, weight=0)
-        self.rowconfigure(1, weight=1)
+        self.rowconfigure(1, weight=0)
         self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=0)
 
@@ -47,7 +47,8 @@ class ResultsDisplay(CTkFrame):
         self.mode_button.grid(row=1, column=0, sticky='nsew', padx=3, pady=6)
         self.csv_button.grid(row=1, column=1, sticky='nsew', padx=3, pady=6)
         self.current_display.grid(row=2, column=0, columnspan=2, sticky='nsew')
-        self.plot_button.grid(row=3, column=0, columnspan=2, sticky='nsew', pady=10, padx=5)
+        self.rowconfigure(2, weight=1)
+        self.plot_button.grid(row=4, column=0, columnspan=2, sticky='nsew', pady=10, padx=5)
         self.update()
 
     def update(self):
@@ -111,7 +112,7 @@ class TextBox(CTkFrame):
         self.columnconfigure(0, weight=0, minsize=5)
         if self.is_named: self.name_label.grid(row=0, column=1, sticky='nsew', padx=5, pady=5)
         for i, (key, value) in enumerate(self.dict.items()):
-            CTkLabel(self, text=key, anchor="e").grid(row=i + 1, column=1, padx=5, pady=2, sticky="e")
+            CTkLabel(self, text=key, anchor="e", width=80).grid(row=i + 1, column=1, padx=5, pady=2, sticky="e")
 
             entry = CTkEntry(self, width=80, border_width=0, fg_color='transparent')
             entry.insert(0, self._format(value))

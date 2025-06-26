@@ -55,6 +55,7 @@ class CalcDisplay(CTkFrame):
 
         self.columnconfigure(1, weight=1)
 
+        self.right_frame.rowconfigure(0, weight=1)
         self.results_display.grid(row=0, column=1, sticky='news', padx=20, pady=20)
 
         self.run_case()

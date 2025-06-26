@@ -1,7 +1,10 @@
 # G-AVL
 
 This is G-AVL - a GUI overlay for Mark Drela's Athena Vortex Lattice software.
-For more information about the original software, go to https://web.mit.edu/drela/Public/web/avl/.
+For more information about the original software, visit [MIT/AVL](https://web.mit.edu/drela/Public/web/avl/).
+
+This software uses GhostScript Portable for image conversion. For more information, visit
+[PortableApps/GhostScript](https://portableapps.com/apps/utilities/ghostscript_portable).
 
 ## Software contents
 
@@ -84,8 +87,8 @@ The file with points should be in the following format:
 * One point per line, containing x/c, y/c of the point separated with a comma, spaces, tabs or any combination of those.
 * Points can be provided in any order.
 * Any lines containing plain text (or anything not fitting the previously defined point format) will be ignored.
-* Example of a correct file: http://airfoiltools.com/airfoil/seligdatfile?airfoil=n0012-il (all files from
-  airfoiltools.com should work)
+* Example of a correct file: [AirfoilTools/naca0012](http://airfoiltools.com/airfoil/seligdatfile?airfoil=n0012-il)
+(all files from [AirfoilTools](http://airfoiltools.com) should work)
 
 #### Control Surfaces
 Control surfaces can be added and edited using the `Control Surfaces` sub-menu. When starting from the default geometry,

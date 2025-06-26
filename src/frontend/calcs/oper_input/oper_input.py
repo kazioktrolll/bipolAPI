@@ -73,6 +73,7 @@ class OperSeriesInput(RowManager):
         self.grid.columnconfigure(1, minsize=120)
         self.stack_spacing(0)
         self.stack(self.name_label, sticky='e', pady=6, padx=6)
+        self.grid.columnconfigure(2, minsize=140)
         self.stack([
             self.bind_menu,
             self.series_config,
