@@ -25,8 +25,6 @@ class CalcDisplay(CTkFrame):
 
         self.left_frame = CTkFrame(self, fg_color='transparent', border_width=3)
         self.right_frame = CTkFrame(self, fg_color='transparent', border_width=3)
-        self.left_frame.grid(row=0, column=0, sticky='nsew', padx=20, pady=20)
-        self.right_frame.grid(row=0, column=2, sticky='nsew', padx=20, pady=20)
 
         self.exec_button = CTkButton(self.left_frame, text='Execute', command=self.run_case)
 
@@ -35,7 +33,9 @@ class CalcDisplay(CTkFrame):
         self.oip = OperSeriesInputPanel(self.left_frame, controls_names)
         self.static_input = StaticInputPanel(self.left_frame, self.geometry.ref_pos.tuple())
 
-        self.build()
+        if len(self.geometry.surfaces) == 0:
+            self.error('Cannot proces an empty geometry.\nCreate the geometry first.')
+        self.run_case()
 
     @property
     def geometry(self):
@@ -46,19 +46,20 @@ class CalcDisplay(CTkFrame):
         return self.master.app.geometry
 
     def build(self):
-        self.rowconfigure(0, weight=1)
+        self.left_frame.place(relx=0.25, rely=0.5, anchor='center', relheight=1.0)
+        self.right_frame.place(relx=0.75, rely=0.5, anchor='center', relheight=1.0)
 
         self.oip.grid(row=0, column=0, sticky="news", padx=20, pady=20)
         self.static_input.grid(row=1, column=0, sticky="news", padx=20, pady=20)
         self.left_frame.rowconfigure(2, weight=1)
         self.exec_button.grid(row=2, column=0, sticky='news', padx=20, pady=20)
 
-        self.columnconfigure(1, weight=1)
-
         self.right_frame.rowconfigure(0, weight=1)
         self.results_display.grid(row=0, column=1, sticky='news', padx=20, pady=20)
 
-        self.run_case()
+    def grid(self, **kwargs):
+        super().grid(**kwargs)
+        self.after(1000, self.build, )
 
     def update(self):
         self.build()
@@ -69,7 +70,7 @@ class CalcDisplay(CTkFrame):
             oip_data, size = self.oip.get_run_file_data()
             return self.static_input.get_data(size) | oip_data
         except ValueError as e:
-            HelpTopLevel(self, e.args[0])
+            self.error(e.args[0])
             return None
         except ResourceWarning:
             force = AskPopup.ask('It is highly discouraged to run more than a thousand cases at once.\nContinue anyway?',
@@ -79,6 +80,7 @@ class CalcDisplay(CTkFrame):
             return self.oip.get_run_file_data(forced=True)
 
     def run_case(self):
+        if len(self.geometry.surfaces) == 0: return
         self.exec_button.configure(state='disabled')
         popup = Popup(self)
         CTkLabel(popup, text='Running...').grid(row=0, column=0, padx=5, pady=5, sticky='nsew')

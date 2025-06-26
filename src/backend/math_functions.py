@@ -34,6 +34,8 @@ def best_factor_pair(n: int) -> tuple[int, int]:
 def distribute_units(total_units: int, weights: list[float]) -> list[int]:
     """Returns a distribution of given number of units, according to given weights."""
     total_weight = sum(weights)
+    if total_weight == 0:
+        raise ValueError("Cannot distribute units with zero total weight.")
     ideal_allocations = [w / total_weight * total_units for w in weights]
 
     allocations = [int(x) for x in ideal_allocations]

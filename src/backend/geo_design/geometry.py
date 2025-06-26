@@ -99,6 +99,7 @@ class Geometry:
 
     def distribute_points(self, nof_points=500) -> None:
         """Distributes the given number of AVL calculation points over all surfaces. Must not be higher than 3000."""
+        if len(self.surfaces) == 0: return
         if nof_points > 3000:
             raise AttributeError("The number of points cannot be greater than 3000.")
         min_points = [surf.min_points() for surf in self.surfaces.values()]
