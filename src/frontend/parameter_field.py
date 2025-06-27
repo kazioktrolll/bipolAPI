@@ -143,7 +143,6 @@ class ParameterField(CTkFrame):
     @handle_crash
     def set(self, value: value_types = None) -> bool:
         """Sets the value in the entry as the new value of the parameter. Returns True if changed successfully."""
-        print(self.entry.winfo_width())
         if isinstance(self.entry, CTkCheckBox):
             return self.set_checkbox()
         elif isinstance(self.entry, CTkEntry):

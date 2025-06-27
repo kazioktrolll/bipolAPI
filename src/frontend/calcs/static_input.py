@@ -24,7 +24,7 @@ class StaticInputPanel(CTkFrame):
 
         self.height = 0
         self.height_label = CTkLabel(self, width=120, anchor='e')
-        self.height_entry = EntryWithInstructions(self, 'height', width=120)
+        self.height_entry = EntryWithInstructions(self, 'altitude', width=120)
         self.height_set_button = CTkButton(self, text='Set', width=40, command=self.set_height)
 
         self.set_mass(center_of_mass)
@@ -38,7 +38,7 @@ class StaticInputPanel(CTkFrame):
         self.mass_entry.grid(column=3, row=0, padx=3, pady=3)
         self.mass_set_button.grid(column=4, row=0, padx=3, pady=3)
 
-        CTkLabel(self, text='Height', width=120, anchor='e').grid(column=0, row=1, padx=3, pady=3)
+        CTkLabel(self, text='Altitude', width=120, anchor='e').grid(column=0, row=1, padx=3, pady=3)
         self.height_label.grid(column=2, row=1, padx=3, pady=3)
         self.height_entry.grid(column=3, row=1, padx=3, pady=3)
         self.height_set_button.grid(column=4, row=1, padx=3, pady=3)

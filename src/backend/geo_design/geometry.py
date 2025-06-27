@@ -21,9 +21,6 @@ class Geometry:
 
     Attributes:
         name (str): The name of the aircraft.
-        surface_area (float): The surface area of the aircraft.
-        chord_length (float): The mean aerodynamic chord length of the aircraft.
-        span_length (float): The wingspan of the aircraft.
         mach (float): The cruise speed of the aircraft as Mach number.
         ref_pos (Vector3): The reference position of the aircraft, ideally the position of the center of mass.
         surfaces (Dict[str, Surface]): The ``Surface`` objects associated with the aircraft.
@@ -32,27 +29,18 @@ class Geometry:
 
     def __init__(self,
                  name: str,
-                 chord_length: float,
-                 span_length: float,
-                 surface_area: float = 0,
                  mach: float = 0,
                  ref_pos: AnyVector3 = Vector3.zero(),
                  surfaces: list[Surface] = None):
         """
         Parameters:
             name (str): The name of the aircraft.
-            chord_length (float): The mean aerodynamic chord length of the aircraft.
-            span_length (float): The wingspan of the aircraft.
-            surface_area (float): The surface area of the aircraft. If not given, will be calculated as chord*span.
             mach (float): The cruise speed of the aircraft as Mach number.
             ref_pos (AnyVector3): The reference position of the aircraft, ideally the position of the center of mass.
             surfaces (list[Surface]): The ``Surface`` objects associated with the aircraft.
         """
         self.name = name
         self.mach = mach
-        self.chord_length = chord_length
-        self.span_length = span_length
-        self.surface_area = surface_area or chord_length * span_length
         self.ref_pos = Vector3(*ref_pos)
         self.surfaces = {surf.name: surf for surf in surfaces} if surfaces else {}
 
@@ -107,3 +95,27 @@ class Geometry:
         distribution = distribute_units(nof_points - sum(min_points), areas)
         for surf, points in zip(self.surfaces.values(), distribution):
             surf.distribute_points(surf.min_points() + points)
+
+    @property
+    def main_surface(self) -> Surface:
+        """Returns the main surface of the aircraft."""
+        if 'Wing' in self.surfaces.keys():
+            return self.surfaces['Wing']
+        surfs = [(s, s.area()) for s in self.surfaces.values()]
+        surfs.sort(key=lambda x: x[1], reverse=True)
+        return surfs[0][0]
+
+    @property
+    def span_length(self):
+        if len(self.surfaces) == 0: return 0
+        return self.main_surface.span
+
+    @property
+    def chord_length(self):
+        if len(self.surfaces) == 0: return 0
+        return self.main_surface.mac()
+
+    @property
+    def surface_area(self):
+        if len(self.surfaces) == 0: return 0
+        return self.main_surface.area()

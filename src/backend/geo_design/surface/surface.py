@@ -100,8 +100,9 @@ class SurfaceTemplates:
     @staticmethod
     def double_trapez(name: str,
                       root_chord: float, mid_chord: float, tip_chord: float,
-                      mid_offset: AnyVector3, tip_offset: AnyVector3, origin_position: AnyVector3 = Vector3.zero(),
-                      inclination_angle: float = 0, airfoil: Airfoil = None) -> 'Surface':
+                      length: float, seam_spanwise: float, origin_position: AnyVector3,
+                      inclination_angle: float, airfoil: Airfoil, dihedral_angle: float, sweep_angle: float,
+                      mid_gap: float, y_duplicate: bool) -> 'Surface':
         """
         Creates a ``Surface`` based on parameters of a double trapezoidal wing.
 
@@ -109,32 +110,24 @@ class SurfaceTemplates:
         :param root_chord: Aerodynamic root chord of the surface in meters.
         :param mid_chord: Aerodynamic mid-chord of the surface in meters.
         :param tip_chord: Aerodynamic tip chord of the surface in meters.
-        :param mid_offset: Offset between the mid-chord-le and the root-chord-le of the surface in meters.
-        :param tip_offset: Offset between the tip-chord-le and the root-chord-le of the surface in meters.
+        :param length: Span of the surface in meters.
+        :param seam_spanwise: Spanwise position of the seam in meters.
         :param origin_position: Position of the root-chord-le of the surface in meters.
         :param inclination_angle: Inclination angle of the surface in degrees.
         :param airfoil: Airfoil object.
+        :param dihedral_angle: Dihedral angle of the surface in degrees.
+        :param sweep_angle: Sweep angle of the surface in degrees.
+        :param mid_gap: Mid-gap of the surface in meters.
+        :param y_duplicate: Whether the surface should be mirrored about Y-axis.
         """
-        root = Section(
-            leading_edge_position=(0, 0, 0),
-            chord=root_chord,
-            inclination=inclination_angle,
-            airfoil=airfoil
-        )
-        mid = Section(
-            leading_edge_position=mid_offset,
-            chord=mid_chord,
-            inclination=inclination_angle,
-            airfoil=airfoil
-        )
-        tip = Section(
-            leading_edge_position=tip_offset,
-            chord=tip_chord,
-            inclination=inclination_angle,
-            airfoil=airfoil
-        )
+        mac_0 = (root_chord + tip_chord) / 2
+        surf = SurfaceTemplates.simple_tapered(
+            name=name, length=length, origin_position=origin_position, sweep_angle=sweep_angle, dihedral_angle=dihedral_angle, airfoil=airfoil,
+            inclination_angle=inclination_angle, taper_ratio=tip_chord/root_chord, chord=mac_0, mid_gap=mid_gap, y_duplicate=y_duplicate)
 
-        surf = Surface(name=name, y_duplicate=True, origin_position=origin_position, airfoil=airfoil, sections=[root, mid, tip])
+        mid_section = surf.add_section_gentle(seam_spanwise)
+        mid_section.chord = mid_chord
+
         return surf
 
     @staticmethod
@@ -350,12 +343,13 @@ class Surface:
         self.sections.append(section)
         self.sort_sections()
 
-    def add_section_gentle(self, spanwise: float | list[float]) -> None:
+    def add_section_gentle(self, spanwise: float | list[float]) -> Section | list[Section]:
         """Add a new section to the surface without modifying the shape of the surface."""
         if isinstance(spanwise, list):
+            scn_list = []
             for spn_i in spanwise:
-                self.add_section_gentle(spn_i)
-            return
+                scn_list.append(self.add_section_gentle(spn_i))
+            return scn_list
 
         assert isinstance(spanwise, (int, float))
 
@@ -374,6 +368,7 @@ class Surface:
         inc = prev_sec.inclination + d_spanwise * (next_sec.inclination - prev_sec.inclination)
         sec = Section(self.xspan_to_xyz(xle, spanwise), chord, inc, self.airfoil)
         self.add_section(sec)
+        return sec
 
     def sort_sections(self) -> None:
         """Sorts the sections along the major axis of the surface."""
@@ -389,12 +384,12 @@ class Surface:
         surf.name = self.name + '_symm'
         reflected_sections = [sec.mirror() for sec in self.sections]
         surf.sections = reflected_sections
-        surf.clear_controls()
-        surf.mechanization = {}
-        sym_controls = {}
-        for k, list_of_ranges in self.mechanization.items():
-            sym_controls[k] = [(-e, -s, xc) for s, e, xc in list_of_ranges]
-        surf.set_mechanization(**sym_controls)
+        # surf.clear_controls()
+        # surf.mechanization = {}
+        # sym_controls = {}
+        # for k, list_of_ranges in self.mechanization.items():
+        #     sym_controls[k] = [(-e, -s, xc) for s, e, xc in list_of_ranges]
+        # surf.set_mechanization(**sym_controls)
         return surf
 
     def assert_straight(self):
@@ -484,7 +479,6 @@ class Surface:
                 if section.control is None: continue
                 if section.control.is_equal_to(prev_section.control) and section.control is not prev_section.control:
                     self.add_section_gentle(prev_section.y + 0.01)
-
 
     def min_points(self) -> int:
         """Returns the minimal number of vortex points required for this surface. """

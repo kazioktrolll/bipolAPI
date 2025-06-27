@@ -22,24 +22,22 @@ class GeometryGenerator:
     def empty(cls) -> 'Geometry':
         g = Geometry(
             name='Empty',
-            chord_length=0,
-            span_length=0
         )
         return g
 
     @classmethod
     def default(cls) -> Geometry:
-        wing = Surface.template.simple_tapered(name='Wing', length=4, chord=1, airfoil=Airfoil.from_naca('2415'), taper_ratio=1, sweep_angle=0, origin_position=(0, 0, 0),
+        wing = Surface.template.simple_tapered(name='Wing', length=4, chord=1, airfoil=Airfoil.from_naca('0006'), taper_ratio=1, sweep_angle=0, origin_position=(0, 0, 0),
                                                y_duplicate=True, dihedral_angle=0, inclination_angle=0, mid_gap=0)
         wing.set_mechanization(ailerons=[(3, 4, .8)], flaps=[(2.3, 2.8, .6)])
-        h_tail = Surface.template.simple_tapered(name='H Tail', length=1, chord=1, origin_position=(4, 0, 1), airfoil=Airfoil.from_naca('0012'), taper_ratio=1, sweep_angle=0,
+        h_tail = Surface.template.simple_tapered(name='H Tail', length=1, chord=1, origin_position=(4, 0, 1), airfoil=Airfoil.from_naca('0006'), taper_ratio=1, sweep_angle=0,
                                                  y_duplicate=True, dihedral_angle=0, inclination_angle=0, mid_gap=0)
         h_tail.set_mechanization(elevators=[(0, 1, .8)])
         v_tail = Surface(
             name='V Tail',
             sections=[
-                Section((0, 0, 0), 1.1, 0, airfoil=Airfoil.from_naca('0012')),
-                Section((.2, 0, .5), .9, 0, airfoil=Airfoil.from_naca('0012')),
+                Section((0, 0, 0), 1.1, 0, airfoil=Airfoil.from_naca('0006')),
+                Section((.2, 0, .5), .9, 0, airfoil=Airfoil.from_naca('0006')),
             ],
             origin_position=(3.8, 0, .5),
             y_duplicate=False,
@@ -47,10 +45,7 @@ class GeometryGenerator:
         )
         g = Geometry(
             name="default",
-            chord_length=wing.mac(),
-            span_length=wing.span,
             surfaces=[wing, h_tail, v_tail],
-            surface_area=wing.mac() * wing.span,
         )
         return g
 
@@ -125,9 +120,6 @@ class FromAvl:
             lines.insert(0, next_line)
         geometry_data = {
             'name': name,
-            'chord_length': refs[1],
-            'span_length': refs[2],
-            'surface_area': refs[0],
             'mach': mach,
             'ref_pos': ref_pos,
             'surfaces': []

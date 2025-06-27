@@ -13,6 +13,7 @@ from typing import Callable
 from tempfile import TemporaryDirectory
 from tkinter.filedialog import askopenfilename
 import pickle
+import os
 from src.backend.geo_design import Geometry, GeometryGenerator
 from src.backend import handle_crash
 
@@ -160,6 +161,11 @@ class App:
 
         self.set_geometry(geom)
 
+    @staticmethod
+    def open_help():
+        path = Path(__file__).parent.parent / 'INSTRUCTION.pdf'
+        os.startfile(path)
+
 
 from customtkinter import CTkFrame
 from src.frontend import TopBarItem, TopBarButton
@@ -182,6 +188,8 @@ class TopBar(CTkFrame):
                      ).grid(column=2, row=0, sticky='nsew')
         TopBarButton(self, 'Calculations', lambda: app.set_scene(CalcScene(app))
                      ).grid(column=3, row=0, sticky='nsew')
+        TopBarButton(self, 'Help', app.open_help
+                     ).grid(column=4, row=0, sticky='nsew')
 
     def collapse_all(self):
         for child in self.children.values():

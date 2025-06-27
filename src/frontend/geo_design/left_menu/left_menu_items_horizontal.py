@@ -73,7 +73,7 @@ class LMRectangular(LMTapered):
             ('pos', 'Position XZ', 'The X and Z positions of the tip of the root section.',
              lambda tup: True, (surf.origin_position.x, surf.origin_position.z), 'Vector2'),
 
-            ('span', 'Span', "The span of the horizontal tail.\nHas to be positive.",
+            ('span', 'Span', "The span of the surface.\nHas to be positive.",
              lambda w: w > 0, surf.span),
 
             ('chord', 'MAC', "The mean aerodynamic chord of the surface.\nHas to be positive.",
@@ -159,14 +159,22 @@ class LMDoubleTrapez(LeftMenuItem):
             ('tip_chord', 'Tip Chord', "The chord of the surface at its tip section.",
              lambda c: c > 0, surf.sections[-1].chord),
 
-            ('mo', 'Middle Offset XYZ', '',
-             lambda tup: True, (0, 1, 0), 'Vector3'), #TODO fill
+            ('span', 'Span', "The span of the surface.\nHas to be positive.",
+             lambda w: w > 0, surf.span),
 
-            ('to', 'Tip Offset XYZ', '',
-             lambda tup: True, (surf.sections[-1].leading_edge_position.tuple()), 'Vector3'),
+            ('ss', 'Seam Spanwise Position', "The spanwise position of the seam as percent of the wing span.\nHas to be between 0 and 1.",
+             lambda ss: 0 < ss < 1, 0.2, 'float'),
 
-            ('inclination', 'Inclination', "The inclination of the surface, in degrees\n.",
-             lambda i: True, surf.sections[0].inclination)
+            ('inclination', 'Inclination Angle', "The inclination of the surface, in degrees\n.",
+             lambda i: True, surf.sections[0].inclination),
+
+            ('sweep', 'Sweep Angle', "Sweep angle of the wing, in degrees.\n"
+                                     "The angle between Y-axis and the 25%MAC line. Positive means wing deflected backwards.\n"
+                                     "Has to be between -90 and 90.",
+             lambda sa: -90 < sa < 90, (surf.sweep_angle() if surf.sweep_angle() is not None else 0)),
+
+            ('dihedral', 'Dihedral Angle', "The dihedral of the surface, in degrees\n.",
+             lambda d: -90 < d < 90, surf.sections[0].inclination)
         ]
         return pfs_params
 
@@ -176,15 +184,19 @@ class LMDoubleTrapez(LeftMenuItem):
             root_chord=self.pfs['root_chord'].value,
             mid_chord=self.pfs['mid_chord'].value,
             tip_chord=self.pfs['tip_chord'].value,
-            mid_offset=self.pfs['mo'].value,
-            tip_offset=self.pfs['to'].value,    # TODO ogarnąć
+            length=self.pfs['span'].value/2,
+            seam_spanwise=self.pfs['ss'].value * self.pfs['span'].value / 2,
+            sweep_angle=self.pfs['sweep'].value,
             origin_position=(
                 self.pfs['pos'].value[0],
                 0,
                 self.pfs['pos'].value[1]
             ),
             inclination_angle=self.pfs['inclination'].value,
-            airfoil=self.airfoil_chooser.airfoil
+            dihedral_angle=self.pfs['dihedral'].value,
+            airfoil=self.airfoil_chooser.airfoil,
+            mid_gap=0,
+            y_duplicate=True
         )
         do_with_surface = lambda surface: surface.set_mechanization(**self.mechanizations.get_values())
         super()._update_surface(surface_generator, do_with_surface)
