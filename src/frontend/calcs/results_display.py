@@ -10,7 +10,7 @@ the Free Software Foundation, either version 3 of the License, or
 
 from customtkinter import CTkFrame, CTkSegmentedButton, CTkLabel, CTkEntry, CTkButton
 from pathlib import Path
-from .plot_button import PlotTrefftz
+from .plot_button import PlotTrefftz, PlotLoading
 
 
 class ResultsDisplay(CTkFrame):
@@ -25,7 +25,8 @@ class ResultsDisplay(CTkFrame):
         self.forces_display = ForcesDisplay(self, controls_names)
         self.stability_display = STDisplay(self, controls_names)
         self.current_display = self.forces_display
-        self.plot_button = PlotTrefftz(self, app_wd, calc_display)
+        self.trefftz_button = PlotTrefftz(self, app_wd, calc_display)
+        self.loading_button = PlotLoading(self, app_wd, calc_display)
         self.mode_button.set('Forces')
         self.build()
 
@@ -48,7 +49,8 @@ class ResultsDisplay(CTkFrame):
         self.csv_button.grid(row=1, column=1, sticky='nsew', padx=3, pady=6)
         self.current_display.grid(row=2, column=0, columnspan=2, sticky='nsew')
         self.rowconfigure(2, weight=1)
-        self.plot_button.grid(row=4, column=0, columnspan=2, sticky='nsew', pady=10, padx=5)
+        self.trefftz_button.grid(row=4, column=0, columnspan=2, sticky='nsew', pady=10, padx=5)
+        self.loading_button.grid(row=5, column=0, columnspan=2, sticky='nsew', pady=10, padx=5)
         self.update()
 
     def update(self):

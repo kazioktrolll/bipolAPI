@@ -145,3 +145,44 @@ class ImageGetter:
                    'Q\n')
         png_path = cls.get_image(avl_file_path, command, app_wd)
         return cls.image_from_path(png_path)
+
+    @classmethod
+    def get_loading(cls,
+                    geometry: Geometry,
+                    run_file_data: dict[str, list[float]],
+                    case_number: int,
+                    height: float,
+                    app_wd: str | Path) -> Image.Image:
+        """Returns a loading plot of the given conditions.
+
+        :param geometry: The geometry of the aircraft.
+        :param run_file_data: Run-file type data.
+        :param case_number: The number of the case considered.
+        :param height: The altitude of the aircraft.
+        :param app_wd: App working directory.
+        :return: The Trefftz plot as a PIL Image.
+        """
+        contents = AVLInterface.create_run_file_contents(run_file_data, height)
+
+        work_dir = Path(app_wd) / 'loading'
+        if not work_dir.exists(): work_dir.mkdir()
+        avl_file_path = work_dir / 'plane.avl'
+        run_file_path = work_dir / 'plane.run'
+
+        with open(avl_file_path, 'w') as avl_file: avl_file.write(geometry.string())
+        with open(run_file_path, 'w') as run_file: run_file.write(contents)
+
+        command = ('OPER\n'
+                   f'{case_number + 1}\n'
+                   'X\n'
+                   'G\n'
+                   'LO\n'
+                   'CH\n'
+                   'BO\n'
+                   'AX\n'
+                   'H\n'
+                   '\n'
+                   '\n'
+                   'Q\n')
+        png_path = cls.get_image(avl_file_path, command, app_wd)
+        return cls.image_from_path(png_path)

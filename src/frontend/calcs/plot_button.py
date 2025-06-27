@@ -19,8 +19,8 @@ from ...backend import ImageGetter
 
 
 class PlotButton(CTkButton, ABC):
-    def __init__(self, parent):
-        super().__init__(parent, text='Plot Trefftz', command=self.plot)
+    def __init__(self, parent, text: str):
+        super().__init__(parent, text=text, command=self.plot)
 
     @abstractmethod
     def generate_image(self) -> Image.Image:
@@ -32,7 +32,7 @@ class PlotButton(CTkButton, ABC):
 
 class PlotTrefftz(PlotButton):
     def __init__(self, parent, app_wd: str | Path, calc_display):
-        super().__init__(parent)
+        super().__init__(parent, 'Plot Trefftz')
         self._calc_display = calc_display
         self.app_wd = app_wd
 
@@ -53,6 +53,20 @@ class PlotTrefftz(PlotButton):
     @property
     def current_page(self):
         return self.calc_display.results_display.page
+
+
+class PlotLoading(PlotTrefftz):
+    def __init__(self, parent, app_wd: str | Path, calc_display):
+        super().__init__(parent, app_wd, calc_display)
+        self.configure(text='Plot Loading')
+
+    def generate_image(self) -> Image.Image:
+        geometry = self.calc_display.geometry
+        run_file_data: dict[str, list[float]] = self.calc_display.oip.get_run_file_data()[0]
+        case_number: int = self.current_page
+        return ImageGetter.get_loading(geometry, run_file_data, case_number,
+                                       self.calc_display.static_input.height,
+                                       self.app_wd)
 
 
 class PlotWindow(CTkToplevel):
