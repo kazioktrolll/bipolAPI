@@ -53,9 +53,6 @@ class LMRectangularV(LeftMenuItem):
         )
         super()._update_surface(surface_generator)
 
-    def init_mechanization(self):
-        ...
-
 
 class LMSimpleTaperedV(LeftMenuItem):
     @cached_property
@@ -103,9 +100,6 @@ class LMSimpleTaperedV(LeftMenuItem):
             y_duplicate=False
         )
         super()._update_surface(surface_generator)
-
-    def init_mechanization(self):
-        ...
 
 
 class LMTwinV(LeftMenuItem):
@@ -157,6 +151,3 @@ class LMTwinV(LeftMenuItem):
             dihedral_angle=90
         )
         super()._update_surface(surface_generator)
-
-    def init_mechanization(self):
-        ...

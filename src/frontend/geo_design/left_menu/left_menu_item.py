@@ -8,13 +8,15 @@ the Free Software Foundation, either version 3 of the License, or
 """
 
 
-from customtkinter import CTkFrame, CTkLabel
+from customtkinter import CTkFrame, CTkLabel, StringVar
 from typing import Callable, final, Any, Literal
 from abc import ABC, abstractmethod
 from functools import cached_property
 
 from ..airfoil_chooser import AirfoilChooser
 from ..mechanization_chooser import MechanizationChooser
+from ..mechanization_chooser import ControlTypeItem
+from ... import FlapItem
 from ...parameter_field import ParameterField
 from ....backend.geo_design import Surface, Geometry
 from ....backend import handle_crash
@@ -53,9 +55,16 @@ class LeftMenuItem(CTkFrame, ABC):
         self.mechanizations.grid(row=1, column=0, sticky='nsew')
         self.airfoil_chooser.grid(row=2, column=0, padx=10, pady=10, sticky='nsew')
 
-    @abstractmethod
     def init_mechanization(self):
-        ...
+        if not self.surface.mechanization: return
+        for key, list_of_ranges in self.surface.mechanization.items():
+            key = key.capitalize()
+            list_preset = ControlTypeItem(key, self.update_surface, True)
+            for start, stop, xc in list_of_ranges:
+                item = FlapItem()
+                item.set_values(StringVar(value=f'{start}'), StringVar(value=f'{stop}'), StringVar(value=f'{xc}'))
+                list_preset.add_position(item)
+            self.mechanizations.add_position(list_preset)
 
     @cached_property
     @abstractmethod

@@ -7,12 +7,9 @@ the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 """
 from typing import Callable, Any
-from customtkinter import StringVar
 from functools import cached_property
 
 from .left_menu_item import LeftMenuItem
-from ..mechanization_chooser import ControlTypeItem
-from ... import FlapItem
 from ....backend.geo_design import Surface
 
 
@@ -66,17 +63,6 @@ class LMTapered(LeftMenuItem):
         )
         do_with_surface = lambda surface: surface.set_mechanization(**self.mechanizations.get_values())
         super()._update_surface(surface_generator, do_with_surface)
-
-    def init_mechanization(self):
-        if not self.surface.mechanization: return
-        for key, list_of_ranges in self.surface.mechanization.items():
-            key = key.capitalize()
-            list_preset = ControlTypeItem(key, self.update_surface, True)
-            for start, stop, xc in list_of_ranges:
-                item = FlapItem()
-                item.set_values(StringVar(value=f'{start}'), StringVar(value=f'{stop}'), StringVar(value=f'{xc}'))
-                list_preset.add_position(item)
-            self.mechanizations.add_position(list_preset)
 
 
 class LMRectangular(LMTapered):
@@ -202,15 +188,3 @@ class LMDoubleTrapez(LeftMenuItem):
         )
         do_with_surface = lambda surface: surface.set_mechanization(**self.mechanizations.get_values())
         super()._update_surface(surface_generator, do_with_surface)
-
-    def init_mechanization(self):
-        if not self.surface.mechanization: return
-        for key, list_of_ranges in self.surface.mechanization.items():
-            key = key.capitalize()
-            list_preset = ControlTypeItem(key, self.update_surface, True)
-            for start, stop, xc in list_of_ranges:
-                item = FlapItem()
-                item.set_values(StringVar(value=f'{start}'), StringVar(value=f'{stop}'), StringVar(value=f'{xc}'))
-                list_preset.add_position(item)
-            self.mechanizations.add_position(list_preset)
-
