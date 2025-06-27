@@ -1,6 +1,8 @@
 # G-AVL
+#### *(Wojciech Kwiatkowski)*
 
 This is G-AVL - a GUI overlay for Mark Drela's Athena Vortex Lattice software.
+
 For more information about the original software, visit [MIT/AVL](https://web.mit.edu/drela/Public/web/avl/).
 
 This software uses GhostScript Portable for image conversion. For more information, visit
@@ -21,12 +23,13 @@ such as wingspan, taper ratio, etc.
 ### Calc
 Performance Calculator, or Calc for short, is an interface for the MIT AVL.
 It takes the geometry created by the user in the GeoDesign module and transforms it into an AVL-type text file.
-Then allows the user to run a measurement or a series of measurements for desired flight parameters,
+It then allows the user to run a measurement or a series of measurements for desired flight parameters,
 like the angle of attack, sideslip, etc.
-The results can then be accessed directly through the software, exported into a .csv file,
+The results can be accessed directly through the software, exported into a .csv file,
 or plotted on the screen using AVL built-in functionalities.
 
 ## Guide
+*A step-by-step example session is provided in the next section.*
 ### Geometry Creation
 *If you already have an .avl file from other sources, skip to the next section.*
 
@@ -72,7 +75,7 @@ information.
     * Root chord – Chord of the wing at the root, in meters. Must be positive.
     * Mid Chord – Chord of the wing at the seam, in meters. Must be positive.
     * Tip Chord – Chord of the wing at the tip, in meters. Must be positive.
-    * Seam Spanwise Position – the position of the seam as a fraction of the total span. Must be between 0 and 1.
+    * Seam Spanwise Position – the position of the seam as a fraction of the total half-span. Must be between 0 and 1.
   * Delta
     * Surface Area – the surface area of the wing, in meters squared.
   * Vertical Tail
