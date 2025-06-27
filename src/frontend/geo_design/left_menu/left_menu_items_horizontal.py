@@ -13,14 +13,13 @@ from functools import cached_property
 from .left_menu_item import LeftMenuItem
 from ..mechanization_chooser import ControlTypeItem
 from ... import FlapItem
-from ....backend.geo_design import HorizontalSurface
+from ....backend.geo_design import Surface
 
 
 class LMTapered(LeftMenuItem):
     @cached_property
     def pfs_params(self) -> list[tuple[str, str, str, Callable[[Any], bool], Any]]:
         surf = self.surface
-        assert isinstance(surf, HorizontalSurface)
         pfs_params = [
             ('pos', 'Position XZ', 'The X and Z positions of the tip of the root section.',
              lambda tup: True, (surf.origin_position.x, surf.origin_position.z), 'Vector2'),
@@ -48,10 +47,10 @@ class LMTapered(LeftMenuItem):
         return pfs_params
 
     def update_surface(self, _=None) -> None:
-        surface_generator = lambda: HorizontalSurface.simple_tapered(
+        surface_generator = lambda: Surface.template.simple_tapered(
             name=self.name,
-            span=self.pfs['span'].value,
-            chord_length=self.pfs['chord'].value,
+            length=self.pfs['span'].value/2,
+            chord=self.pfs['chord'].value,
             taper_ratio=self.pfs['taper'].value,
             sweep_angle=self.pfs['sweep'].value,
             origin_position=(
@@ -61,13 +60,14 @@ class LMTapered(LeftMenuItem):
             ),
             inclination_angle=self.pfs['inclination'].value,
             dihedral_angle=self.pfs['dihedral'].value,
-            airfoil=self.airfoil_chooser.airfoil
+            airfoil=self.airfoil_chooser.airfoil,
+            mid_gap=0,
+            y_duplicate=True
         )
         do_with_surface = lambda surface: surface.set_mechanization(**self.mechanizations.get_values())
         super()._update_surface(surface_generator, do_with_surface)
 
     def init_mechanization(self):
-        assert isinstance(self.surface, HorizontalSurface)
         if not self.surface.mechanization: return
         for key, list_of_ranges in self.surface.mechanization.items():
             key = key.capitalize()
@@ -83,7 +83,6 @@ class LMRectangular(LMTapered):
     @cached_property
     def pfs_params(self) -> list[tuple[str, str, str, Callable[[Any], bool], Any]]:
         surf = self.surface
-        assert isinstance(surf, HorizontalSurface)
         pfs_params = [
             ('pos', 'Position XZ', 'The X and Z positions of the tip of the root section.',
              lambda tup: True, (surf.origin_position.x, surf.origin_position.z), 'Vector2'),
@@ -100,17 +99,22 @@ class LMRectangular(LMTapered):
         return pfs_params
 
     def update_surface(self, _=None) -> None:
-        surface_generator = lambda: HorizontalSurface.simple_tapered(
+        surface_generator = lambda: Surface.template.simple_tapered(
             name=self.name,
-            span=self.pfs['span'].value,
-            chord_length=self.pfs['chord'].value,
+            length=self.pfs['span'].value/2,
+            chord=self.pfs['chord'].value,
             origin_position=(
                 self.pfs['pos'].value[0],
                 0,
                 self.pfs['pos'].value[1]
             ),
             inclination_angle=self.pfs['inclination'].value,
-            airfoil=self.airfoil_chooser.airfoil
+            airfoil=self.airfoil_chooser.airfoil,
+            taper_ratio=1,
+            sweep_angle=0,
+            mid_gap=0,
+            y_duplicate=True,
+            dihedral_angle=0
         )
         do_with_surface = lambda surface: surface.set_mechanization(**self.mechanizations.get_values())
         super()._update_surface(surface_generator, do_with_surface)
@@ -120,7 +124,6 @@ class LMDelta(LMTapered):
     @cached_property
     def pfs_params(self) -> list[tuple[str, str, str, Callable[[Any], bool], Any]]:
         surf = self.surface
-        assert isinstance(surf, HorizontalSurface)
         pfs_params = [
             ('pos', 'Position XZ', 'The X and Z positions of the tip of the root section.',
              lambda tup: True, (surf.origin_position.x, surf.origin_position.z), 'Vector2'),
@@ -137,7 +140,7 @@ class LMDelta(LMTapered):
         return pfs_params
 
     def update_surface(self, _=None) -> None:
-        surface_generator = lambda: HorizontalSurface.delta(
+        surface_generator = lambda: Surface.template.delta(
             name=self.name,
             span=self.pfs['span'].value,
             surface_area=self.pfs['surface_area'].value,
@@ -157,7 +160,6 @@ class LMDoubleTrapez(LeftMenuItem):
     @cached_property
     def pfs_params(self) -> list[tuple[str, str, str, Callable[[Any], bool], Any]]:
         surf = self.surface
-        assert isinstance(surf, HorizontalSurface)
         pfs_params = [
             ('pos', 'Position XZ', 'The X and Z positions of the tip of the root section.',
              lambda tup: True, (surf.origin_position.x, surf.origin_position.z), 'Vector2'),
@@ -183,13 +185,13 @@ class LMDoubleTrapez(LeftMenuItem):
         return pfs_params
 
     def update_surface(self, _=None) -> None:
-        surface_generator = lambda: HorizontalSurface.double_trapez(
+        surface_generator = lambda: Surface.template.double_trapez(
             name=self.name,
             root_chord=self.pfs['root_chord'].value,
             mid_chord=self.pfs['mid_chord'].value,
             tip_chord=self.pfs['tip_chord'].value,
             mid_offset=self.pfs['mo'].value,
-            tip_offset=self.pfs['to'].value,
+            tip_offset=self.pfs['to'].value,    # TODO ogarnąć
             origin_position=(
                 self.pfs['pos'].value[0],
                 0,
@@ -202,7 +204,6 @@ class LMDoubleTrapez(LeftMenuItem):
         super()._update_surface(surface_generator, do_with_surface)
 
     def init_mechanization(self):
-        assert isinstance(self.surface, HorizontalSurface)
         if not self.surface.mechanization: return
         for key, list_of_ranges in self.surface.mechanization.items():
             key = key.capitalize()

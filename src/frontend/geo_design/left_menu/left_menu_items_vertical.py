@@ -11,14 +11,13 @@ the Free Software Foundation, either version 3 of the License, or
 from functools import cached_property
 from typing import Any, Callable
 from .left_menu_item import LeftMenuItem
-from ....backend.geo_design import VerticalSurface
+from ....backend.geo_design import Surface
 
 
 class LMRectangularV(LeftMenuItem):
     @cached_property
     def pfs_params(self) -> list[tuple[str, str, str, Callable[[Any], bool], Any]]:
         surf = self.surface
-        assert isinstance(surf, VerticalSurface)
         pfs_params = [
             ('x', 'X', 'The X-axis position of the tip of the root section.',
              lambda x: True, surf.origin_position.x),
@@ -35,16 +34,22 @@ class LMRectangularV(LeftMenuItem):
         return pfs_params
 
     def update_surface(self, _=None) -> None:
-        surface_generator = lambda: VerticalSurface.simple_tapered(
+        surface_generator = lambda: Surface.template.simple_tapered(
             name=self.name,
-            height=self.pfs['height'].value,
-            mac=self.pfs['chord'].value,
+            length=self.pfs['height'].value,
+            chord=self.pfs['chord'].value,
             origin_position=(
                 self.pfs['x'].value,
                 0,
                 self.pfs['z'].value
             ),
-            airfoil=self.airfoil_chooser.airfoil
+            airfoil=self.airfoil_chooser.airfoil,
+            y_duplicate=False,
+            taper_ratio=1,
+            sweep_angle=0,
+            inclination_angle=0,
+            dihedral_angle=90,
+            mid_gap=0
         )
         super()._update_surface(surface_generator)
 
@@ -56,7 +61,6 @@ class LMSimpleTaperedV(LeftMenuItem):
     @cached_property
     def pfs_params(self) -> list[tuple[str, str, str, Callable[[Any], bool], Any]]:
         surf = self.surface
-        assert isinstance(surf, VerticalSurface)
         pfs_params = [
             ('x', 'X', 'The X-axis position of the tip of the root section.',
              lambda x: True, surf.origin_position.x),
@@ -81,10 +85,10 @@ class LMSimpleTaperedV(LeftMenuItem):
         return pfs_params
 
     def update_surface(self, _=None) -> None:
-        surface_generator = lambda: VerticalSurface.simple_tapered(
+        surface_generator = lambda: Surface.template.simple_tapered(
             name=self.name,
-            height=self.pfs['height'].value,
-            mac=self.pfs['chord'].value,
+            length=self.pfs['height'].value,
+            chord=self.pfs['chord'].value,
             taper_ratio=self.pfs['taper'].value,
             sweep_angle=self.pfs['sweep'].value,
             origin_position=(
@@ -92,7 +96,11 @@ class LMSimpleTaperedV(LeftMenuItem):
                 0,
                 self.pfs['z'].value
             ),
-            airfoil=self.airfoil_chooser.airfoil
+            airfoil=self.airfoil_chooser.airfoil,
+            inclination_angle=0,
+            dihedral_angle=90,
+            mid_gap=0,
+            y_duplicate=False
         )
         super()._update_surface(surface_generator)
 
@@ -104,7 +112,6 @@ class LMTwinV(LeftMenuItem):
     @cached_property
     def pfs_params(self) -> list[tuple[str, str, str, Callable[[Any], bool], Any]]:
         surf = self.surface
-        assert isinstance(surf, VerticalSurface)
         pfs_params = [
             ('x', 'X', 'The X-axis position of the tip of the root section.',
              lambda x: True, surf.origin_position.x),
@@ -132,10 +139,10 @@ class LMTwinV(LeftMenuItem):
         return pfs_params
 
     def update_surface(self, _=None) -> None:
-        surface_generator = lambda: VerticalSurface.simple_tapered(
+        surface_generator = lambda: Surface.template.simple_tapered(
             name=self.name,
-            height=self.pfs['height'].value,
-            mac=self.pfs['chord'].value,
+            length=self.pfs['height'].value,
+            chord=self.pfs['chord'].value,
             taper_ratio=self.pfs['taper'].value,
             sweep_angle=self.pfs['sweep'].value,
             origin_position=(
@@ -144,7 +151,10 @@ class LMTwinV(LeftMenuItem):
                 self.pfs['z'].value
             ),
             airfoil=self.airfoil_chooser.airfoil,
-            gap=self.pfs['gap'].value,
+            mid_gap=self.pfs['gap'].value,
+            y_duplicate=True,
+            inclination_angle=0,
+            dihedral_angle=90
         )
         super()._update_surface(surface_generator)
 

@@ -8,8 +8,9 @@ the Free Software Foundation, either version 3 of the License, or
 """
 
 
-from math import atan2, degrees, sqrt, radians, sin, cos
+from math import atan2, degrees, sqrt, radians, sin, cos, tan
 from copy import copy
+from typing import Literal, Optional
 
 from ..airfoil import Airfoil
 from ..section import Section, Control, control_types
@@ -17,7 +18,188 @@ from ...math_functions import best_factor_pair, distribute_units
 from ...vector3 import Vector3, AnyVector3
 
 
+class SurfaceTemplates:
+    types = Literal['Rectangular', 'Delta', 'Simple Tapered', 'Double Trapez', 'Vertical Rectangular', 'Vertical Tapered']
+    @staticmethod
+    def simple_tapered(name: str,
+                       length: float,
+                       chord: float,
+                       taper_ratio: float,
+                       sweep_angle: float,
+                       origin_position: AnyVector3,
+                       inclination_angle: float,
+                       dihedral_angle: float,
+                       airfoil,
+                       mid_gap: float,
+                       y_duplicate: bool
+                       ) -> 'Surface':
+        """
+        Creates a ``Surface`` based on parameters of a simple tapered wing.
+
+        Parameters:
+            name (str): The name of the lifting surface.
+            length (float): The YZ distance from root to tip.
+            chord (float): The mean aerodynamic chord length of the surface.
+            origin_position (AnyVector3): Position of the leading edge of the root chord.
+            inclination_angle (float): The inclination of the surface, in degrees.
+              Zero means horizontal, positive means leading edge up.
+            airfoil (Airfoil): The airfoil of the surface.
+            taper_ratio (float): The taper ratio of the surface.
+            sweep_angle (float): The sweep angle of the surface in degrees.
+            dihedral_angle (float): Dihedral angle of the surface, positive means tips up.
+            mid_gap (float): The horizontal gap between the surface's halves' root sections in meters.
+            y_duplicate (bool): Whether the lifting surface should be mirrored about Y-axis.
+        """
+
+        # Calculate the position and chord for both root and tip sections.
+
+        root_chord = 2 * chord / (1 + taper_ratio)
+        c_eq = lambda s: root_chord * (1 - (1 - taper_ratio) * s / length)
+        mac025 = lambda s: root_chord * .25 + s * tan(radians(sweep_angle))
+        le_x_eq = lambda s: mac025(s) - c_eq(s) * .25
+        le_y_eq = lambda s: s * cos(radians(dihedral_angle))
+        le_z_eq = lambda s: s * sin(radians(dihedral_angle))
+
+        root = Section((0, mid_gap / 2, 0),
+                       c_eq(0), inclination_angle, airfoil)
+        tip = Section((le_x_eq(length), le_y_eq(length) + mid_gap / 2, le_z_eq(length)),
+                      c_eq(length), inclination_angle, airfoil)
+
+        surf = Surface(name=name,
+                       sections=[root, tip],
+                       y_duplicate=y_duplicate,
+                       origin_position=origin_position,
+                       airfoil=airfoil)
+        return surf
+
+    @staticmethod
+    def delta(name: str, span: float, surface_area: float,
+              origin_position: AnyVector3 = Vector3.zero(),
+              inclination_angle: float = 0.0,
+              airfoil: Airfoil = None) -> 'Surface':
+        """
+        Creates a ``Surface`` based on parameters of a delta wing.
+
+        :param name: Name of the surface.
+        :param span: Span of the whole surface in meters.
+        :param surface_area: Surface area of the whole surface in meters squared.
+        :param origin_position: Origin position of the surface in meters.
+        :param inclination_angle: Inclination angle of the surface in degrees.
+        :param airfoil: Airfoil object.
+        """
+        chord = surface_area / span
+        sweep = degrees(atan2(3 * chord, span))
+        surf = SurfaceTemplates.simple_tapered(
+            name=name, length=span/2, origin_position=origin_position,
+            airfoil=airfoil, inclination_angle=inclination_angle,
+            taper_ratio=0, chord=chord, sweep_angle=sweep, dihedral_angle=0,
+            mid_gap=0, y_duplicate=True,
+        )
+        return surf
+
+    @staticmethod
+    def double_trapez(name: str,
+                      root_chord: float, mid_chord: float, tip_chord: float,
+                      mid_offset: AnyVector3, tip_offset: AnyVector3, origin_position: AnyVector3 = Vector3.zero(),
+                      inclination_angle: float = 0, airfoil: Airfoil = None) -> 'Surface':
+        """
+        Creates a ``Surface`` based on parameters of a double trapezoidal wing.
+
+        :param name: Name of the surface.
+        :param root_chord: Aerodynamic root chord of the surface in meters.
+        :param mid_chord: Aerodynamic mid-chord of the surface in meters.
+        :param tip_chord: Aerodynamic tip chord of the surface in meters.
+        :param mid_offset: Offset between the mid-chord-le and the root-chord-le of the surface in meters.
+        :param tip_offset: Offset between the tip-chord-le and the root-chord-le of the surface in meters.
+        :param origin_position: Position of the root-chord-le of the surface in meters.
+        :param inclination_angle: Inclination angle of the surface in degrees.
+        :param airfoil: Airfoil object.
+        """
+        root = Section(
+            leading_edge_position=(0, 0, 0),
+            chord=root_chord,
+            inclination=inclination_angle,
+            airfoil=airfoil
+        )
+        mid = Section(
+            leading_edge_position=mid_offset,
+            chord=mid_chord,
+            inclination=inclination_angle,
+            airfoil=airfoil
+        )
+        tip = Section(
+            leading_edge_position=tip_offset,
+            chord=tip_chord,
+            inclination=inclination_angle,
+            airfoil=airfoil
+        )
+
+        surf = Surface(name=name, y_duplicate=True, origin_position=origin_position, airfoil=airfoil, sections=[root, mid, tip])
+        return surf
+
+    @staticmethod
+    def is_simple_tapered(surface: 'Surface', accuracy=.05) -> bool:
+        surface.assert_straight()
+        x_eq = lambda _y: surface.root.x + _y / surface.tip.y * (surface.tip.x - surface.root.x)
+        z_eq = lambda _y: surface.root.z + _y / surface.tip.y * (surface.tip.z - surface.root.z)
+        c_eq = lambda _y: surface.root.chord + _y / surface.tip.y * (surface.tip.chord - surface.root.chord)
+        inc = surface.root.inclination
+
+        # Check if the surface is of correct shape
+        for section in surface.sections:
+            if section is surface.root or section is surface.tip: continue
+            y = section.y
+            le = section.leading_edge_position
+            c = section.chord
+            if abs((le.x - x_eq(y)) / c) > accuracy: return False
+            if abs((le.z - z_eq(y)) / c) > accuracy: return False
+            if abs((c - c_eq(y)) / c) > accuracy: return False
+            if section.inclination != inc: return False
+        return True
+
+
+    @staticmethod
+    def is_delta(surface: 'Surface', accuracy=.05) -> bool:
+        if not SurfaceTemplates.is_simple_tapered(surface, accuracy):
+            return False
+        root = surface.sections[0]
+        tip = surface.sections[-1]
+        if tip.chord != 0: return False
+        if not tip.trailing_edge_position == root.trailing_edge_position: return False
+        return True
+
+    @staticmethod
+    def is_double_trapez(surface: 'Surface', accuracy=.05) -> bool:
+        raise NotImplementedError
+
+    @staticmethod
+    def is_vertical(surface: 'Surface', accuracy=.05) -> bool:
+        if not surface.is_straight: return False
+        if not surface.root.y == surface.tip.y: return False
+        return True
+
+    @staticmethod
+    def get_type(surface: 'Surface', accuracy=0.05) -> Optional['SurfaceTemplates.types']:
+        vertical = SurfaceTemplates.is_vertical(surface, accuracy)
+        if SurfaceTemplates.is_delta(surface, accuracy):
+            return 'Delta'
+        tapered = SurfaceTemplates.is_simple_tapered(surface, accuracy)
+        # double_trapez = SurfaceTemplates.is_double_trapez(surface, accuracy)
+        double_trapez = False
+        rect = tapered and surface.taper_ratio() == 1 and surface.sweep_angle() == 0
+
+        if rect and vertical: return 'Vertical Rectangular'
+        if tapered and vertical: return 'Vertical Tapered'
+
+        if rect: return 'Rectangular'
+        if tapered: return 'Simple Tapered'
+        if double_trapez: return 'Double Trapez'
+        return None
+
+
 class Surface:
+    template = SurfaceTemplates
+
     def __init__(self,
                  name: str,
                  sections: list[Section],
@@ -142,6 +324,22 @@ class Surface:
         """Returns the spanwise position of the section on the surface."""
         return sqrt((section.y - self.root.y) ** 2 + (section.z - self.root.z) ** 2)
 
+    def is_simple_tapered(self, accuracy=.05) -> bool:
+        return SurfaceTemplates.is_simple_tapered(self, accuracy)
+
+    def taper_ratio(self) -> float:
+        if not self.is_simple_tapered():
+            raise ValueError('Surface is too complex')
+        return self.tip.chord / self.root.chord
+
+    def sweep_angle(self) -> float:
+        if not self.is_simple_tapered():
+            raise ValueError('Surface is too complex')
+        root_25mac = self.root.get_position_at_xc(.25)
+        tip_25mac = self.tip.get_position_at_xc(.25)
+        sweep = degrees(atan2(tip_25mac.x - root_25mac.x, self.spanwise(self.tip) - self.spanwise(self.root)))
+        return sweep
+
     def add_section(self, section: Section) -> None:
         """Add a new section to the surface and ensures the sections are well-ordered."""
         # Check whether the section is not outside the wing.
@@ -185,7 +383,7 @@ class Surface:
             return sqrt((section.y - ref_sec.y) ** 2 + (section.z - ref_sec.z) ** 2)
         self.sections.sort(key=lambda section: pos(section))
 
-    def get_symmetric(self) -> 'Surface2':
+    def get_symmetric(self) -> 'Surface':
         """Returns a copy of the surface mirrored about Y-axis."""
         surf = copy(self)
         surf.name = self.name + '_symm'

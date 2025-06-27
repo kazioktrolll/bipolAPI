@@ -1,151 +1,9 @@
-from math import degrees, atan
 from typing import Literal
 
 from .surface import Surface
-from ..airfoil import Airfoil
-from ..section import Section
-from ...vector3 import Vector3, AnyVector3
 
 
 class HorizontalSurface(Surface):
-    """
-    A class representing a single lifting surface of the aircraft, oriented more-or-less horizontally.
-
-    Attributes:
-        name (str): The name of the lifting surface.
-        y_duplicate (bool): Whether the lifting surface should be mirrored about Y-axis.
-        origin_position (Vector3): Position of the leading edge of the root chord.
-        airfoil (Airfoil): The airfoil of the surface.
-        sections (list[Section]): The sections of the surface. It is always sorted left wingtip-to-right wingtip.
-        """
-
-    def __init__(self,
-                 name: str,
-                 sections: list[Section],
-                 y_duplicate: bool,
-                 origin_position: AnyVector3,
-                 airfoil: Airfoil = None):
-        """
-        Parameters:
-            name (str): The name of the lifting surface.
-            sections (list[Section]): Sections of the surface.
-            y_duplicate (bool): Whether the lifting surface should be mirrored about Y-axis.
-                Set ``True`` when defining only one half of a symmetric surface.
-            origin_position (AnyVector3): Position of the leading edge of the root chord.
-            airfoil (Airfoil): The airfoil of the surface.
-        """
-        super().__init__(name=name, sections=sections, y_duplicate=y_duplicate, origin_position=origin_position, airfoil=airfoil)
-        self.mechanization = {}
-
-    @classmethod
-    def simple_tapered(cls,
-                       name: str,
-                       span: float,
-                       chord_length: float,
-                       taper_ratio: float = 1,
-                       sweep_angle: float = 0,
-                       origin_position: AnyVector3 = Vector3.zero(),
-                       inclination_angle: float = 0,
-                       dihedral_angle: float = 0,
-                       airfoil=None,
-                       mid_gap: float = 0) -> 'HorizontalSurface':
-        """
-        Creates a ``HorizontalSurface`` based on parameters of a simple tapered wing.
-
-        Parameters:
-            name (str): The name of the lifting surface.
-            span (float): The span of the whole surface.
-            chord_length (float): The mean aerodynamic chord length of the surface.
-            origin_position (AnyVector3): Position of the leading edge of the root chord.
-            inclination_angle (float): The inclination of the surface, in degrees.
-              Zero means horizontal, positive means leading edge up.
-            airfoil (Airfoil): The airfoil of the surface.
-            taper_ratio (float): The taper ratio of the surface.
-            sweep_angle (float): The sweep angle of the surface in degrees.
-            dihedral_angle (float): Dihedral angle of the surface, positive means tips up.
-            mid_gap (float): The horizontal gap between the surface's halves' root sections in meters.
-        """
-
-        # Calculate position and chord for both root and tip sections.
-        root_chord = 2 * chord_length / (1 + taper_ratio)
-        chord = lambda y: root_chord * (1 - (1 - taper_ratio) * 2 * y / span)
-        from math import radians, tan
-        mac025 = lambda y: root_chord * .25 + y * tan(radians(sweep_angle))
-        leading_edge_y = lambda y: mac025(y) - chord(y) * .25
-        leading_edge_z = lambda y: atan(radians(dihedral_angle)) * y
-
-        root = Section((0, mid_gap/2, 0), chord(0), inclination_angle, airfoil)
-        tip = Section((leading_edge_y(span / 2), span / 2, leading_edge_z(span)), chord(span / 2),
-                      inclination_angle, airfoil)
-
-        surf = cls(name=name,
-                   sections=[root, tip],
-                   y_duplicate=True,
-                   origin_position=origin_position,
-                   airfoil=airfoil)
-        return surf
-
-    @classmethod
-    def delta(cls, name: str, span: float, surface_area: float,
-              origin_position: AnyVector3 = Vector3.zero(),
-              inclination_angle: float = 0.0,
-              airfoil: Airfoil = None) -> 'HorizontalSurface':
-        """
-        Creates a ``HorizontalSurface`` based on parameters of a delta wing.
-
-        :param name: Name of the surface.
-        :param span: Span of the whole surface in meters.
-        :param surface_area: Surface area of the whole surface in meters squared.
-        :param origin_position: Origin position of the surface in meters.
-        :param inclination_angle: Inclination angle of the surface in degrees.
-        :param airfoil: Airfoil object.
-        """
-        chord = surface_area / span
-        sweep = degrees(atan(3 * chord / span))
-        surf = cls.simple_tapered(name=name, span=span, origin_position=origin_position,
-                                  airfoil=airfoil, inclination_angle=inclination_angle,
-                                  taper_ratio=0, chord_length=chord, sweep_angle=sweep)
-        return surf
-
-    @classmethod
-    def double_trapez(cls, name: str,
-                      root_chord: float, mid_chord: float, tip_chord: float,
-                      mid_offset: AnyVector3, tip_offset: AnyVector3, origin_position: AnyVector3 = Vector3.zero(),
-                      inclination_angle: float = 0, airfoil: Airfoil = None) -> 'HorizontalSurface':
-        """
-        Creates a ``HorizontalSurface`` based on parameters of a double trapezoidal wing.
-
-        :param name: Name of the surface.
-        :param root_chord: Aerodynamic root chord of the surface in meters.
-        :param mid_chord: Aerodynamic mid-chord of the surface in meters.
-        :param tip_chord: Aerodynamic tip chord of the surface in meters.
-        :param mid_offset: Offset between the mid-chord-le and the root-chord-le of the surface in meters.
-        :param tip_offset: Offset between the tip-chord-le and the root-chord-le of the surface in meters.
-        :param origin_position: Position of the root-chord-le of the surface in meters.
-        :param inclination_angle: Inclination angle of the surface in degrees.
-        :param airfoil: Airfoil object.
-        """
-        root = Section(
-            leading_edge_position=(0, 0, 0),
-            chord=root_chord,
-            inclination=inclination_angle,
-            airfoil=airfoil
-        )
-        mid = Section(
-            leading_edge_position=mid_offset,
-            chord=mid_chord,
-            inclination=inclination_angle,
-            airfoil=airfoil
-        )
-        tip = Section(
-            leading_edge_position=tip_offset,
-            chord=tip_chord,
-            inclination=inclination_angle,
-            airfoil=airfoil
-        )
-
-        surf = cls(name=name, y_duplicate=True, origin_position=origin_position, airfoil=airfoil, sections=[root, mid, tip])
-        return surf
 
     def get_type(self, accuracy=0.05) -> None | Literal['Rectangular', 'Delta', 'Simple Tapered', 'Double Trapez']:
         if HorizontalSurface.is_delta(self, accuracy):
@@ -158,28 +16,6 @@ class HorizontalSurface(Surface):
         if tapered: return 'Simple Tapered'
         if double_trapez: return 'Double Trapez'
         return None
-
-    @staticmethod
-    def is_simple_tapered(surface: 'HorizontalSurface', accuracy=.05) -> bool:
-        root = surface.sections[0]
-        tip = surface.sections[-1]
-
-        x_eq = lambda _y: root.x + _y / tip.y * (tip.x - root.x)
-        z_eq = lambda _y: root.z + _y / tip.y * (tip.z - root.z)
-        c_eq = lambda _y: root.chord + _y / tip.y * (tip.chord - root.chord)
-        inc = root.inclination
-
-        # Check if the surface is of correct shape
-        for section in surface.sections:
-            if section is root or section is tip: continue
-            y = section.y
-            le = section.leading_edge_position
-            c = section.chord
-            if abs((le.x - x_eq(y)) / c) > accuracy: return False
-            if abs((le.z - z_eq(y)) / c) > accuracy: return False
-            if abs((c - c_eq(y)) / c) > accuracy: return False
-            if section.inclination != inc: return False
-        return True
 
     @classmethod
     def is_delta(cls, surface: 'HorizontalSurface', accuracy=.05) -> bool:
@@ -194,16 +30,3 @@ class HorizontalSurface(Surface):
     @staticmethod
     def is_double_trapez(surface: 'HorizontalSurface', accuracy=.05) -> bool:
         raise NotImplementedError
-
-    def taper_ratio(self) -> float:
-        if not HorizontalSurface.is_simple_tapered(self, 0.05):
-            raise ValueError('Surface is too complex')
-        return self.sections[-1].chord / self.sections[0].chord
-
-    def sweep_angle(self) -> float:
-        if not HorizontalSurface.is_simple_tapered(self, 0.05):
-            raise ValueError('Surface is too complex')
-        root = self.sections[0].get_position_at_xc(.25)
-        tip = self.sections[-1].get_position_at_xc(.25)
-        sweep = degrees(atan((tip.x - root.x) / (tip.y - root.y)))
-        return sweep

@@ -11,8 +11,8 @@ the Free Software Foundation, either version 3 of the License, or
 from customtkinter import CTkFrame, CTkSegmentedButton, CTkButton
 from typing import Callable
 
-from .left_menu_surface import LeftMenuSurface, LeftMenuHorizontal, LeftMenuVertical, LeftMenuOblique
-from ....backend.geo_design import Geometry, HorizontalSurface, VerticalSurface
+from .left_menu_surface import LeftMenuSurface
+from ....backend.geo_design import Geometry
 from ....backend import handle_crash
 
 
@@ -50,15 +50,9 @@ class LeftMenu(CTkFrame):
         self.show_first()
 
     def update_items(self) -> None:
-        menu_item = {HorizontalSurface: LeftMenuHorizontal,
-                     VerticalSurface: LeftMenuVertical}
         self.items.clear()
         for name, surface in self.geometry.surfaces.items():
-            try:
-                item_type = menu_item[type(surface)]
-            except KeyError:
-                item_type = LeftMenuOblique
-            self.items[name] = item_type(self, surface)
+            self.items[name] = LeftMenuSurface(self, surface)
         self.items_button.configure(values=[item.name for item in self.items.values()])
 
     @property

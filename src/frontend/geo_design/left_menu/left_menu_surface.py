@@ -1,25 +1,50 @@
 from .left_menu_item import LeftMenuItem, LMOblique, LMEmpty
 from .left_menu_items_horizontal import LMTapered, LMRectangular, LMDelta, LMDoubleTrapez
-from .left_menu_items_vertical import LMRectangularV, LMSimpleTaperedV, LMTwinV
-from ....backend.geo_design import Surface, HorizontalSurface, Geometry, VerticalSurface
+from .left_menu_items_vertical import LMRectangularV, LMSimpleTaperedV
+from ....backend.geo_design import Surface, Geometry
 from ....backend import handle_crash
 from customtkinter import CTkFrame, CTkOptionMenu
 
 
 class LeftMenuSurface(CTkFrame):
     @handle_crash
-    def __init__(self, parent: CTkFrame, surface: Surface, types: dict[str, type[LeftMenuItem]]):
+    def __init__(self, parent: CTkFrame, surface: Surface):
         super().__init__(parent)
         self.name = surface.name
-        self.types = types
+
+        self.types: dict[str, type[LeftMenuItem]] = {
+            'Rectangular': LMRectangular,
+            'Simple Tapered': LMTapered,
+            'Double Trapez': LMDoubleTrapez,
+            'Delta': LMDelta,
+            'Vertical Rectangular': LMRectangularV,
+            'Vertical Tapered': LMSimpleTaperedV,
+            'Oblique': LMOblique,
+            'None': LMEmpty,
+        }
         self.option_menu = CTkOptionMenu(
-            self, values=list(types.keys()), command=lambda t: self.set_lm(types[t])
+            self, values=list(self.types.keys()), command=lambda t: self.set_lm(self.types[t])
         )
-        self.option_menu.grid(row=0, column=0, sticky='nsew')
         self.lm: LeftMenuItem = LMEmpty(self, surface)
+        self.auto_set(surface)
+
+        if surface.name == 'Wing':
+            del self.types['None']
+            del self.types['Vertical Rectangular']
+            del self.types['Vertical Tapered']
+        if surface.name == 'H Tail':
+            del self.types['Vertical Rectangular']
+            del self.types['Vertical Tapered']
+        if surface.name == 'V Tail':
+            del self.types['Rectangular']
+            del self.types['Delta']
+            del self.types['Double Trapez']
+        del self.types['Oblique']
+
+        self.option_menu.configure(values=list(self.types.keys()))
+        self.option_menu.grid(row=0, column=0, sticky='nsew')
         self.columnconfigure(0, weight=1)
         self.rowconfigure(1, weight=1)
-        self.auto_set(surface)
 
     @handle_crash
     def set_lm(self, lm: type[LeftMenuItem]) -> None:
@@ -36,8 +61,8 @@ class LeftMenuSurface(CTkFrame):
                 return n
         return None
 
-    def auto_set(self, surface: HorizontalSurface | VerticalSurface) -> None:
-        _t = surface.get_type()
+    def auto_set(self, surface: Surface) -> None:
+        _t = surface.template.get_type(surface)
         if _t is None:
             raise TypeError
         self.set_lm(self.types[str(_t)])
@@ -51,39 +76,3 @@ class LeftMenuSurface(CTkFrame):
     @property
     def surface(self) -> Surface:
         return self.geometry.surfaces[self.name]
-
-
-class LeftMenuHorizontal(LeftMenuSurface):
-    @handle_crash
-    def __init__(self, parent: CTkFrame, surface: Surface):
-        types = {
-            'Rectangular': LMRectangular,
-            'Simple Tapered': LMTapered,
-            'Double Trapez': LMDoubleTrapez,
-            'Delta': LMDelta,
-            'None': LMEmpty,
-        }
-        if surface.name == 'Wing':
-            del types['None']
-        super().__init__(parent=parent, surface=surface, types=types)
-
-
-
-class LeftMenuVertical(LeftMenuSurface):
-    @handle_crash
-    def __init__(self, parent: CTkFrame, surface: Surface):
-        types = {
-            'Rectangular': LMRectangularV,
-            'Simple Tapered': LMSimpleTaperedV,
-            'Twin': LMTwinV,
-            'None': LMEmpty,
-        }
-        super().__init__(parent=parent, surface=surface, types=types)
-
-
-class LeftMenuOblique(LeftMenuSurface):
-    @handle_crash
-    def __init__(self, parent: CTkFrame, surface: Surface):
-        types = {'Oblique': LMOblique}
-        super().__init__(parent=parent, surface=surface, types=types)
-        self.set_lm(LMOblique)
