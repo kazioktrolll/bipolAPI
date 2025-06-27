@@ -168,7 +168,7 @@ class PreDefControl(Control):
         return self.__class__(self.x_hinge)
 
 
-class Flap(PreDefControl):
+class Flaps(PreDefControl):
     class_name = 'flaps'
 
     def __init__(self, x_hinge: float):
@@ -180,7 +180,7 @@ class Flap(PreDefControl):
         super().__init__(x_hinge=x_hinge, SgnDup='+1', color='yellow')
 
 
-class Aileron(PreDefControl):
+class Ailerons(PreDefControl):
     class_name = 'ailerons'
 
     def __init__(self, x_hinge: float):
@@ -192,7 +192,7 @@ class Aileron(PreDefControl):
         super().__init__(x_hinge=x_hinge, SgnDup='-1')
 
 
-class Elevator(PreDefControl):
+class Elevators(PreDefControl):
     class_name = 'elevators'
 
     def __init__(self, x_hinge: float):
@@ -204,4 +204,16 @@ class Elevator(PreDefControl):
         super().__init__(x_hinge=x_hinge, SgnDup='+1', color='green3')
 
 
-control_types = [Flap, Aileron, Elevator]
+class Rudder(PreDefControl):
+    class_name = 'rudder'
+
+    def __init__(self, x_hinge: float):
+        """
+        Parameters:
+            x_hinge (float): The x/c position of the hinge.
+        """
+        assert 0 <= x_hinge <= 1
+        super().__init__(x_hinge=x_hinge, SgnDup='-1', color='purple4')
+
+
+control_types = [Flaps, Ailerons, Elevators, Rudder]

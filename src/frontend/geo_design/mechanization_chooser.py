@@ -13,7 +13,7 @@ from customtkinter import CTkFrame, CTkLabel, CTkOptionMenu, CTkButton
 from ..list_preset import ListPreset
 from ..items import Item, FlapItem
 from ..popup import Popup
-from ...backend.geo_design import Control
+from ...backend.geo_design import Control, control_types
 from ...backend import handle_crash
 
 
@@ -59,7 +59,8 @@ class MechanizationChooser(ListPreset):
 
     def add_by_user(self):
         """Opens a dialog for user to create a new type."""
-        vals = [val for val in ['Ailerons', 'Flaps', 'Elevators'] if val not in self.lists.keys()]
+        names = [t.__name__ for t in control_types]
+        vals = [val for val in names if val not in self.lists.keys()]
         if not vals: return
 
         window = Popup(master=None)
