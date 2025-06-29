@@ -168,7 +168,7 @@ class SurfaceTemplates:
     @staticmethod
     def is_vertical(surface: 'Surface', accuracy=.05) -> bool:
         if not surface.is_straight: return False
-        if not surface.root.y == surface.tip.y: return False
+        if not abs(surface.root.y - surface.tip.y) <= accuracy: return False
         return True
 
     @staticmethod
@@ -181,8 +181,8 @@ class SurfaceTemplates:
         double_trapez = False
         rect = tapered and surface.taper_ratio() == 1 and surface.sweep_angle() == 0
 
-        if rect and vertical: return 'Vertical Rectangular'
-        if tapered and vertical: return 'Vertical Tapered'
+        if vertical and rect: return 'Vertical Rectangular'
+        if vertical and tapered: return 'Vertical Tapered'
 
         if rect: return 'Rectangular'
         if tapered: return 'Simple Tapered'
