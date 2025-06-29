@@ -133,9 +133,10 @@ class SurfaceTemplates:
     @staticmethod
     def is_simple_tapered(surface: 'Surface', accuracy=.05) -> bool:
         surface.assert_straight()
-        x_eq = lambda _y: surface.root.x + _y / surface.tip.y * (surface.tip.x - surface.root.x)
-        z_eq = lambda _y: surface.root.z + _y / surface.tip.y * (surface.tip.z - surface.root.z)
-        c_eq = lambda _y: surface.root.chord + _y / surface.tip.y * (surface.tip.chord - surface.root.chord)
+        safe_tip_y = surface.tip.y if surface.tip.y != 0 else 1e-10
+        x_eq = lambda _y: surface.root.x + _y / safe_tip_y * (surface.tip.x - surface.root.x)
+        z_eq = lambda _y: surface.root.z + _y / safe_tip_y * (surface.tip.z - surface.root.z)
+        c_eq = lambda _y: surface.root.chord + _y / safe_tip_y * (surface.tip.chord - surface.root.chord)
         inc = surface.root.inclination
 
         # Check if the surface is of correct shape

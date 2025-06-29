@@ -43,6 +43,7 @@ class GeometryGenerator:
             y_duplicate=False,
             airfoil=Airfoil.from_naca('0012')
         )
+        v_tail.set_mechanization(rudder=[(0, .5, .7)])
         g = Geometry(
             name="default",
             surfaces=[wing, h_tail, v_tail],
