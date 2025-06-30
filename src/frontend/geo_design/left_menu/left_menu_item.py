@@ -55,6 +55,7 @@ class LeftMenuItem(CTkFrame, ABC):
         self.mechanizations.grid(row=1, column=0, sticky='nsew')
         self.airfoil_chooser.grid(row=2, column=0, padx=10, pady=10, sticky='nsew')
 
+    @final
     def init_mechanization(self):
         if not self.surface.mechanization: return
         for key, list_of_ranges in self.surface.mechanization.items():
@@ -135,8 +136,6 @@ class LMEmpty(LeftMenuItem):
 
     def update_surface(self, _=None) -> None:
         super()._update_surface(lambda: self.surface)
-
-    def init_mechanization(self): ...
 
 
 class LMOblique(LMEmpty):
