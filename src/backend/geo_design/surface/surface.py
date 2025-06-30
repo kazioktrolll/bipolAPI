@@ -30,8 +30,7 @@ class SurfaceTemplates:
                        inclination_angle: float,
                        dihedral_angle: float,
                        airfoil,
-                       mid_gap: float,
-                       y_duplicate: bool
+                       mid_gap: float
                        ) -> 'Surface':
         """
         Creates a ``Surface`` based on parameters of a simple tapered wing.
@@ -48,7 +47,6 @@ class SurfaceTemplates:
             sweep_angle (float): The sweep angle of the surface in degrees.
             dihedral_angle (float): Dihedral angle of the surface, positive means tips up.
             mid_gap (float): The horizontal gap between the surface's halves' root sections in meters.
-            y_duplicate (bool): Whether the lifting surface should be mirrored about Y-axis.
         """
 
         # Calculate the position and chord for both root and tip sections.
@@ -64,6 +62,8 @@ class SurfaceTemplates:
                        c_eq(0), inclination_angle, airfoil)
         tip = Section((le_x_eq(length), le_y_eq(length) + mid_gap / 2, le_z_eq(length)),
                       c_eq(length), inclination_angle, airfoil)
+
+        y_duplicate = not (dihedral_angle > 89.5 and abs(root.y) < 0.05)
 
         surf = Surface(name=name,
                        sections=[root, tip],
@@ -93,7 +93,7 @@ class SurfaceTemplates:
             name=name, length=span/2, origin_position=origin_position,
             airfoil=airfoil, inclination_angle=inclination_angle,
             taper_ratio=0, chord=chord, sweep_angle=sweep, dihedral_angle=0,
-            mid_gap=0, y_duplicate=True,
+            mid_gap=0
         )
         return surf
 
@@ -102,7 +102,7 @@ class SurfaceTemplates:
                       root_chord: float, mid_chord: float, tip_chord: float,
                       length: float, seam_spanwise: float, origin_position: AnyVector3,
                       inclination_angle: float, airfoil: Airfoil, dihedral_angle: float, sweep_angle: float,
-                      mid_gap: float, y_duplicate: bool) -> 'Surface':
+                      mid_gap: float) -> 'Surface':
         """
         Creates a ``Surface`` based on parameters of a double trapezoidal wing.
 
@@ -118,12 +118,11 @@ class SurfaceTemplates:
         :param dihedral_angle: Dihedral angle of the surface in degrees.
         :param sweep_angle: Sweep angle of the surface in degrees.
         :param mid_gap: Mid-gap of the surface in meters.
-        :param y_duplicate: Whether the surface should be mirrored about Y-axis.
         """
         mac_0 = (root_chord + tip_chord) / 2
         surf = SurfaceTemplates.simple_tapered(
             name=name, length=length, origin_position=origin_position, sweep_angle=sweep_angle, dihedral_angle=dihedral_angle, airfoil=airfoil,
-            inclination_angle=inclination_angle, taper_ratio=tip_chord/root_chord, chord=mac_0, mid_gap=mid_gap, y_duplicate=y_duplicate)
+            inclination_angle=inclination_angle, taper_ratio=tip_chord/root_chord, chord=mac_0, mid_gap=mid_gap)
 
         mid_section = surf.add_section_gentle(seam_spanwise)
         mid_section.chord = mid_chord
@@ -167,9 +166,9 @@ class SurfaceTemplates:
         raise NotImplementedError
 
     @staticmethod
-    def is_vertical(surface: 'Surface', accuracy=.05) -> bool:
+    def is_vertical(surface: 'Surface', accuracy=.5) -> bool:
         if not surface.is_straight: return False
-        if not abs(surface.root.y - surface.tip.y) <= accuracy: return False
+        if surface.dihedral < 90 - accuracy: return False
         return True
 
     @staticmethod

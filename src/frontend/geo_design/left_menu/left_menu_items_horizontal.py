@@ -58,8 +58,7 @@ class LMTapered(LeftMenuItem):
             inclination_angle=self.pfs['inclination'].value,
             dihedral_angle=self.pfs['dihedral'].value,
             airfoil=self.airfoil_chooser.airfoil,
-            mid_gap=0,
-            y_duplicate=True
+            mid_gap=0
         )
         do_with_surface = lambda surface: surface.set_mechanization(**self.mechanizations.get_values())
         super()._update_surface(surface_generator, do_with_surface)
@@ -99,7 +98,6 @@ class LMRectangular(LMTapered):
             taper_ratio=1,
             sweep_angle=0,
             mid_gap=0,
-            y_duplicate=True,
             dihedral_angle=0
         )
         do_with_surface = lambda surface: surface.set_mechanization(**self.mechanizations.get_values())
@@ -195,8 +193,7 @@ class LMDoubleTrapez(LeftMenuItem):
             inclination_angle=self.pfs['inclination'].value,
             dihedral_angle=self.pfs['dihedral'].value,
             airfoil=self.airfoil_chooser.airfoil,
-            mid_gap=0,
-            y_duplicate=True
+            mid_gap=0
         )
         do_with_surface = lambda surface: surface.set_mechanization(**self.mechanizations.get_values())
         super()._update_surface(surface_generator, do_with_surface)

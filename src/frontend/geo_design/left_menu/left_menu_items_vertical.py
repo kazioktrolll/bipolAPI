@@ -44,14 +44,14 @@ class LMRectangularV(LeftMenuItem):
                 self.pfs['z'].value
             ),
             airfoil=self.airfoil_chooser.airfoil,
-            y_duplicate=False,
             taper_ratio=1,
             sweep_angle=0,
             inclination_angle=0,
             dihedral_angle=90,
             mid_gap=0
         )
-        super()._update_surface(surface_generator)
+        do_with_surface = lambda surface: surface.set_mechanization(**self.mechanizations.get_values())
+        super()._update_surface(surface_generator, do_with_surface)
 
 
 class LMSimpleTaperedV(LeftMenuItem):
@@ -96,10 +96,10 @@ class LMSimpleTaperedV(LeftMenuItem):
             airfoil=self.airfoil_chooser.airfoil,
             inclination_angle=0,
             dihedral_angle=90,
-            mid_gap=0,
-            y_duplicate=False
+            mid_gap=0
         )
-        super()._update_surface(surface_generator)
+        do_with_surface = lambda surface: surface.set_mechanization(**self.mechanizations.get_values())
+        super()._update_surface(surface_generator, do_with_surface)
 
 
 class LMTwinV(LeftMenuItem):
@@ -146,8 +146,8 @@ class LMTwinV(LeftMenuItem):
             ),
             airfoil=self.airfoil_chooser.airfoil,
             mid_gap=self.pfs['gap'].value,
-            y_duplicate=True,
             inclination_angle=0,
             dihedral_angle=90
         )
-        super()._update_surface(surface_generator)
+        do_with_surface = lambda surface: surface.set_mechanization(**self.mechanizations.get_values())
+        super()._update_surface(surface_generator, do_with_surface)

@@ -28,10 +28,10 @@ class GeometryGenerator:
     @classmethod
     def default(cls) -> Geometry:
         wing = Surface.template.simple_tapered(name='Wing', length=4, chord=1, airfoil=Airfoil.from_naca('0006'), taper_ratio=1, sweep_angle=0, origin_position=(0, 0, 0),
-                                               y_duplicate=True, dihedral_angle=0, inclination_angle=0, mid_gap=0)
+                                               dihedral_angle=0, inclination_angle=0, mid_gap=0)
         wing.set_mechanization(ailerons=[(3, 4, .8)], flaps=[(2.3, 2.8, .6)])
         h_tail = Surface.template.simple_tapered(name='H Tail', length=1, chord=1, origin_position=(4, 0, 1), airfoil=Airfoil.from_naca('0006'), taper_ratio=1, sweep_angle=0,
-                                                 y_duplicate=True, dihedral_angle=0, inclination_angle=0, mid_gap=0)
+                                                 dihedral_angle=0, inclination_angle=0, mid_gap=0)
         h_tail.set_mechanization(elevators=[(0, 1, .8)])
         v_tail = Surface(
             name='V Tail',
