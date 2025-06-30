@@ -50,8 +50,7 @@ class LMRectangularV(LeftMenuItem):
             dihedral_angle=90,
             mid_gap=0
         )
-        do_with_surface = lambda surface: surface.set_mechanization(**self.mechanizations.get_values())
-        super()._update_surface(surface_generator, do_with_surface)
+        super()._update_surface(surface_generator)
 
 
 class LMSimpleTaperedV(LeftMenuItem):
@@ -98,8 +97,7 @@ class LMSimpleTaperedV(LeftMenuItem):
             dihedral_angle=90,
             mid_gap=0
         )
-        do_with_surface = lambda surface: surface.set_mechanization(**self.mechanizations.get_values())
-        super()._update_surface(surface_generator, do_with_surface)
+        super()._update_surface(surface_generator)
 
 
 class LMTwinV(LeftMenuItem):
@@ -149,5 +147,4 @@ class LMTwinV(LeftMenuItem):
             inclination_angle=0,
             dihedral_angle=90
         )
-        do_with_surface = lambda surface: surface.set_mechanization(**self.mechanizations.get_values())
-        super()._update_surface(surface_generator, do_with_surface)
+        super()._update_surface(surface_generator)

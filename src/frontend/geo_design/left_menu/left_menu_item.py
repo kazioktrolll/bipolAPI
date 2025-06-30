@@ -94,17 +94,12 @@ class LeftMenuItem(CTkFrame, ABC):
 
     @handle_crash
     @final
-    def _update_surface(self,
-                        surface_creator: Callable[[], Surface] = None,
-                        do_with_surface: Callable[[Surface], None] = None
-                        ) -> None:
-        if surface_creator is None:
-            surface_creator = lambda: self.surface
+    def _update_surface(self, surface_creator: Callable[[], Surface]) -> None:
 
         if not self.initialized: return
 
         surface = surface_creator()
-        if do_with_surface is not None: do_with_surface(surface)
+        surface.set_mechanization(**self.mechanizations.get_values())
         surface.disabled = self.disabled
         self.geometry.replace_surface(surface)
         self.parent.do_on_update()
@@ -139,7 +134,7 @@ class LMEmpty(LeftMenuItem):
         return []
 
     def update_surface(self, _=None) -> None:
-        super()._update_surface()
+        super()._update_surface(lambda: self.surface)
 
     def init_mechanization(self): ...
 

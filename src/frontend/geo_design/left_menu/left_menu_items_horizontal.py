@@ -60,8 +60,7 @@ class LMTapered(LeftMenuItem):
             airfoil=self.airfoil_chooser.airfoil,
             mid_gap=0
         )
-        do_with_surface = lambda surface: surface.set_mechanization(**self.mechanizations.get_values())
-        super()._update_surface(surface_generator, do_with_surface)
+        super()._update_surface(surface_generator)
 
 
 class LMRectangular(LMTapered):
@@ -100,8 +99,7 @@ class LMRectangular(LMTapered):
             mid_gap=0,
             dihedral_angle=0
         )
-        do_with_surface = lambda surface: surface.set_mechanization(**self.mechanizations.get_values())
-        super()._update_surface(surface_generator, do_with_surface)
+        super()._update_surface(surface_generator)
 
 
 class LMDelta(LMTapered):
@@ -136,8 +134,7 @@ class LMDelta(LMTapered):
             inclination_angle=self.pfs['inclination'].value,
             airfoil=self.airfoil_chooser.airfoil
         )
-        do_with_surface = lambda surface: surface.set_mechanization(**self.mechanizations.get_values())
-        super()._update_surface(surface_generator, do_with_surface)
+        super()._update_surface(surface_generator)
 
 
 class LMDoubleTrapez(LeftMenuItem):
@@ -195,5 +192,4 @@ class LMDoubleTrapez(LeftMenuItem):
             airfoil=self.airfoil_chooser.airfoil,
             mid_gap=0
         )
-        do_with_surface = lambda surface: surface.set_mechanization(**self.mechanizations.get_values())
-        super()._update_surface(surface_generator, do_with_surface)
+        super()._update_surface(surface_generator)
