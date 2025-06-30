@@ -131,7 +131,10 @@ class SurfaceTemplates:
 
     @staticmethod
     def is_simple_tapered(surface: 'Surface', accuracy=.05) -> bool:
-        surface.assert_straight()
+        try:
+            surface.assert_straight()
+        except Exception:
+            return False
         safe_tip_y = surface.tip.y if surface.tip.y != 0 else 1e-10
         x_eq = lambda _y: surface.root.x + _y / safe_tip_y * (surface.tip.x - surface.root.x)
         z_eq = lambda _y: surface.root.z + _y / safe_tip_y * (surface.tip.z - surface.root.z)
@@ -446,7 +449,10 @@ class Surface:
             This will create **ailerons** for ``y`` = <1 : 2> ``hinge`` 0.7 x/c and ``y`` = <3 : 3.5> ``hinge`` 0.6 x/c,
             and **flaps** for ``y`` = <2.1 : 2.9> ``hinge`` 0.6 x/c.
         """
-        self.assert_straight()
+        try:
+            self.assert_straight()
+        except Exception:
+            return
         if self.mechanization:
             raise ValueError(f"The surface {self.name} already has mechanization!")
         self.mechanization = kwargs

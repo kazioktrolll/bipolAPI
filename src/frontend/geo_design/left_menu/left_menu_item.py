@@ -138,8 +138,17 @@ class LMEmpty(LeftMenuItem):
         super()._update_surface(lambda: self.surface)
 
 
-class LMOblique(LMEmpty):
+class LMOblique(LeftMenuItem):
     def __init__(self, parent, surface: Surface) -> None:
         super().__init__(parent, surface)
+        self.mechanizations.grid_forget()
+        self.airfoil_chooser.grid_forget()
         self.columnconfigure(0, weight=1)
         CTkLabel(self, text='NOT EDITABLE').grid(row=0, column=0, sticky='nsew')
+
+    @cached_property
+    def pfs_params(self) -> list[tuple[str, str, str, Callable[[Any], bool], Any]]:
+        return []
+
+    def update_surface(self, _=None) -> None:
+        super().update_surface(lambda: self.surface)

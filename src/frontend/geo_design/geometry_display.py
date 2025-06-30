@@ -168,7 +168,7 @@ class GeometryDisplay(CTkFrame):
 
         if wing.y_duplicate:
             # If wing is symmetric, create a mirror copy of the wing,
-            # display it, and the n continue displaying the original wing.
+            # display it, and then continue displaying the original wing.
             ydup = wing.get_symmetric()
             ydup.y_duplicate = False
             self.display_wing(ydup)

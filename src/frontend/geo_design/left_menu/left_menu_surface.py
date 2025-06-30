@@ -64,8 +64,9 @@ class LeftMenuSurface(CTkFrame):
     def auto_set(self, surface: Surface) -> None:
         _t = surface.template.get_type(surface)
         if _t is None:
-            raise TypeError
-        self.set_lm(self.types[str(_t)])
+            self.set_lm(LMOblique)
+        else:
+            self.set_lm(self.types[str(_t)])
 
     @property
     def geometry(self) -> Geometry:
