@@ -6,42 +6,14 @@ it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 """
-from typing import Callable, Any
-from functools import cached_property
 
 from .left_menu_item import LeftMenuItem
 from ....backend.geo_design import Surface
 
 
 class LMTapered(LeftMenuItem):
-    @cached_property
-    def pfs_params(self) -> list[tuple[str, str, str, Callable[[Any], bool], Any]]:
-        surf = self.surface
-        pfs_params = [
-            ('pos', 'Position XZ', 'The X and Z positions of the tip of the root section.',
-             lambda tup: True, (surf.origin_position.x, surf.origin_position.z), 'Vector2'),
-
-            ('span', 'Span', "The span of the horizontal tail.\nHas to be positive.",
-             lambda w: w > 0, surf.span),
-
-            ('chord', 'MAC', "The mean aerodynamic chord of the surface.\nHas to be positive.",
-             lambda c: c > 0, surf.mac()),
-
-            ('taper', 'Taper Ratio', "The taper ratio of the surface - c_tip / c_root.\nHas to be between 0 and 1.",
-             lambda tr: 0 <= tr <= 1, (surf.taper_ratio() if surf.taper_ratio() is not None else 1)),
-
-            ('sweep', 'Sweep Angle', "Sweep angle of the wing, in degrees.\n"
-                                     "The angle between Y-axis and the 25%MAC line. Positive means wing deflected backwards.\n"
-                                     "Has to be between -90 and 90.",
-             lambda sa: -90 < sa < 90, (surf.sweep_angle() if surf.sweep_angle() is not None else 0)),
-
-            ('inclination', 'Inclination', "The inclination of the surface, in degrees\n.",
-             lambda i: True, surf.sections[0].inclination),
-
-            ('dihedral', 'Dihedral', "The dihedral of the surface, in degrees\n.",
-             lambda d: -90 < d < 90, surf.sections[0].inclination)
-        ]
-        return pfs_params
+    def __init__(self, parent, surface: Surface):
+        super().__init__(parent, surface, ['pos', 'span', 'chord', 'taper', 'sweep', 'inclination', 'dihedral'])
 
     def update_surface(self, _=None) -> None:
         surface_generator = lambda: Surface.template.simple_tapered(
@@ -63,24 +35,9 @@ class LMTapered(LeftMenuItem):
         super()._update_surface(surface_generator)
 
 
-class LMRectangular(LMTapered):
-    @cached_property
-    def pfs_params(self) -> list[tuple[str, str, str, Callable[[Any], bool], Any]]:
-        surf = self.surface
-        pfs_params = [
-            ('pos', 'Position XZ', 'The X and Z positions of the tip of the root section.',
-             lambda tup: True, (surf.origin_position.x, surf.origin_position.z), 'Vector2'),
-
-            ('span', 'Span', "The span of the surface.\nHas to be positive.",
-             lambda w: w > 0, surf.span),
-
-            ('chord', 'MAC', "The mean aerodynamic chord of the surface.\nHas to be positive.",
-             lambda c: c > 0, surf.mac()),
-
-            ('inclination', 'Inclination', "The inclination of the surface, in degrees\n.",
-             lambda i: True, surf.sections[0].inclination)
-        ]
-        return pfs_params
+class LMRectangular(LeftMenuItem):
+    def __init__(self, parent, surface: Surface):
+        super().__init__(parent, surface, ['pos', 'span', 'chord', 'inclination'])
 
     def update_surface(self, _=None) -> None:
         surface_generator = lambda: Surface.template.simple_tapered(
@@ -102,24 +59,9 @@ class LMRectangular(LMTapered):
         super()._update_surface(surface_generator)
 
 
-class LMDelta(LMTapered):
-    @cached_property
-    def pfs_params(self) -> list[tuple[str, str, str, Callable[[Any], bool], Any]]:
-        surf = self.surface
-        pfs_params = [
-            ('pos', 'Position XZ', 'The X and Z positions of the tip of the root section.',
-             lambda tup: True, (surf.origin_position.x, surf.origin_position.z), 'Vector2'),
-
-            ('span', 'Span', "The span of the horizontal tail.\nHas to be positive.",
-             lambda b: b > 0, surf.span),
-
-            ('surface_area', 'Surface Area', "The area of the surface.\nHas to be positive.",
-             lambda s: s > 0, surf.area()),
-
-            ('inclination', 'Inclination', "The inclination of the surface, in degrees\n.",
-             lambda i: True, surf.sections[0].inclination)
-        ]
-        return pfs_params
+class LMDelta(LeftMenuItem):
+    def __init__(self, parent, surface: Surface):
+        super().__init__(parent, surface, ['pos', 'span', 'surface_area', 'inclination'])
 
     def update_surface(self, _=None) -> None:
         surface_generator = lambda: Surface.template.delta(
@@ -138,40 +80,8 @@ class LMDelta(LMTapered):
 
 
 class LMDoubleTrapez(LeftMenuItem):
-    @cached_property
-    def pfs_params(self) -> list[tuple[str, str, str, Callable[[Any], bool], Any]]:
-        surf = self.surface
-        pfs_params = [
-            ('pos', 'Position XZ', 'The X and Z positions of the tip of the root section.',
-             lambda tup: True, (surf.origin_position.x, surf.origin_position.z), 'Vector2'),
-
-            ('root_chord', 'Root Chord', "The chord of the surface at its root section.",
-             lambda c: c > 0, surf.sections[0].chord),
-
-            ('mid_chord', 'Mid Chord', "The chord of the surface at the section where it changes the geometry.",
-             lambda c: c > 0, surf.mac()),#TODO fill
-
-            ('tip_chord', 'Tip Chord', "The chord of the surface at its tip section.",
-             lambda c: c > 0, surf.sections[-1].chord),
-
-            ('span', 'Span', "The span of the surface.\nHas to be positive.",
-             lambda w: w > 0, surf.span),
-
-            ('ss', 'Seam Spanwise Position', "The spanwise position of the seam as percent of the wing span.\nHas to be between 0 and 1.",
-             lambda ss: 0 < ss < 1, 0.2, 'float'),
-
-            ('inclination', 'Inclination Angle', "The inclination of the surface, in degrees\n.",
-             lambda i: True, surf.sections[0].inclination),
-
-            ('sweep', 'Sweep Angle', "Sweep angle of the wing, in degrees.\n"
-                                     "The angle between Y-axis and the 25%MAC line. Positive means wing deflected backwards.\n"
-                                     "Has to be between -90 and 90.",
-             lambda sa: -90 < sa < 90, (surf.sweep_angle() if surf.sweep_angle() is not None else 0)),
-
-            ('dihedral', 'Dihedral Angle', "The dihedral of the surface, in degrees\n.",
-             lambda d: -90 < d < 90, surf.sections[0].inclination)
-        ]
-        return pfs_params
+    def __init__(self, parent, surface: Surface):
+        super().__init__(parent, surface, ['pos', 'root_chord', 'mid_chord', 'tip_chord', 'span', 'ss', 'inclination', 'sweep', 'dihedral'])
 
     def update_surface(self, _=None) -> None:
         surface_generator = lambda: Surface.template.double_trapez(

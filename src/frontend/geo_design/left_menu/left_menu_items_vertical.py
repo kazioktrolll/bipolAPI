@@ -15,23 +15,8 @@ from ....backend.geo_design import Surface
 
 
 class LMRectangularV(LeftMenuItem):
-    @cached_property
-    def pfs_params(self) -> list[tuple[str, str, str, Callable[[Any], bool], Any]]:
-        surf = self.surface
-        pfs_params = [
-            ('x', 'X', 'The X-axis position of the tip of the root section.',
-             lambda x: True, surf.origin_position.x),
-
-            ('z', 'Z', 'The Z-axis position of the tip of the root section.',
-             lambda z: True, surf.origin_position.z),
-
-            ('height', 'Height', "The height of the vertical tail.\nHas to be positive.",
-             lambda h: h > 0, surf.span),
-
-            ('chord', 'MAC', "The mean aerodynamic chord of the surface.\nHas to be positive.",
-             lambda c: c > 0, surf.mac()),
-        ]
-        return pfs_params
+    def __init__(self, parent, surface: Surface):
+        super().__init__(parent, surface, ['pos', 'span', 'height', 'chord'])
 
     def update_surface(self, _=None) -> None:
         surface_generator = lambda: Surface.template.simple_tapered(
@@ -39,9 +24,9 @@ class LMRectangularV(LeftMenuItem):
             length=self.pfs['height'].value,
             chord=self.pfs['chord'].value,
             origin_position=(
-                self.pfs['x'].value,
+                self.pfs['pos'].value[0],
                 0,
-                self.pfs['z'].value
+                self.pfs['pos'].value[2]
             ),
             airfoil=self.airfoil_chooser.airfoil,
             taper_ratio=1,
@@ -54,31 +39,8 @@ class LMRectangularV(LeftMenuItem):
 
 
 class LMSimpleTaperedV(LeftMenuItem):
-    @cached_property
-    def pfs_params(self) -> list[tuple[str, str, str, Callable[[Any], bool], Any]]:
-        surf = self.surface
-        pfs_params = [
-            ('x', 'X', 'The X-axis position of the tip of the root section.',
-             lambda x: True, surf.origin_position.x),
-
-            ('z', 'Z', 'The Z-axis position of the tip of the root section.',
-             lambda z: True, surf.origin_position.z),
-
-            ('height', 'Height', "The height of the vertical tail.\nHas to be positive.",
-             lambda h: h > 0, surf.span),
-
-            ('chord', 'MAC', "The mean aerodynamic chord of the surface.\nHas to be positive.",
-             lambda c: c > 0, surf.mac()),
-
-            ('taper', 'Taper Ratio', "The taper ratio of the surface - c_tip / c_root.\nHas to be between 0 and 1.",
-             lambda tr: 0 <= tr <= 1, (surf.taper_ratio() if surf.taper_ratio() is not None else 1)),
-
-            ('sweep', 'Sweep Angle', "Sweep angle of the wing, in degrees.\n"
-                                     "The angle between Y-axis and the 25%MAC line. Positive means wing deflected backwards.\n"
-                                     "Has to be between -90 and 90.",
-             lambda sa: -90 < sa < 90, (surf.sweep_angle() if surf.sweep_angle() is not None else 0)),
-        ]
-        return pfs_params
+    def __init__(self, parent, surface: Surface):
+        super().__init__(parent, surface, ['pos', 'height', 'chord', 'taper', 'sweep'])
 
     def update_surface(self, _=None) -> None:
         surface_generator = lambda: Surface.template.simple_tapered(
@@ -88,9 +50,9 @@ class LMSimpleTaperedV(LeftMenuItem):
             taper_ratio=self.pfs['taper'].value,
             sweep_angle=self.pfs['sweep'].value,
             origin_position=(
-                self.pfs['x'].value,
+                self.pfs['pos'].value[0],
                 0,
-                self.pfs['z'].value
+                self.pfs['pos'].value[2]
             ),
             airfoil=self.airfoil_chooser.airfoil,
             inclination_angle=0,
@@ -101,34 +63,8 @@ class LMSimpleTaperedV(LeftMenuItem):
 
 
 class LMTwinV(LeftMenuItem):
-    @cached_property
-    def pfs_params(self) -> list[tuple[str, str, str, Callable[[Any], bool], Any]]:
-        surf = self.surface
-        pfs_params = [
-            ('x', 'X', 'The X-axis position of the tip of the root section.',
-             lambda x: True, surf.origin_position.x),
-
-            ('z', 'Z', 'The Z-axis position of the tip of the root section.',
-             lambda z: True, surf.origin_position.z),
-
-            ('height', 'Height', "The height of the vertical tail.\nHas to be positive.",
-             lambda h: h > 0, surf.span),
-
-            ('chord', 'MAC', "The mean aerodynamic chord of the surface.\nHas to be positive.",
-             lambda c: c > 0, surf.mac()),
-
-            ('taper', 'Taper Ratio', "The taper ratio of the surface - c_tip / c_root.\nHas to be between 0 and 1.",
-             lambda tr: 0 <= tr <= 1, (surf.taper_ratio() if surf.taper_ratio() is not None else 1)),
-
-            ('sweep', 'Sweep Angle', "Sweep angle of the wing, in degrees.\n"
-                                     "The angle between Y-axis and the 25%MAC line. Positive means wing deflected backwards.\n"
-                                     "Has to be between -90 and 90.",
-             lambda sa: -90 < sa < 90, (surf.sweep_angle() if surf.sweep_angle() is not None else 0)),
-
-            ('gap', 'Gap', "The gap between the two parts of the surface in meters.\n Has to be positive.",
-             lambda g: g > 0, 1),
-        ]
-        return pfs_params
+    def __init__(self, parent, surface: Surface):
+        super().__init__(parent, surface, ['pos', 'height', 'chord', 'taper', 'sweep', 'gap'])
 
     def update_surface(self, _=None) -> None:
         surface_generator = lambda: Surface.template.simple_tapered(
@@ -138,9 +74,9 @@ class LMTwinV(LeftMenuItem):
             taper_ratio=self.pfs['taper'].value,
             sweep_angle=self.pfs['sweep'].value,
             origin_position=(
-                self.pfs['x'].value,
+                self.pfs['pos'].value[0],
                 0,
-                self.pfs['z'].value
+                self.pfs['pos'].value[2]
             ),
             airfoil=self.airfoil_chooser.airfoil,
             mid_gap=self.pfs['gap'].value,
