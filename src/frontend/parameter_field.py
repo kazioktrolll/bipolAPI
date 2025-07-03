@@ -83,11 +83,14 @@ class ParameterField(CTkFrame):
         self.build()
 
     def build(self):
+        self.columnconfigure(0, minsize=10)
         if self.has_message: self.help_button.grid(column=0, row=0, sticky="w")
-        self.name_label.grid(column=1, row=0, sticky="w")
-        self.value_label.grid(column=2, row=0, sticky="w", padx=10)
-        self.entry.grid(column=3, row=0, sticky="ew")
-        if self.mode != 'bool': self.set_button.grid(column=4, row=0, sticky="e")
+        self.name_label.grid(column=1, row=0, sticky="w", padx=5)
+        self.columnconfigure(2, weight=1)
+        self.value_label.grid(column=3, row=0, sticky="w", padx=10)
+        self.entry.grid(column=4, row=0, sticky="ew")
+        self.columnconfigure(5, minsize=40)
+        if self.mode != 'bool': self.set_button.grid(column=5, row=0, sticky="e", padx=5)
 
     def set_entry(self, value: float | str) -> bool:
         assert isinstance(self.entry, CTkEntry)
