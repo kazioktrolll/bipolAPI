@@ -8,8 +8,6 @@ the Free Software Foundation, either version 3 of the License, or
 """
 
 
-from functools import cached_property
-from typing import Any, Callable
 from .left_menu_item import LeftMenuItem
 from ....backend.geo_design import Surface
 
@@ -26,7 +24,7 @@ class LMRectangularV(LeftMenuItem):
             origin_position=(
                 self.pfs['pos'].value[0],
                 0,
-                self.pfs['pos'].value[2]
+                self.pfs['pos'].value[1]
             ),
             airfoil=self.airfoil_chooser.airfoil,
             taper_ratio=1,
@@ -52,7 +50,7 @@ class LMSimpleTaperedV(LeftMenuItem):
             origin_position=(
                 self.pfs['pos'].value[0],
                 0,
-                self.pfs['pos'].value[2]
+                self.pfs['pos'].value[1]
             ),
             airfoil=self.airfoil_chooser.airfoil,
             inclination_angle=0,
@@ -76,7 +74,7 @@ class LMTwinV(LeftMenuItem):
             origin_position=(
                 self.pfs['pos'].value[0],
                 0,
-                self.pfs['pos'].value[2]
+                self.pfs['pos'].value[1]
             ),
             airfoil=self.airfoil_chooser.airfoil,
             mid_gap=self.pfs['gap'].value,

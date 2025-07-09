@@ -3,6 +3,8 @@ from .left_menu_items_horizontal import LMTapered, LMRectangular, LMDelta, LMDou
 from .left_menu_items_vertical import LMRectangularV, LMSimpleTaperedV
 from ....backend.geo_design import Surface, Geometry
 from ....backend import handle_crash
+from ..airfoil_chooser import AirfoilChooser
+from ..mechanization_chooser import MechanizationChooser
 from customtkinter import CTkFrame, CTkOptionMenu
 
 
@@ -11,7 +13,6 @@ class LeftMenuSurface(CTkFrame):
     def __init__(self, parent: CTkFrame, surface: Surface):
         super().__init__(parent)
         self.name = surface.name
-
         self.types: dict[str, type[LeftMenuItem]] = {
             'Rectangular': LMRectangular,
             'Simple Tapered': LMTapered,
@@ -22,10 +23,12 @@ class LeftMenuSurface(CTkFrame):
             'Oblique': LMOblique,
             'None': LMEmpty,
         }
-        self.option_menu = CTkOptionMenu(
-            self, values=list(self.types.keys()), command=lambda t: self.set_lm(self.types[t])
-        )
+
+        self.option_menu = CTkOptionMenu(self, values=list(self.types.keys()), command=lambda t: self.set_lm(self.types[t]))
+        self.mechanizations = MechanizationChooser(self, self.update_surface, True)
+        self.airfoil_chooser = AirfoilChooser(self)
         self.lm: LeftMenuItem = LMEmpty(self, surface)
+
         self.auto_set(surface)
 
         if surface.name == 'Wing':
@@ -40,8 +43,11 @@ class LeftMenuSurface(CTkFrame):
             del self.types['Delta']
             del self.types['Double Trapez']
         del self.types['Oblique']
-
         self.option_menu.configure(values=list(self.types.keys()))
+
+        self.build()
+
+    def build(self):
         self.option_menu.grid(row=0, column=0, sticky='nsew')
         self.columnconfigure(0, weight=1)
         self.rowconfigure(1, weight=1)
@@ -77,3 +83,6 @@ class LeftMenuSurface(CTkFrame):
     @property
     def surface(self) -> Surface:
         return self.geometry.surfaces[self.name]
+
+    def update_surface(self) -> None:
+        self.lm.update_surface()

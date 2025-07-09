@@ -43,6 +43,7 @@ class LeftMenuItem(CTkFrame, ABC):
         self.get_all_pfs()
         self.init_mechanization()
         self.build()
+        self.initialized = True
 
     @final
     def __repr__(self) -> str:
@@ -155,11 +156,17 @@ class LeftMenuItem(CTkFrame, ABC):
         self.parent.do_on_update()
 
     @property
+    def LMS(self):
+        from .left_menu_surface import LeftMenuSurface
+        assert isinstance(self.master, LeftMenuSurface)
+        return self.master
+
+    @property
     @final
     def parent(self):
         from .left_menu import LeftMenu
-        assert isinstance(self.master.master, LeftMenu)
-        return self.master.master
+        assert isinstance(self.LMS.master, LeftMenu)
+        return self.LMS.master
 
     @property
     @final
