@@ -37,7 +37,7 @@ class LeftMenu(CTkFrame):
         self.show_first()
 
     def build(self) -> None:
-        self.columnconfigure(0, weight=1, minsize=400)
+        self.columnconfigure(0, weight=1, minsize=450)
 
         self.items_button.grid(row=0, column=0, sticky='nsew')
         self.rowconfigure(1, minsize=4)
