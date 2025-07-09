@@ -12,8 +12,9 @@ from ....backend.geo_design import Surface
 
 
 class LMTapered(LeftMenuItem):
-    def __init__(self, parent, surface: Surface):
-        super().__init__(parent, surface, ['pos', 'span', 'chord', 'taper', 'sweep', 'inclination', 'dihedral'])
+    @property
+    def active_pfs(self) -> list[str]:
+        return ['pos', 'span', 'chord', 'taper', 'sweep', 'inclination', 'dihedral']
 
     def update_surface(self, _=None) -> None:
         surface_generator = lambda: Surface.template.simple_tapered(
@@ -36,8 +37,9 @@ class LMTapered(LeftMenuItem):
 
 
 class LMRectangular(LeftMenuItem):
-    def __init__(self, parent, surface: Surface):
-        super().__init__(parent, surface, ['pos', 'span', 'chord', 'inclination'])
+    @property
+    def active_pfs(self) -> list[str]:
+        return ['pos', 'span', 'chord', 'inclination']
 
     def update_surface(self, _=None) -> None:
         surface_generator = lambda: Surface.template.simple_tapered(
@@ -60,8 +62,9 @@ class LMRectangular(LeftMenuItem):
 
 
 class LMDelta(LeftMenuItem):
-    def __init__(self, parent, surface: Surface):
-        super().__init__(parent, surface, ['pos', 'span', 'surface_area', 'inclination'])
+    @property
+    def active_pfs(self) -> list[str]:
+        return ['pos', 'span', 'surface_area', 'inclination']
 
     def update_surface(self, _=None) -> None:
         surface_generator = lambda: Surface.template.delta(
@@ -80,8 +83,9 @@ class LMDelta(LeftMenuItem):
 
 
 class LMDoubleTrapez(LeftMenuItem):
-    def __init__(self, parent, surface: Surface):
-        super().__init__(parent, surface, ['pos', 'root_chord', 'mid_chord', 'tip_chord', 'span', 'ss', 'inclination', 'sweep', 'dihedral'])
+    @property
+    def active_pfs(self) -> list[str]:
+        return ['pos', 'root_chord', 'mid_chord', 'tip_chord', 'span', 'ss', 'inclination', 'sweep', 'dihedral']
 
     def update_surface(self, _=None) -> None:
         surface_generator = lambda: Surface.template.double_trapez(

@@ -23,14 +23,12 @@ from ....backend import handle_crash
 
 
 class LeftMenuItem(CTkFrame, ABC):
-    @abstractmethod
-    def __init__(self, parent, surface: Surface, active_pfs: list[str]):
+    def __init__(self, parent, surface: Surface):
         CTkFrame.__init__(self, parent)
         ABC.__init__(self)
         self.name = surface.name
         self.initialized = False
         self.pfs: dict[str, ParameterField] = {}
-        self.active_pfs = active_pfs
         self.disabled = False
 
         self.pf_frame = CTkFrame(self, fg_color='transparent')
@@ -44,6 +42,11 @@ class LeftMenuItem(CTkFrame, ABC):
         self.init_mechanization()
         self.build()
         self.initialized = True
+
+    @property
+    @abstractmethod
+    def active_pfs(self) -> list[str]:
+        ...
 
     @final
     def __repr__(self) -> str:
@@ -181,10 +184,14 @@ class LeftMenuItem(CTkFrame, ABC):
 
 class LMEmpty(LeftMenuItem):
     def __init__(self, parent, surface: Surface):
-        super().__init__(parent, surface, [])
+        super().__init__(parent, surface)
         self.disabled = True
         self.mechanizations.grid_forget()
         self.airfoil_chooser.grid_forget()
+
+    @property
+    def active_pfs(self):
+        return []
 
     @cached_property
     def pfs_params(self) -> list[tuple[str, str, str, Callable[[Any], bool], Any]]:
@@ -196,11 +203,15 @@ class LMEmpty(LeftMenuItem):
 
 class LMOblique(LeftMenuItem):
     def __init__(self, parent, surface: Surface) -> None:
-        super().__init__(parent, surface, [])
+        super().__init__(parent, surface)
         self.mechanizations.grid_forget()
         self.airfoil_chooser.grid_forget()
         self.columnconfigure(0, weight=1)
         CTkLabel(self, text='NOT EDITABLE').grid(row=0, column=0, sticky='nsew')
+
+    @property
+    def active_pfs(self):
+        return []
 
     @cached_property
     def pfs_params(self) -> list[tuple[str, str, str, Callable[[Any], bool], Any]]:

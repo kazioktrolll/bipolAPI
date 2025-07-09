@@ -13,8 +13,9 @@ from ....backend.geo_design import Surface
 
 
 class LMRectangularV(LeftMenuItem):
-    def __init__(self, parent, surface: Surface):
-        super().__init__(parent, surface, ['pos', 'span', 'height', 'chord'])
+    @property
+    def active_pfs(self) -> list[str]:
+        return ['pos', 'span', 'height', 'chord']
 
     def update_surface(self, _=None) -> None:
         surface_generator = lambda: Surface.template.simple_tapered(
@@ -37,8 +38,9 @@ class LMRectangularV(LeftMenuItem):
 
 
 class LMSimpleTaperedV(LeftMenuItem):
-    def __init__(self, parent, surface: Surface):
-        super().__init__(parent, surface, ['pos', 'height', 'chord', 'taper', 'sweep'])
+    @property
+    def active_pfs(self) -> list[str]:
+        return ['pos', 'height', 'chord', 'taper', 'sweep']
 
     def update_surface(self, _=None) -> None:
         surface_generator = lambda: Surface.template.simple_tapered(
@@ -61,8 +63,9 @@ class LMSimpleTaperedV(LeftMenuItem):
 
 
 class LMTwinV(LeftMenuItem):
-    def __init__(self, parent, surface: Surface):
-        super().__init__(parent, surface, ['pos', 'height', 'chord', 'taper', 'sweep', 'gap'])
+    @property
+    def active_pfs(self) -> list[str]:
+        return ['pos', 'height', 'chord', 'taper', 'sweep', 'gap']
 
     def update_surface(self, _=None) -> None:
         surface_generator = lambda: Surface.template.simple_tapered(
