@@ -60,6 +60,9 @@ class ListPreset:
     def grid_forget(self) -> None:
         self.main_frame.grid_forget()
 
+    def grid_info(self):
+        return self.main_frame.grid_info()
+
     def update_items(self) -> None:
         self.redo_item_frames()
         for i, item_frame in enumerate(self.item_frames):

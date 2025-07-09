@@ -381,9 +381,12 @@ class Surface:
             return sqrt((section.y - ref_sec.y) ** 2 + (section.z - ref_sec.z) ** 2)
         self.sections.sort(key=lambda section: pos(section))
 
+    def copy(self) -> 'Surface':
+        return copy(self)
+
     def get_symmetric(self) -> 'Surface':
         """Returns a copy of the surface mirrored about Y-axis."""
-        surf = copy(self)
+        surf = self.copy()
         surf.name = self.name + '_symm'
         reflected_sections = [sec.mirror() for sec in self.sections]
         surf.sections = reflected_sections
@@ -437,6 +440,11 @@ class Surface:
         return Vector3(x, y, z)
 
     # Nowe
+    def clear_mechanization(self) -> None:
+        self.mechanization = {}
+        for sec in self.sections:
+            sec.control = None
+
     def set_mechanization(self, **kwargs: list[tuple[float, float, float]]) -> None:
         """Sets the mechanization of the surface.
 

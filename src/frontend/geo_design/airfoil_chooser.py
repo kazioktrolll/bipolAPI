@@ -20,7 +20,7 @@ from ...backend import handle_crash
 
 class AirfoilChooser(CTkFrame):
     def __init__(self, parent):
-        super().__init__(parent)
+        super().__init__(parent, border_width=3)
         self.path: Path | None = None
         self.airfoil = Airfoil.empty()
 
@@ -33,9 +33,9 @@ class AirfoilChooser(CTkFrame):
         self.columnconfigure(1, weight=1)
 
         CTkButton(self, text="Load from File", command=self.load_from_file
-                  ).grid(row=0, column=2, sticky="nse", padx=5, pady=5)
+                  ).grid(row=0, column=2, sticky="nse", padx=8, pady=8)
         CTkButton(self, text="NACA", command=self.load_naca
-                  ).grid(row=2, column=2, sticky="nse", padx=5, pady=5)
+                  ).grid(row=2, column=2, sticky="nse", padx=8, pady=8)
 
     @handle_crash
     def load_naca(self):

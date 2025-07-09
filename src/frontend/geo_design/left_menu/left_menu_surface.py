@@ -5,13 +5,17 @@ from ....backend.geo_design import Surface, Geometry
 from ....backend import handle_crash
 from ..airfoil_chooser import AirfoilChooser
 from ..mechanization_chooser import MechanizationChooser
-from customtkinter import CTkFrame, CTkOptionMenu
+from customtkinter import CTkFrame, CTkOptionMenu, StringVar
+
+
+from ..mechanization_chooser import ControlTypeItem
+from ... import FlapItem
 
 
 class LeftMenuSurface(CTkFrame):
     @handle_crash
     def __init__(self, parent: CTkFrame, surface: Surface):
-        super().__init__(parent)
+        super().__init__(parent, fg_color='transparent')
         self.name = surface.name
         self.types: dict[str, type[LeftMenuItem]] = {
             'Rectangular': LMRectangular,
@@ -26,7 +30,9 @@ class LeftMenuSurface(CTkFrame):
 
         self.option_menu = CTkOptionMenu(self, values=list(self.types.keys()), command=lambda t: self.set_lm(self.types[t]))
         self.mechanizations = MechanizationChooser(self, self.update_surface, True)
+        self.init_mechanization()
         self.airfoil_chooser = AirfoilChooser(self)
+        self.airfoil_chooser.set(surface.airfoil)
         self.lm: LeftMenuItem = LMEmpty(self, surface)
 
         self.auto_set(surface)
@@ -51,6 +57,8 @@ class LeftMenuSurface(CTkFrame):
         self.option_menu.grid(row=0, column=0, sticky='nsew')
         self.columnconfigure(0, weight=1)
         self.rowconfigure(1, weight=1)
+        self.mechanizations.grid(row=2, column=0, sticky='nsew', pady=10)
+        self.airfoil_chooser.grid(row=3, column=0, sticky='nsew', pady=10)
 
     @handle_crash
     def set_lm(self, lm: type[LeftMenuItem]) -> None:
@@ -86,3 +94,14 @@ class LeftMenuSurface(CTkFrame):
 
     def update_surface(self) -> None:
         self.lm.update_surface()
+
+    def init_mechanization(self):
+        if not self.surface.mechanization: return
+        for key, list_of_ranges in self.surface.mechanization.items():
+            key = key.capitalize()
+            list_preset = ControlTypeItem(key, self.update_surface, True)
+            for start, stop, xc in list_of_ranges:
+                item = FlapItem()
+                item.set_values(StringVar(value=f'{start}'), StringVar(value=f'{stop}'), StringVar(value=f'{xc}'))
+                list_preset.add_position(item)
+            self.mechanizations.add_position(list_preset)

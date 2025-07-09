@@ -8,15 +8,10 @@ the Free Software Foundation, either version 3 of the License, or
 """
 
 
-from customtkinter import CTkFrame, CTkLabel, StringVar
-from typing import Callable, final, Any
+from customtkinter import CTkFrame, CTkLabel
+from typing import Callable, final
 from abc import ABC, abstractmethod
-from functools import cached_property
 
-from ..airfoil_chooser import AirfoilChooser
-from ..mechanization_chooser import MechanizationChooser
-from ..mechanization_chooser import ControlTypeItem
-from ... import FlapItem
 from ...parameter_field import ParameterField
 from ....backend.geo_design import Surface, Geometry
 from ....backend import handle_crash
@@ -24,7 +19,7 @@ from ....backend import handle_crash
 
 class LeftMenuItem(CTkFrame, ABC):
     def __init__(self, parent, surface: Surface):
-        CTkFrame.__init__(self, parent)
+        CTkFrame.__init__(self, parent, fg_color='transparent')
         ABC.__init__(self)
         self.name = surface.name
         self.initialized = False
@@ -34,12 +29,10 @@ class LeftMenuItem(CTkFrame, ABC):
         self.pf_frame = CTkFrame(self, fg_color='transparent')
         self.pf_frame.columnconfigure(0, weight=1)
 
-        self.mechanizations = MechanizationChooser(self, self.update_surface, True)
-        self.airfoil_chooser = AirfoilChooser(self)
-        self.airfoil_chooser.set(surface.airfoil)
+        self.mechanizations = self.LMS.mechanizations
+        self.airfoil_chooser = self.LMS.airfoil_chooser
 
         self.get_all_pfs()
-        self.init_mechanization()
         self.build()
         self.initialized = True
 
@@ -55,24 +48,15 @@ class LeftMenuItem(CTkFrame, ABC):
     @final
     def build(self) -> None:
         self.update_pfs()
+        if not self.mechanizations.grid_info():
+            self.mechanizations.grid(row=2, column=0, sticky='nsew', pady=10)
+        if not self.airfoil_chooser.grid_info():
+            self.airfoil_chooser.grid(row=3, column=0, sticky='nsew', pady=10)
+
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
 
         self.pf_frame.grid(row=0, column=0, sticky='nsew')
-        self.mechanizations.grid(row=1, column=0, sticky='nsew')
-        self.airfoil_chooser.grid(row=2, column=0, padx=10, pady=10, sticky='nsew')
-
-    @final
-    def init_mechanization(self):
-        if not self.surface.mechanization: return
-        for key, list_of_ranges in self.surface.mechanization.items():
-            key = key.capitalize()
-            list_preset = ControlTypeItem(key, self.update_surface, True)
-            for start, stop, xc in list_of_ranges:
-                item = FlapItem()
-                item.set_values(StringVar(value=f'{start}'), StringVar(value=f'{stop}'), StringVar(value=f'{xc}'))
-                list_preset.add_position(item)
-            self.mechanizations.add_position(list_preset)
 
     @final
     def get_all_pfs(self) -> None:
@@ -193,12 +177,12 @@ class LMEmpty(LeftMenuItem):
     def active_pfs(self):
         return []
 
-    @cached_property
-    def pfs_params(self) -> list[tuple[str, str, str, Callable[[Any], bool], Any]]:
-        return []
-
     def update_surface(self, _=None) -> None:
-        super()._update_surface(lambda: self.surface)
+        def getter():
+            surf = self.surface.copy()
+            surf.clear_mechanization()
+            return surf
+        super()._update_surface(getter)
 
 
 class LMOblique(LeftMenuItem):
@@ -211,10 +195,6 @@ class LMOblique(LeftMenuItem):
 
     @property
     def active_pfs(self):
-        return []
-
-    @cached_property
-    def pfs_params(self) -> list[tuple[str, str, str, Callable[[Any], bool], Any]]:
         return []
 
     def update_surface(self, _=None) -> None:
