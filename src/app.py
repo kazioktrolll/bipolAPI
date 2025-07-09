@@ -77,6 +77,7 @@ class App:
         self.root.destroy()
         self.work_dir.cleanup()
 
+    @handle_crash
     def set_scene(self, scene) -> None:
         """Sets the Scene instance as the new currently displayed scene."""
         from .scenes import Scene
@@ -98,6 +99,7 @@ class App:
 
     # 'File' menu
 
+    @handle_crash
     def save_as(self, path: str | Path = None) -> None:
         """Saves the current geometry as a .gavl file."""
         self.top_bar.collapse_all()
@@ -113,6 +115,7 @@ class App:
         with open(path, 'wb') as f:
             pickle.dump(self.geometry, f)  # noqa
 
+    @handle_crash
     def load(self, path: str | Path = None) -> None:
         """Loads the geometry from a .gavl file."""
         self.top_bar.collapse_all()
@@ -129,11 +132,13 @@ class App:
         from src.backend.geo_design import GeometryGenerator
         self.set_geometry(GeometryGenerator.empty())
 
+    @handle_crash
     def new_default(self) -> None:
         self.top_bar.collapse_all()
         from src.backend.geo_design import GeometryGenerator
         self.set_geometry(GeometryGenerator.default())
 
+    @handle_crash
     def export_to_avl(self, path: str | Path = None) -> None:
         """Exports the current geometry to an .avl file."""
         self.top_bar.collapse_all()
@@ -145,6 +150,7 @@ class App:
         ))
         self.geometry.save_to_avl(path=path)
 
+    @handle_crash
     def import_from_avl(self, path: str | Path = None) -> None:
         """Imports the current geometry from an .avl file."""
         from src.backend.geo_design import GeometryGenerator
@@ -162,6 +168,7 @@ class App:
         self.set_geometry(geom)
 
     @staticmethod
+    @handle_crash
     def open_help():
         path = Path(__file__).parent.parent / 'INSTRUCTION.pdf'
         os.startfile(path)
