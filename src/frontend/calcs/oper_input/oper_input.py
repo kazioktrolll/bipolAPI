@@ -138,6 +138,8 @@ class OperSeriesInputPanel(CTkFrame):
             case 'Single':
                 target = False
                 self.load_from_file_button.grid_forget()
+                for oi in self.ois:
+                    oi.series_config.set_mode('Constant')
             case 'Series':
                 target = True
                 self.load_from_file_button.grid(row=0, column=3, sticky='e', padx=3)

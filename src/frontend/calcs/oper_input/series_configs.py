@@ -11,7 +11,7 @@ the Free Software Foundation, either version 3 of the License, or
 
 
 from abc import ABC, abstractmethod
-from typing import final
+from typing import final, Literal
 
 from customtkinter import CTkFrame, CTkLabel, CTkButton, CTkEntry, CTkOptionMenu
 from .files_manager import FilesManager
@@ -159,8 +159,8 @@ class SeriesConfig(CTkFrame):
         self.build()
 
     @property
-    def mode(self):
-        return self.mode_menu.get()
+    def mode(self) -> Literal['Constant', 'Range', 'From File']:
+        return self.mode_menu.get() # noqa sklej pizde
 
     def build(self):
         self.columnconfigure(0, minsize=100)
@@ -173,17 +173,22 @@ class SeriesConfig(CTkFrame):
             self.mode_menu.grid_forget()
         self.switch_mode()
 
-    def switch_mode(self, _=None):
+    def switch_mode(self, mode: Literal['Constant', 'Range', 'From File'] | None = None):
+        if mode is None: mode = self.mode
         curr_active = {
             'Constant': self.constant_entry,
             'Range': self.range_entry,
             'From File': self.from_file_entry
-        }[self.mode]
+        }[mode]
         if curr_active is self.active_entry: return
         if self.active_entry is not None:
             self.active_entry.grid_forget()
         self.active_entry = curr_active
         self.active_entry.grid(column=1, row=0)
+
+    def set_mode(self, mode: Literal['Constant', 'Range', 'From File']):
+        self.mode_menu.set(mode)
+        self.update()
 
     def get_value(self) -> float | list[float]:
         return self.active_entry.get_values()
