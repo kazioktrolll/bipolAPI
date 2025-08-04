@@ -40,7 +40,6 @@ class GeometryGenerator:
                 Section((.2, 0, .5), .9, 0, airfoil=Airfoil.from_naca('0006')),
             ],
             origin_position=(3.8, 0, .5),
-            y_duplicate=False,
             airfoil=Airfoil.from_naca('0012')
         )
         v_tail.set_mechanization(rudder=[(0, .5, .7)])

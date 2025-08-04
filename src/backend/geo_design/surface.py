@@ -63,11 +63,8 @@ class SurfaceTemplates:
         tip = Section((le_x_eq(length), le_y_eq(length) + mid_gap / 2, le_z_eq(length)),
                       c_eq(length), inclination_angle, airfoil)
 
-        y_duplicate = not (dihedral_angle > 89.5 and abs(root.y) < 0.05)
-
         surf = Surface(name=name,
                        sections=[root, tip],
-                       y_duplicate=y_duplicate,
                        origin_position=origin_position,
                        airfoil=airfoil)
         return surf
@@ -199,7 +196,6 @@ class Surface:
     def __init__(self,
                  name: str,
                  sections: list[Section],
-                 y_duplicate: bool,
                  origin_position: AnyVector3,
                  airfoil: Airfoil = None, ):
         """
@@ -208,13 +204,10 @@ class Surface:
                         If named 'Wing', 'H_tail', 'V_tail' - will be recognized as such by the ``Geometry`` instance.
                         It is not used for geometry generation, just for calculations.
                     sections (list[Section]): Sections of the surface.
-                    y_duplicate (bool): Whether the lifting surface should be mirrored about Y-axis.
-                        Set ``True`` when defining only one half of a symmetric surface.
                     origin_position (AnyVector3): Position of the leading edge of the root chord.
                     airfoil (Airfoil): The airfoil of the surface.
                 """
         self.name = name
-        self.y_duplicate = y_duplicate
         self.origin_position = Vector3(*origin_position)
         self.airfoil = airfoil if airfoil else Airfoil.empty()
         if not len(sections) >= 2: raise ValueError("Cannot create a surface with less than two sections.")
@@ -222,6 +215,7 @@ class Surface:
         self.sort_sections()
         self.chord_points = 1
         self.disabled = False
+        self._lock_y_duplicate: None | bool = None
         self.mechanization = {}
 
     def __repr__(self) -> str:
@@ -234,6 +228,21 @@ class Surface:
     @property
     def tip(self) -> Section:
         return self.sections[-1]
+
+    @property
+    def y_duplicate(self) -> bool:
+        """Returns ``True`` if the surface should be mirrored about Y-axis."""
+        if self._lock_y_duplicate is not None:
+            return self._lock_y_duplicate
+        # A surface should not be mirrored if it's fully in the Y=0 plane,
+        # or it has sections on both sides of the plane.
+        has_positive_y = any(section.y > 0.05 for section in self.sections)
+        has_negative_y = any(section.y < -0.05 for section in self.sections)
+        if not has_positive_y and not has_negative_y:
+            return False
+        if has_positive_y and has_negative_y:
+            return False
+        return True
 
     @property
     def is_straight(self, tol = 0.05) -> bool:
@@ -390,6 +399,7 @@ class Surface:
         surf.name = self.name + '_symm'
         reflected_sections = [sec.mirror() for sec in self.sections]
         surf.sections = reflected_sections
+        surf._lock_y_duplicate = False
         # surf.clear_controls()
         # surf.mechanization = {}
         # sym_controls = {}
