@@ -26,14 +26,14 @@ It takes the geometry created by the user in the GeoDesign module and transforms
 It then allows the user to run a measurement or a series of measurements for desired flight parameters,
 like the angle of attack, sideslip, etc.
 The results can be accessed directly through the software, exported into a .csv file,
-or plotted on the screen using AVL built-in functionalities.
+or plotted on the screen using AVL's built-in functionalities.
 
 ## Guide
 *A step-by-step example session is provided in the next section.*
 ### Geometry Creation
 *If you already have an .avl file from other sources, skip to the next section.*
 
-G-AVL allows for the creation of a simple geometry of an aircraft. User can choose from presets of configurations
+G-AVL allows for the creation of a simple geometry of an aircraft. The user can choose from presets of configurations
 for a wing, a horizontal tail and a vertical tail. Each of the configurations can be further refined
 by inserting relevant parameters.
 
@@ -59,7 +59,7 @@ information.
   * Position (x, z) – position of the surface's root section's leading edge, relative to an arbitrary
   origin of the geometry (could be the tip of the fuselage, wing origin point, etc., as long as it is consistent
   for every surface), in meters.
-  * Span – the horizontal distance between surface's tips, in meters. Must be positive.
+  * Span – the horizontal distance between the surface's tips, in meters. Must be positive.
   * MAC – the Mean Aerodynamic Chord of the surface, in meters. Must be positive.
   * Inclination – the built-in AoA of the surface relative to the x-axis, in degrees.
   * Dihedral – the angle between the surface main axis and y-axis, in degrees. Positive for tip up, negative for tip
@@ -67,7 +67,7 @@ information.
 * Preset Specific
   * Simple Tapered & Swept
     * Taper Ratio – ratio of the tip chord to the root chord - c_tip / c_root. Must be between 0 and 1.
-    * Sweep Angle – angle between the y-axis and the 25%MAC line of the surface, in degrees. Positive for backward
+    * Sweep Angle – angle between the y-axis and the 25%MAC line of the surface, in degrees. Positive for backwards
     sweep, negative for forward sweep. Must be between -90 and 90.
     * Clearance – Optional Y distance between the root sections of two symmetrical halves of the surface. Change from 0
     only for distinctly separated configurations, like canard or fighter-type tail.
@@ -99,15 +99,15 @@ those.
 
 #### Control Surfaces
 Control surfaces can be added and edited using the `Control Surfaces` sub-menu. When starting from the default geometry,
-there will be already Ailerons, Flaps, and Elevator defined.
+there will already be Ailerons, Flaps, and Elevator defined.
 
 When adding a new type of control surface onto the wing, press the top-most `+` button. A pop-up will open with
 a dropdown menu, where you can select the type of control you want to add.
 
 To add a new strip of control onto the wing, press the `+` button next to the name of the type of control you want to
-add. A pop-up will appear where you can input the spanwise position of start and end of the strip, as well as the
-chordwise position of the hinge. The strips cannot overlap. **As of now, that means one strip can't start at the same
-point another one ends!** If you want to do so, leave a 1 cm gap between the strips.
+add. A pop-up will appear where you can input the spanwise position of the start and the end of the strip, as well as
+the chordwise position of the hinge. The strips cannot overlap. **As of now, that means one strip can't start at the
+same point another one ends!** If you want to do so, leave a 1 cm gap between the strips.
 
 To edit an existing strip, press the `E` button next to it.
 
@@ -118,10 +118,10 @@ DISCLAIMER: Importing an AVL file is not recommended, as the functionality of G-
 recreate the geometry in the app, as it will take no longer than 15 minutes and will be more reliable. However, if,
 for any reason, you do not wish to remake the geometry from scratch, continue reading.
 
-It is possible to import geometry from an existing AVL-type text file. Although it is not guaranteed this geometry will
-be editable in GAVL, it can still be used for calculations, as described in the following sections.
+It is possible to import geometry from an existing AVL-type text file. Although it is not guaranteed that this geometry
+will be editable in GAVL, it can still be used for calculations, as described in the following sections.
 To do this, on the top bar press `File` -> `Import`. G-AVL will then try to recognise if the surfaces fit any of the
-existing presets. Control Surfaces, as of now, are not supported with importing. If the AVL file has any, they will
+existing presets. Control Surfaces, as of now, are not supported for importing. If the AVL file has any, they will
 stay and (probably) work with `CALC` mode, but you will not be able to edit them in `GEODESIGN`.
 
 #### What NOT to do
@@ -129,10 +129,10 @@ stay and (probably) work with `CALC` mode, but you will not be able to edit them
 
   `COMPONENT`, `NOWAKE`, `NOALBE`, `NOLOAD`, `CLAF`, `CDCL`, `BODY`
 
-  or uses `iYsym` / `iZsym`, those will be ignored along with its blocks. Make sure the file does not contain any of
+  or uses `iYsym` / `iZsym`, those will be ignored along with their blocks. Make sure the file does not contain any of
 those, or at least that it will work properly without those.
 * Do **NOT** use `SURFACE` for things that are not lifting surfaces (like fuselage, nacelle).
-* If `AFILE` is used for any section, make sure the path is defined correctly, that is the path is either:
+* If `AFILE` is used for any section, make sure the path is defined correctly, that is, the path is either:
   * absolute - `AFILE C:\...\airfoil.dat`
   * relative with respect to the AVL file - if the AVL file is `...\parent_folder\avl_file.avl`, then a block `AFILE
     airfoil.dat` will be interpreted as `...\parent_folder\airfoil.dat`
@@ -140,7 +140,7 @@ those, or at least that it will work properly without those.
 ### Validation
 When the geometry design is finished, and you wish to proceed to the calculations, it is advised to check the
 `VALIDATION` mode and ensure that everything is in order. You can check the geometry as seen by AVL, the actual core of
-this app that will be conducting the calculations, as well as the reference wingspan, wing area, and chord used for
+this app that will be conducting the calculations, as well as the reference wingspan, wing area, and chord used for the
 calculation of the parameters.
 
 ### Calculations
@@ -156,7 +156,7 @@ The input section contains the following fields:
     * Control Surfaces – Deflection of each control surface, in degrees.
     * Configuration
       * Center of Mass – You can adjust the position of CoM, important for calculations of CM and such.
-      * Height – Flight level of the aircraft, in meters above sea level. Must be between 0 and 80 000.
+      * Height – Flight level of the aircraft, in meters above sea level. Must be between 0 and 80,000.
       
 #### Series of Measurements
 Each of the Flight Data parameters can be defined by:
@@ -164,13 +164,13 @@ Each of the Flight Data parameters can be defined by:
 * A series of values (ex: from -10 to 10, step 0.5)
 * Values from a file
 
-To switch between those modes, press the `single / series` buton at the top of the menu, and choose the desired input
+To switch between those modes, press the `single / series` button at the top of the menu, and choose the desired input
 mode for each parameter from the dropdowns. **For every non-constant parameter, there must be an equal number of values
 given!**
 
 To import a series of values from a file:
-1. Ensure the file is in CSV format. If the data in the file has a header line, it will be used to name the aviable
-series in step 7. If not, series will be named `Series 1`, `Series 2`, ...
+1. Ensure the file is in CSV format. If the data in the file has a header line, it will be used to name the available
+series in step 7. If not, the series will be named `Series 1`, `Series 2`, ...
 2. In `Series` mode, press `Add File` at the top
 3. Select your CSV file
 4. Change the mode of the parameter you want to import to `From File`
@@ -183,14 +183,14 @@ series in step 7. If not, series will be named `Series 1`, `Series 2`, ...
 
 #### Binding Parameters
 The values can describe the parameter directly, or by relation with another parameter (ex: flaps deflection can
-be defined as 20 degrees, or such that CL = 1.2). To use the bound definition, press `bind` button at the right of the
-field, and then pick the binding parameter from the dropdown menu. Take notice that the software **DOES NOT KNOW**
+be defined as 20 degrees, or such that CL = 1.2). To use the bound definition, press the `bind` button to the right of
+the field, and then pick the binding parameter from the dropdown menu. Take notice that the software **DOES NOT KNOW**
 whether the parameters you bind are actually related. For example, you can bind `flap` deflection using `CL`, as flaps
 influence lift. However, if you bind `flap` using `Roll Moment`, there will be no effect at best, and a crash at worst,
-as there is no relation between those two. It remains for your discretion to choose the proper binds.
+as there is no relation between those two. It remains at your discretion to choose the proper binds.
 
-After all the parameters are inserted correctly, pres the `execute` buton at the bottom of the menu. The app wil display
-a `Running...` pop-up, that will disappear upon completion.
+After all the parameters are inserted correctly, press the `execute` button at the bottom of the menu. The app will
+display a `Running...` pop-up, that will disappear upon completion.
 
 #### Output
 The calculated values are displayed in the left part of the screen. They are divided into `Forces` and `Stability`,
@@ -204,11 +204,11 @@ software.
 
 ## Example Session
 **Before you start, you need to know your:**
-* Wing's, Horizontal, and Vertical Tails' Spans,
-* Wing's Horizontal, and Vertical Tails' Mean Aerodynamic Chords (MACs),
+* Wingspan, Horizontal and Vertical Tails' Spans,
+* Wing's, Horizontal and Vertical Tails' Mean Aerodynamic Chords (MACs),
 * If any of the surfaces is tapered or swept, then the respective values are also needed,
-* Wing's, Horizontal, and Vertical Tails' airfoils (either 4-digit NACA codes or files with points),
-* Positions of Horizontal and Vertical Tails in relation to the Wing,
+* Wing's, Horizontal and Vertical Tails' airfoils (either 4-digit NACA codes or files with points),
+* Positions of Horizontal and Vertical Tails relative to the Wing,
 * Position of Center of Mass (CoM) relative to the wing,
 * Type, spanwise position, and chordwise hinge position of all control surfaces your aircraft has – ailerons, flaps,
 elevators & rudder.
@@ -217,8 +217,8 @@ elevators & rudder.
 2. Create a new default geometry by clicking `New` or `File` -> `New`.
 3. Edit the wing:
    1. Select the correct shape of the wing from the dropdown menu at the top left.
-   2. Fill the required geometrical parameters:
-      1. For any wing – Span, MAC, and position (it is recommended to leave wing's position as [0,0,0] and use it as
+   2. Fill in the required geometrical parameters:
+      1. For any wing – Span, MAC, and position (it is recommended to leave the wing's position as [0,0,0] and use it as
       a reference for the other positions).
       2. Additionally, for a simple tapered wing – Taper Ratio, and Sweep Angle,
       3. Additionally, for a double trapez wing - Root & Mid & Tip Chords, Span, Spanwise Seam Position, and
@@ -255,12 +255,12 @@ mode from `Forces` to `Stability`.
     5. Press `Execute`.
     6. To switch between the measurements in the series, use the newly displayed page menu at the top left.
     7. The plot buttons at the bottom left display the graphs for the currently selected measurement.
-    8. Consider saving the results to a file and working on them in Excel or MATLAB, by pressing `Save to .csv`. This
+    8. Consider saving the results to a file and working on them in Excel or MATLAB by pressing `Save to .csv`. This
       will generate a file containing all the values in all the measurements. To import this file into another software:
        1. Excel: `Data` -> `From Text/CSV` -> `Transform Data` -> `Transform` -> `Use Firts Row as Headers` -> `File` ->
        `Close & Load`
-       2. MATLAB: `data = readtable(path_to_csv);` -> access series as f.e. `data('Alpha')`. You can get the file path
-       as text by: `File Explorer` -> Go to your .csv file -> `Right Click` -> `Copy as Path` -> paste it in MATLAB
-       using `Ctrl+V`.
+       2. MATLAB: `data = readtable(path_to_csv);` -> access series as f.e. `alpha = data('Alpha')`. You can get the
+       file path as text by: `File Explorer` -> Go to your .csv file -> `Right Click` -> `Copy as Path` -> paste it in
+       MATLAB using `Ctrl+V`.
 
 **FOR MORE DETAILED DESCRIPTIONS OF FUNCTIONS, READ THE PREVIOUS PART, *GUIDE*.**
