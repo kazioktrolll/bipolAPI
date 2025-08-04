@@ -12,10 +12,10 @@ from math import atan2, degrees, sqrt, radians, sin, cos, tan
 from copy import copy
 from typing import Literal, Optional
 
-from ..airfoil import Airfoil
-from ..section import Section, Control, control_types
-from ...math_functions import best_factor_pair, distribute_units
-from ...vector3 import Vector3, AnyVector3
+from .airfoil import Airfoil
+from .section import Section, Control, control_types
+from ..math_functions import best_factor_pair, distribute_units
+from ..vector3 import Vector3, AnyVector3
 
 
 class SurfaceTemplates:

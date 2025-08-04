@@ -13,7 +13,7 @@ from typing import Any
 from .airfoil import Airfoil
 from .geometry import Geometry
 from .section import Section, Control
-from .surface import Surface, SurfaceCreator
+from .surface import Surface
 from ..vector3 import Vector3
 
 
@@ -193,7 +193,7 @@ class FromAvl:
                     )
 
         surface_data['airfoil'] = surface_data['sections'][0].airfoil
-        return SurfaceCreator.UnknownSurface(**surface_data)
+        return Surface(**surface_data)
 
     @classmethod
     def handle_section_level(cls, block: list[str], path: Path, scale=(1, 1, 1), angle=0) -> Section:
