@@ -8,10 +8,11 @@ the Free Software Foundation, either version 3 of the License, or
 """
 
 
-from customtkinter import CTkFrame, CTkButton, CTkLabel, CTkEntry
+from customtkinter import CTkFrame, CTkButton, CTkLabel
 from tkinter import filedialog
 from pathlib import Path
 
+from ..advanced_entry import AdvancedEntry
 from ..popup import Popup
 from ..help_top_level import HelpTopLevel
 from ...backend.geo_design import Airfoil
@@ -40,7 +41,7 @@ class AirfoilChooser(CTkFrame):
     @handle_crash
     def load_naca(self):
         window = Popup(self)
-        entry = CTkEntry(window.frame)
+        entry = AdvancedEntry(window.frame)
         entry.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
 
         @handle_crash

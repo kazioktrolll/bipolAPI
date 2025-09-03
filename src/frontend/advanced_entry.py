@@ -9,20 +9,20 @@ the Free Software Foundation, either version 3 of the License, or
 
 
 from customtkinter import CTkEntry, CTkFrame, CTk
-from typing import Callable
+from typing import Callable, Any, Optional
 
 
 class AdvancedEntry(CTkEntry):
-    def __init__(self, parent: CTkFrame | CTk, on_enter: Callable[[], None] = None, **kwargs):
+    def __init__(self, parent: CTkFrame | CTk, on_enter: Callable[[str], Any], **kwargs):
         super().__init__(parent, **kwargs)
         self._on_enter = on_enter or (lambda: None)
-        self.bind("<Return>", lambda _: self._on_enter())
+        self.bind("<Return>", lambda _: self._on_enter(self.get()))
         self.bind("<Escape>", lambda _: self.master.focus_set())
 
 
 class EntryWithInstructions(AdvancedEntry):
-    def __init__(self, parent, instructions: str, **kwargs):
-        super().__init__(parent, **kwargs)
+    def __init__(self, parent: CTkFrame | CTk, on_enter: Callable[[str], None], instructions: str, **kwargs):
+        super().__init__(parent, on_enter, **kwargs)
         self.instructions = instructions
         self.fill_instructions()
         self.bind("<FocusOut>", self.fill_instructions)
@@ -52,7 +52,7 @@ class EntryWithInstructions(AdvancedEntry):
 class EntryWithInstructionsBlock(CTkFrame):
     def __init__(self, parent, instructions: tuple[str, ...], width: int, padx: int, **kwargs):
         super().__init__(parent, **kwargs)
-        self.entries = [EntryWithInstructions(self, t, width=width) for t in instructions]
+        self.entries = [EntryWithInstructions(self, (lambda: None), t, width=width) for t in instructions]
         for i, e in enumerate(self.entries): e.grid(column=i, row=0, padx=padx)
 
     def __iter__(self):

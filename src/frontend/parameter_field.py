@@ -8,7 +8,8 @@ the Free Software Foundation, either version 3 of the License, or
 """
 
 
-from customtkinter import CTkFrame, CTkLabel, CTkEntry, CTkButton, CTkCheckBox
+from customtkinter import CTkFrame, CTkLabel, CTkButton, CTkCheckBox
+from .advanced_entry import AdvancedEntry
 from .help_top_level import HelpTopLevel
 from .advanced_entry import EntryWithInstructionsBlock
 from ..backend import handle_crash
@@ -69,8 +70,7 @@ class ParameterField(CTkFrame):
                 self.entry = CTkCheckBox(self, text='', width=120, command=self.set)
                 self.entry.select()
             case 'float':
-                self.entry = CTkEntry(self)
-                self.set_button = CTkButton(self, text="Set", width=30, command=self.set)
+                self.entry = AdvancedEntry(self, on_enter=self.set_entry)
             case 'Vector2':
                 self.entry = EntryWithInstructionsBlock(self, ('', ''), 130//2, 2, fg_color='transparent')
                 self.set_button = CTkButton(self, text="Set", width=30, command=self.set)
@@ -90,10 +90,10 @@ class ParameterField(CTkFrame):
         self.value_label.grid(column=3, row=0, sticky="w", padx=10)
         self.entry.grid(column=4, row=0, sticky="ew")
         self.columnconfigure(5, minsize=40)
-        if self.mode != 'bool': self.set_button.grid(column=5, row=0, sticky="e", padx=5)
+        if self.mode not in ['bool', 'float']: self.set_button.grid(column=5, row=0, sticky="e", padx=5)
 
     def set_entry(self, value: float | str) -> bool:
-        assert isinstance(self.entry, CTkEntry)
+        assert isinstance(self.entry, AdvancedEntry)
         if value is None: value = self.entry.get()
         if value == '': return False  # When the entry is empty
 
@@ -148,7 +148,7 @@ class ParameterField(CTkFrame):
         """Sets the value in the entry as the new value of the parameter. Returns True if changed successfully."""
         if isinstance(self.entry, CTkCheckBox):
             return self.set_checkbox()
-        elif isinstance(self.entry, CTkEntry):
+        elif isinstance(self.entry, AdvancedEntry):
             return self.set_entry(value)
         elif isinstance(self.entry, EntryWithInstructionsBlock):
             return self.set_entry_block(value)

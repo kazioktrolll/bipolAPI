@@ -13,8 +13,9 @@ the Free Software Foundation, either version 3 of the License, or
 from abc import ABC, abstractmethod
 from typing import final, Literal
 
-from customtkinter import CTkFrame, CTkLabel, CTkButton, CTkEntry, CTkOptionMenu
+from customtkinter import CTkFrame, CTkLabel, CTkButton, CTkOptionMenu
 from .files_manager import FilesManager
+from ...advanced_entry import AdvancedEntry
 from ...popup import Popup
 from ...help_top_level import HelpTopLevel
 from ...advanced_entry import EntryWithInstructionsBlock
@@ -49,7 +50,7 @@ class ConstantConfig(ConfigItem):
         super().__init__(parent)
         self.values = 0.0
         self.nof_values_label.configure(text='')
-        self.entry = CTkEntry(self, width=120)
+        self.entry = AdvancedEntry(self, width=120)
         self.build()
 
     def build(self) -> None:

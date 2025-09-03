@@ -9,8 +9,9 @@ the Free Software Foundation, either version 3 of the License, or
 
 
 from typing import Callable, TypeVar, Generic
-from customtkinter import CTkFrame, CTkLabel, DoubleVar, StringVar, CTkEntry, CTkButton, CTkFont, CTkOptionMenu
+from customtkinter import CTkFrame, CTkLabel, DoubleVar, StringVar, CTkButton, CTkFont, CTkOptionMenu
 from abc import ABC, abstractmethod
+from .advanced_entry import AdvancedEntry
 from .parameter_field import HelpTopLevel
 from .popup import Popup
 from ..backend import Vector3, handle_crash
@@ -60,17 +61,17 @@ class FlapItem(Item[tuple[float, float, float]]):
         if self.ranged:
             CTkLabel(window.frame, text="start:"
                      ).grid(column=0, row=1, sticky="e")
-            CTkEntry(window.frame, textvariable=startvar
+            AdvancedEntry(window.frame, textvariable=startvar, on_enter=(lambda _: None)
                      ).grid(column=2, row=1, sticky='nsew')
 
             CTkLabel(window.frame, text="end: "
                      ).grid(column=0, row=2, sticky="e")
-            CTkEntry(window.frame, textvariable=endvar
+            AdvancedEntry(window.frame, textvariable=endvar, on_enter=(lambda _: None)
                      ).grid(column=2, row=2, sticky='nsew')
 
         CTkLabel(window.frame, text="xc: "
                  ).grid(column=0, row=3, sticky="e")
-        CTkEntry(window.frame, textvariable=xcvar
+        AdvancedEntry(window.frame, textvariable=xcvar, on_enter=(lambda _: None)
                  ).grid(column=2, row=3, sticky='nsew')
 
         CTkButton(window.frame, text='?', width=25, height=25,
@@ -222,27 +223,27 @@ class SectionItem(Item[tuple[Vector3, float, float, Control | None]]):
 
         CTkLabel(window.frame, text="x: "
                  ).grid(column=0, row=2, sticky="e")
-        CTkEntry(window.frame, textvariable=xvar
+        AdvancedEntry(window.frame, textvariable=xvar, on_enter=(lambda _: None)
                  ).grid(column=2, row=2, sticky='nsew')
 
         CTkLabel(window.frame, text="y: "
                  ).grid(column=0, row=3, sticky="e")
-        CTkEntry(window.frame, textvariable=yvar
+        AdvancedEntry(window.frame, textvariable=yvar, on_enter=(lambda _: None)
                  ).grid(column=2, row=3, sticky='nsew')
 
         CTkLabel(window.frame, text="z: "
                  ).grid(column=0, row=4, sticky="e")
-        CTkEntry(window.frame, textvariable=zvar
+        AdvancedEntry(window.frame, textvariable=zvar, on_enter=(lambda _: None)
                  ).grid(column=2, row=4, sticky='nsew')
 
         CTkLabel(window.frame, text="chord: "
                  ).grid(column=0, row=5, sticky="e")
-        CTkEntry(window.frame, textvariable=chordvar
+        AdvancedEntry(window.frame, textvariable=chordvar, on_enter=(lambda _: None)
                  ).grid(column=2, row=5, sticky='nsew')
 
         CTkLabel(window.frame, text="inclination: "
                  ).grid(column=0, row=6, sticky="e")
-        CTkEntry(window.frame, textvariable=incvar
+        AdvancedEntry(window.frame, textvariable=incvar, on_enter=(lambda _: None)
                  ).grid(column=2, row=6, sticky='nsew')
 
         CTkLabel(window.frame, text="Control: "
