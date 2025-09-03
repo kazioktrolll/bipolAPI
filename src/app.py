@@ -75,9 +75,21 @@ class App:
             child.destroy()
 
     def exit(self) -> None:
-        App.destroy_all_children(self.root)
-        self.root.destroy()
-        self.work_dir.cleanup()
+        from src.frontend import AskPopup
+
+        def kill():
+            App.destroy_all_children(self.root)
+            self.work_dir.cleanup()
+            self.root.destroy()
+
+        do_exit = AskPopup.ask("Do you want to save your changes?",
+                               ["Save", "Don't Save", "Cancel"],
+                               "Cancel")
+        if do_exit == "Cancel":
+            return
+        elif do_exit == "Save":
+            self.save()
+        self.after(150, kill)
 
     @handle_crash
     def set_scene(self, scene) -> None:
