@@ -8,10 +8,19 @@ the Free Software Foundation, either version 3 of the License, or
 """
 
 
-from customtkinter import CTkEntry, CTkFrame
+from customtkinter import CTkEntry, CTkFrame, CTk
+from typing import Callable
 
 
-class EntryWithInstructions(CTkEntry):
+class AdvancedEntry(CTkEntry):
+    def __init__(self, parent: CTkFrame | CTk, on_enter: Callable[[], None] = None, **kwargs):
+        super().__init__(parent, **kwargs)
+        self._on_enter = on_enter or (lambda: None)
+        self.bind("<Return>", lambda _: self._on_enter())
+        self.bind("<Escape>", lambda _: self.master.focus_set())
+
+
+class EntryWithInstructions(AdvancedEntry):
     def __init__(self, parent, instructions: str, **kwargs):
         super().__init__(parent, **kwargs)
         self.instructions = instructions
