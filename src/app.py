@@ -119,6 +119,10 @@ class App:
         self.current_save_path = path
         self.settings.data.update_recently_saved(path.as_posix())
         self.settings.save()
+        from src.frontend import TimedMessage
+        tm = TimedMessage(self.root, f'Saved as {path.as_posix()}')
+        tm.frame.place(anchor='se', relx=1, rely=1, x=-10, y=-10)
+        tm.run()
 
     @handle_crash
     def save(self) -> None:
