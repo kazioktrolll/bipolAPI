@@ -7,7 +7,7 @@ from .calcs import *
 from .popup import Popup
 from .top_bar import TopBarItem, TopBarButton
 from .strip_manager import ColumnManager, RowManager
-from .entry_with_instructions import EntryWithInstructions
+from .advanced_entry import EntryWithInstructions
 from .ask_popup import AskPopup
 from .image_frame import ImageFrame
 from .timed_message import TimedMessage

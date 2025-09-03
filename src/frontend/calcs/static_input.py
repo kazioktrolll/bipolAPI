@@ -9,7 +9,7 @@ the Free Software Foundation, either version 3 of the License, or
 
 
 from customtkinter import CTkFrame, CTkButton, CTkLabel
-from ..entry_with_instructions import EntryWithInstructionsBlock, EntryWithInstructions
+from ..advanced_entry import EntryWithInstructionsBlock, EntryWithInstructions
 from ..help_top_level import HelpTopLevel
 from ...backend import handle_crash
 

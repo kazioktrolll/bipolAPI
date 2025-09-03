@@ -17,7 +17,7 @@ from customtkinter import CTkFrame, CTkLabel, CTkButton, CTkEntry, CTkOptionMenu
 from .files_manager import FilesManager
 from ...popup import Popup
 from ...help_top_level import HelpTopLevel
-from ...entry_with_instructions import EntryWithInstructionsBlock
+from ...advanced_entry import EntryWithInstructionsBlock
 
 
 class ConfigItem(CTkFrame, ABC):

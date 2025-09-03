@@ -10,7 +10,7 @@ the Free Software Foundation, either version 3 of the License, or
 
 from customtkinter import CTkFrame, CTkLabel, CTkEntry, CTkButton, CTkCheckBox
 from .help_top_level import HelpTopLevel
-from .entry_with_instructions import EntryWithInstructionsBlock
+from .advanced_entry import EntryWithInstructionsBlock
 from ..backend import handle_crash
 from typing import Callable, Literal, Union
 
