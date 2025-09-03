@@ -14,6 +14,7 @@ g0 = 9.80665  # m/s^2
 R_star = 8.31432  # J/(mol·K)
 M = 0.0289644  # kg/mol
 R = R_star / M  # Specific gas constant for air, J/(kg·K)
+SHR_air = 1.4  # Specific heat ratio γ for air
 
 # Define atmospheric layers (base altitude in km, base temperature in K, base pressure in Pa, lapse rate in K/km)
 layers = [
@@ -75,9 +76,8 @@ def get_density(h: float) -> float:
     :return: Air density in kg/m^3.
     """
     assert 0 <= h <= 8e4
-    h_km = h / 1000
-    T = get_temperature(h_km)
-    P = get_pressure(h_km)
+    T = get_temperature(h)
+    P = get_pressure(h)
     return P / (R * T)
 
 
@@ -90,8 +90,7 @@ def get_mach(velocity: float, altitude: float = 0.0) -> float:
     Returns:
         Mach number.
     """
-    assert 0 <= velocity <= 8e4
-    SHR_air = 1.4  # Specific heat ratio γ for air
+    assert 0 <= altitude <= 8e4
     T = get_temperature(altitude)
     a = (SHR_air * R * T) ** 0.5
     return velocity / a
