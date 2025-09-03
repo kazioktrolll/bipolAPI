@@ -10,6 +10,7 @@ the Free Software Foundation, either version 3 of the License, or
 
 from sys import platform
 from functools import cached_property
+from pathlib import Path
 from .scene import Scene
 from ..backend.geo_design import Geometry
 from ..frontend import GeometryDisplay, ViewMode, LeftMenu
@@ -26,7 +27,10 @@ class GeoDesignScene(Scene):
 
     @cached_property
     def left_menu(self) -> LeftMenu:
-        return LeftMenu(self, self.geometry_display.update)
+        recently_saved: list[Path] = [Path(p) for p in self.app.settings.data.recently_saved]
+        return LeftMenu(parent=self,
+                        do_on_update=self.geometry_display.update,
+                        recently_saved=recently_saved)
 
     def build(self):
         self.columnconfigure(0, weight=0)

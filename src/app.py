@@ -118,6 +118,7 @@ class App:
             pickle.dump(self.geometry, f)  # noqa
         self.current_save_path = path
         self.settings.data.update_recently_saved(path.as_posix())
+        self.settings.save()
 
     @handle_crash
     def save(self) -> None:
@@ -136,6 +137,7 @@ class App:
             return
         with open(path, 'rb') as f:
             self.set_geometry(pickle.load(f))
+        self.current_save_path = path
 
     def new_empty(self) -> None:
         self.top_bar.collapse_all()

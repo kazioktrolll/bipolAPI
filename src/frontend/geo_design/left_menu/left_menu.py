@@ -8,8 +8,9 @@ the Free Software Foundation, either version 3 of the License, or
 """
 
 
-from customtkinter import CTkFrame, CTkSegmentedButton, CTkButton
+from customtkinter import CTkFrame, CTkSegmentedButton, CTkButton, CTkLabel
 from typing import Callable
+from pathlib import Path
 
 from .left_menu_surface import LeftMenuSurface
 from ....backend.geo_design import Geometry
@@ -17,20 +18,27 @@ from ....backend import handle_crash
 
 
 class LeftMenu(CTkFrame):
-    def __init__(self, parent, do_on_update: Callable[[], None]):
+    def __init__(self, parent, do_on_update: Callable[[], None], recently_saved: list[Path] = None):
         super().__init__(parent)
 
         self._do_on_update = do_on_update
         self.items: dict[str, LeftMenuSurface] = {}
         self.items_button = CTkSegmentedButton(self, command=lambda c: self.show_item(name=c))
+        # Create Init Menu
         self.empty_menu_buttons = CTkFrame(self, fg_color='transparent')
         self.empty_menu_buttons.columnconfigure(0, weight=1)
+        if recently_saved:
+            CTkLabel(self.empty_menu_buttons, text='\tRecent:'
+                     ).grid(column=0, row=0, sticky='w', padx=5, pady=5)
+            for i, path in enumerate(recently_saved):
+                CTkButton(self.empty_menu_buttons, text=path.name, command=lambda p=path: self.app.load(p), width=250
+                          ).grid(column=0, row=i + 1, sticky='w', padx=5, pady=5)
         CTkButton(self.empty_menu_buttons, text='Open', command=self.app.load
-                  ).grid(column=0, row=0, sticky='nswe', padx=5, pady=5)
+                  ).grid(column=0, row=6, sticky='nswe', padx=5, pady=5)
         CTkButton(self.empty_menu_buttons, text='New', command=self.app.new_default
-                  ).grid(column=0, row=1, sticky='nswe', padx=5, pady=5)
+                  ).grid(column=0, row=7, sticky='nswe', padx=5, pady=5)
         CTkButton(self.empty_menu_buttons, text='Import', command=self.app.import_from_avl
-                  ).grid(column=0, row=2, sticky='nswe', padx=5, pady=5)
+                  ).grid(column=0, row=8, sticky='nswe', padx=5, pady=5)
 
         self.build()
         self.update()
