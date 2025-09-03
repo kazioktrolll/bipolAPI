@@ -59,3 +59,6 @@ class GeoDesignScene(Scene):
         self.bind("<s>", lambda e: self.geometry_display.change_view(ViewMode.FRONT))
         self.bind("<d>", lambda e: self.geometry_display.change_view(ViewMode.RIGHT))
         self.bind("<a>", lambda e: self.geometry_display.change_view(ViewMode.ISO))
+
+        self.bind("<Control-s>", lambda e: self.app.save())
+        self.bind("<Control-Shift-s>", lambda e: self.app.save_as())
