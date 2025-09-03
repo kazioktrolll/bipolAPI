@@ -1,13 +1,21 @@
 import json
 from pathlib import Path
 from platformdirs import user_config_dir
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 
 
 @dataclass
 class SettingsData:
     """Define your settings here with types and defaults."""
     first_time_running: bool = True
+    recently_saved: list[str] = field(default_factory=list)
+
+    def update_recently_saved(self, path: str) -> None:
+        """Updates the recently saved list with the given path."""
+        if path in self.recently_saved:
+            self.recently_saved.remove(path)
+        self.recently_saved.insert(0, path)
+        self.recently_saved = self.recently_saved[:5]
 
 
 class Settings:
