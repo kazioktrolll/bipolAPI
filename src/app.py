@@ -11,11 +11,10 @@ the Free Software Foundation, either version 3 of the License, or
 from pathlib import Path
 from typing import Callable
 from tempfile import TemporaryDirectory
-from tkinter.filedialog import askopenfilename
 import pickle
 import os
 from src.backend.geo_design import Geometry, GeometryGenerator
-from src.backend import handle_crash
+from src.backend import handle_crash, Settings
 
 
 class App:
@@ -24,6 +23,7 @@ class App:
 
     Attributes:
         root (CTk): The root of the application display.
+        settings (Settings): The settings object that contains the permanent user preferences and previous sessions' paths.
         scene (Scene): The scene currently displayed.
         geometry (Geometry): The geometry of the currently loaded plane.
     """
@@ -34,6 +34,8 @@ class App:
         set_appearance_mode("Dark")
         set_default_color_theme("blue")
         self.root = CTk()
+        self.settings = Settings()
+        self.current_save_path: Path | None = None
         self.work_dir = TemporaryDirectory(prefix='gavl_')
         self.scene = Scene(self)  # Placeholder
         self.geometry = GeometryGenerator.empty()
@@ -101,7 +103,7 @@ class App:
 
     @handle_crash
     def save_as(self, path: str | Path = None) -> None:
-        """Saves the current geometry as a .gavl file."""
+        """Saves the current geometry as a .gavl file at a path if given, otherwise opens a file dialog to choose a path."""
         self.top_bar.collapse_all()
         from tkinter.filedialog import asksaveasfilename
         path = path or Path(asksaveasfilename(
@@ -114,11 +116,18 @@ class App:
         import pickle
         with open(path, 'wb') as f:
             pickle.dump(self.geometry, f)  # noqa
+        self.current_save_path = path
+
+    @handle_crash
+    def save(self) -> None:
+        """Saves the current geometry as a .gavl file at the most recent save path."""
+        self.save_as(self.current_save_path)
 
     @handle_crash
     def load(self, path: str | Path = None) -> None:
         """Loads the geometry from a .gavl file."""
         self.top_bar.collapse_all()
+        from tkinter.filedialog import askopenfilename
         path = path or Path(askopenfilename(
             filetypes=[('GAVL File', ['*.gavl']), ('All Files', ['*.*'])]
         ))
@@ -154,6 +163,7 @@ class App:
     def import_from_avl(self, path: str | Path = None) -> None:
         """Imports the current geometry from an .avl file."""
         from src.backend.geo_design import GeometryGenerator
+        from tkinter.filedialog import askopenfilename
         self.top_bar.collapse_all()
         path = path or Path(askopenfilename(
             defaultextension='.avl',
@@ -182,7 +192,8 @@ class TopBar(CTkFrame):
     def __init__(self, app: App):
         super().__init__(app.root, height=20)
         TopBarItem(self, app.root, 'File', [
-            ('Save', app.save_as),
+            ('Save', app.save),
+            ('Save As', app.save_as),
             ('New', app.new_default),
             ('Open', app.load),
             ('Export', app.export_to_avl),
