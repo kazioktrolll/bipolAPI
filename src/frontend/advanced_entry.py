@@ -9,7 +9,7 @@ the Free Software Foundation, either version 3 of the License, or
 
 
 from customtkinter import CTkEntry, CTkFrame, CTk
-from typing import Callable, Any, Optional
+from typing import Callable, Any
 
 
 class AdvancedEntry(CTkEntry):
@@ -50,13 +50,23 @@ class EntryWithInstructions(AdvancedEntry):
 
 
 class EntryWithInstructionsBlock(CTkFrame):
-    def __init__(self, parent, instructions: tuple[str, ...], width: int, padx: int, **kwargs):
+    def __init__(self, parent, on_enter: Callable[[int, str], Any], instructions: tuple[str, ...],
+                 width: int, padx: int, **kwargs):
         super().__init__(parent, **kwargs)
-        self.entries = [EntryWithInstructions(self, (lambda: None), t, width=width) for t in instructions]
+        self._on_enter = on_enter
+        self.entries = [EntryWithInstructions(self, self.on_enter, t, width=width) for t in instructions]
         for i, e in enumerate(self.entries): e.grid(column=i, row=0, padx=padx)
 
     def __iter__(self):
         return iter(self.entries)
+
+    def on_enter(self, _=None):
+        for i, e in enumerate(self.entries):
+            if e.get() != '':
+                self._on_enter(i, e.get())
+                break
+        self.clear()
+        self.master.focus_set()
 
     def get(self):
         return [e.get() for e in self.entries]

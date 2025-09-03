@@ -110,8 +110,18 @@ class LeftMenuItem(CTkFrame, ABC):
 
         for d in data:
             kw, n, msg, at, iv, m = d
-            self.pfs[kw] = ParameterField(self.pf_frame, name=n, help_message=msg, on_set=self.update_surface, assert_test=at, mode=m)
-            self.pfs[kw].set(iv)
+            self.pfs[kw] = ParameterField(self.pf_frame, name=n, help_message=msg, on_set=self.update_surface,
+                                          assert_test=at, mode=m)
+            match m:
+                case 'float':
+                    self.pfs[kw].set_entry(iv)
+                case 'Vector2' | 'Vector3':
+                    for i, v in enumerate(iv):
+                        self.pfs[kw].set_entry_block(i, v)
+                case 'bool':
+                    self.pfs[kw].set_checkbox(iv)
+                case _:
+                    raise ValueError(f'Unknown mode {m}')
 
     @final
     def update_pfs(self) -> None:

@@ -58,28 +58,32 @@ class ParameterField(CTkFrame):
         self.mode = mode
         self.on_set = on_set
         self.assert_test = assert_test
-        self.value: value_types = 0
+        self.value: value_types
         self.has_message = help_message != ""
 
         # Set the display
         self.help_button = CTkButton(self, text='?', width=10, height=10, command=lambda: HelpTopLevel(self, self.help_message))
         self.name_label = CTkLabel(self, text=name)
-        self.value_label = CTkLabel(self, text=str(self.value))
         match self.mode:
             case 'bool':
-                self.entry = CTkCheckBox(self, text='', width=120, command=self.set)
+                self.entry = CTkCheckBox(self, text='', width=120, command=self.set_checkbox)
+                self.value = False
                 self.entry.select()
             case 'float':
                 self.entry = AdvancedEntry(self, on_enter=self.set_entry)
+                self.value = 0.0
             case 'Vector2':
-                self.entry = EntryWithInstructionsBlock(self, ('', ''), 130//2, 2, fg_color='transparent')
-                self.set_button = CTkButton(self, text="Set", width=30, command=self.set)
+                self.entry = EntryWithInstructionsBlock(self, self.set_entry_block, ('', ''),
+                                                        130//2, 2, fg_color='transparent')
+                self.value = (0.0, 0.0)
             case 'Vector3':
-                self.entry = EntryWithInstructionsBlock(self, ('', '', ''), 130//3, 2, fg_color='transparent')
-                self.set_button = CTkButton(self, text="Set", width=30, command=self.set)
+                self.entry = EntryWithInstructionsBlock(self, self.set_entry_block, ('', '', ''),
+                                                        130//3, 2, fg_color='transparent')
+                self.value = (0.0, 0.0, 0.0)
             case _:
                 raise ValueError
 
+        self.value_label = CTkLabel(self, text=str(self.value))
         self.build()
 
     def build(self):
@@ -90,8 +94,8 @@ class ParameterField(CTkFrame):
         self.value_label.grid(column=3, row=0, sticky="w", padx=10)
         self.entry.grid(column=4, row=0, sticky="ew")
         self.columnconfigure(5, minsize=40)
-        if self.mode not in ['bool', 'float']: self.set_button.grid(column=5, row=0, sticky="e", padx=5)
 
+    @handle_crash
     def set_entry(self, value: float | str) -> bool:
         assert isinstance(self.entry, AdvancedEntry)
         if value is None: value = self.entry.get()
@@ -113,12 +117,11 @@ class ParameterField(CTkFrame):
         self.on_set(self.value)
         return True
 
-    def set_entry_block(self, values: tuple[str, ...] = None) -> bool:
+    @handle_crash
+    def set_entry_block(self, i: int, val: str) -> bool:
         assert isinstance(self.entry, EntryWithInstructionsBlock)
-        if values is None: values = self.entry.get()
-        for i, v in enumerate(values):
-            if v == '':
-                values[i] = str(self.value[i])
+        values = list(map(str, self.value))
+        values[i] = val
 
         try:
             self.value = tuple(map(float, values))
@@ -137,22 +140,12 @@ class ParameterField(CTkFrame):
         self.on_set(self.value)
         return True
 
+    @handle_crash
     def set_checkbox(self) -> bool:
         assert isinstance(self.entry, CTkCheckBox)
         self.value = self.entry.get()
         self.on_set(self.value)
         return True
-
-    @handle_crash
-    def set(self, value: value_types = None) -> bool:
-        """Sets the value in the entry as the new value of the parameter. Returns True if changed successfully."""
-        if isinstance(self.entry, CTkCheckBox):
-            return self.set_checkbox()
-        elif isinstance(self.entry, AdvancedEntry):
-            return self.set_entry(value)
-        elif isinstance(self.entry, EntryWithInstructionsBlock):
-            return self.set_entry_block(value)
-        raise NotImplementedError
 
     @classmethod
     def raise_bad_input(cls, message: str) -> None:
@@ -160,5 +153,4 @@ class ParameterField(CTkFrame):
 
     def disable(self) -> None:
         """Disables the change of the parameter."""
-        self.set_button.configure(state="disabled", fg_color="gray40", text_color="white")
         self.entry.configure(state="disabled")

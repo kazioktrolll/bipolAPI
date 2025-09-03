@@ -50,7 +50,7 @@ class ConstantConfig(ConfigItem):
         super().__init__(parent)
         self.values = 0.0
         self.nof_values_label.configure(text='')
-        self.entry = AdvancedEntry(self, width=120)
+        self.entry = AdvancedEntry(self, (lambda _: None), width=120)
         self.build()
 
     def build(self) -> None:
@@ -78,7 +78,8 @@ class RangeConfig(ConfigItem):
     def __init__(self, parent):
         super().__init__(parent)
         self.values = []
-        self.entries = EntryWithInstructionsBlock(self, ('from', 'step', 'to'), 40,1, fg_color='transparent')
+        self.entries = EntryWithInstructionsBlock(self, (lambda _, __: None), ('from', 'step', 'to'),
+                                                  40,1, fg_color='transparent')
         self.build()
 
     def build(self):
