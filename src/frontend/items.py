@@ -32,8 +32,7 @@ class Item(ABC, Generic[T]):
 
 
 class FlapItem(Item[tuple[float, float, float]]):
-    def __init__(self, ranged=True):
-        self.ranged = ranged
+    def __init__(self):
         self.start = DoubleVar(value=0)
         self.end = DoubleVar(value=0)
         self.xc = DoubleVar(value=0)
@@ -58,16 +57,15 @@ class FlapItem(Item[tuple[float, float, float]]):
         CTkLabel(window.frame, text="Specify geometry of the device", font=CTkFont(weight='bold')
                  ).grid(column=0, row=0, columnspan=3, sticky='nsew', padx=5, pady=5)
 
-        if self.ranged:
-            CTkLabel(window.frame, text="start:"
-                     ).grid(column=0, row=1, sticky="e")
-            AdvancedEntry(window.frame, textvariable=startvar, on_enter=(lambda _: None)
-                     ).grid(column=2, row=1, sticky='nsew')
+        CTkLabel(window.frame, text="start:"
+                 ).grid(column=0, row=1, sticky="e")
+        AdvancedEntry(window.frame, textvariable=startvar, on_enter=(lambda _: None)
+                 ).grid(column=2, row=1, sticky='nsew')
 
-            CTkLabel(window.frame, text="end: "
-                     ).grid(column=0, row=2, sticky="e")
-            AdvancedEntry(window.frame, textvariable=endvar, on_enter=(lambda _: None)
-                     ).grid(column=2, row=2, sticky='nsew')
+        CTkLabel(window.frame, text="end: "
+                 ).grid(column=0, row=2, sticky="e")
+        AdvancedEntry(window.frame, textvariable=endvar, on_enter=(lambda _: None)
+                 ).grid(column=2, row=2, sticky='nsew')
 
         CTkLabel(window.frame, text="xc: "
                  ).grid(column=0, row=3, sticky="e")
@@ -94,12 +92,11 @@ class FlapItem(Item[tuple[float, float, float]]):
         window.run()
 
     @handle_crash
-    def set_values(self, start: StringVar, end: StringVar, xc: StringVar) -> None:
+    def set_values(self, start_var: StringVar, end_var: StringVar, xc_var: StringVar) -> None:
         try:
-            if self.ranged:
-                start = float(start.get())
-                end = float(end.get())
-            xc = float(xc.get())
+            start = float(start_var.get())
+            end = float(end_var.get())
+            xc = float(xc_var.get())
         except ValueError:
             return
         if not abs(start) <= abs(end): return
@@ -114,20 +111,19 @@ class FlapItem(Item[tuple[float, float, float]]):
     def display(self, parent: CTkFrame) -> CTkFrame:
 
         class FlapDisplay(CTkFrame):
-            def __init__(self, item: 'FlapItem', parent: CTkFrame, ranged: bool):
+            def __init__(self, item: 'FlapItem', parent: CTkFrame):
                 CTkFrame.__init__(self, parent, fg_color=parent.cget('fg_color'))
                 self.item = item
 
-                if ranged:
-                    CTkLabel(self, text="start: "
-                             ).grid(column=0, row=0)
-                    CTkLabel(self, textvariable=item.start, width=30, anchor='w'
-                             ).grid(column=1, row=0)
+                CTkLabel(self, text="start: "
+                         ).grid(column=0, row=0)
+                CTkLabel(self, textvariable=item.start, width=30, anchor='w'
+                         ).grid(column=1, row=0)
 
-                    CTkLabel(self, text="end: "
-                             ).grid(column=2, row=0)
-                    CTkLabel(self, textvariable=item.end, width=30, anchor='w'
-                             ).grid(column=3, row=0)
+                CTkLabel(self, text="end: "
+                         ).grid(column=2, row=0)
+                CTkLabel(self, textvariable=item.end, width=30, anchor='w'
+                         ).grid(column=3, row=0)
 
                 CTkLabel(self, text="xc: "
                          ).grid(column=4, row=0)
@@ -137,11 +133,7 @@ class FlapItem(Item[tuple[float, float, float]]):
                 self.update()
 
             def update(self) -> None:
-                if (
-                        self.item.ranged and self.item.start.get() == 0 and self.item.end.get() == 0
-                ) or (
-                        not self.item.ranged and self.item.xc.get() == 0
-                ):
+                if self.item.start.get() == 0 and self.item.end.get() == 0:
                     self.disable()
                 else:
                     self.enable()
@@ -156,23 +148,7 @@ class FlapItem(Item[tuple[float, float, float]]):
                     if not isinstance(child, CTkLabel): continue
                     child.configure(text_color='white')
 
-        return FlapDisplay(item=self, parent=parent, ranged=self.ranged)
-
-
-class NonRangedFlapItem(FlapItem):
-    def __init__(self):
-        super().__init__(ranged=False)
-
-    def __repr__(self):
-        return f'NonRangedFlapItem({self.xc.get()})'
-
-    def set_values(self, start: StringVar, end: StringVar, xc: StringVar) -> None:
-        try:
-            xc = float(xc.get())
-        except ValueError:
-            return
-        if not 0 < xc < 1: return
-        self.xc.set(xc)
+        return FlapDisplay(item=self, parent=parent)
 
 
 class SectionItem(Item[tuple[Vector3, float, float, Control | None]]):
