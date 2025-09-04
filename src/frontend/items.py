@@ -84,12 +84,16 @@ class FlapItem(Item[tuple[float, float, float]]):
                   ).grid(column=0, row=4, columnspan=2, sticky='nsew')
 
         CTkButton(window.frame, text="Set",
-                  command=lambda: (self.set_values(startvar, endvar, xcvar),
-                                   window.destroy(),
-                                   do_on_update())
+                  command=lambda: self.on_edit_set(startvar, endvar, xcvar, window, do_on_update)
                   ).grid(column=2, row=4, sticky='nsew')
 
         window.run()
+
+    @handle_crash
+    def on_edit_set(self, start: StringVar, end: StringVar, xc: StringVar, window: Popup, do_on_update: Callable[[], None]) -> None:
+        self.set_values(start, end, xc)
+        window.destroy()
+        do_on_update()
 
     @handle_crash
     def set_values(self, start_var: StringVar, end_var: StringVar, xc_var: StringVar) -> None:
