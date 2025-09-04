@@ -19,6 +19,10 @@ class AdvancedEntry(CTkEntry):
         self.bind("<Return>", lambda _: self._on_enter(self.get()))
         self.bind("<Escape>", lambda _: self.master.focus_set())
 
+    def flash(self, color: str = 'red2'):
+        self.configure(fg_color=color)
+        self.after(300, lambda: self.configure(fg_color=CTkEntry(None).cget('fg_color'))) # noqa
+
 
 class EntryWithInstructions(AdvancedEntry):
     def __init__(self, parent: CTkFrame | CTk, on_enter: Callable[[str], None], instructions: str, **kwargs):

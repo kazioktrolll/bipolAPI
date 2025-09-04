@@ -65,6 +65,7 @@ class ConstantConfig(ConfigItem):
         try:
             val = float(val)
         except ValueError:
+            self.entry.flash()
             HelpTopLevel(None, 'Value must be numeric.')
             return
         self.values = val

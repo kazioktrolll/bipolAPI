@@ -100,6 +100,7 @@ class ParameterField(CTkFrame):
 
     @handle_crash
     def set_entry(self, value: float | str) -> bool:
+        """Sets the value of the parameter, if the input device is an Entry."""
         assert isinstance(self.entry, AdvancedEntry)
         if value is None: value = self.entry.get()
         if value == '': return False  # When the entry is empty
@@ -107,11 +108,11 @@ class ParameterField(CTkFrame):
         try:
             self.value = float(value)
         except ValueError:
-            ParameterField.raise_bad_input('Value must be numeric.')
+            self.raise_bad_input('Value must be numeric.')
             return False
 
         if not self.assert_test(self.value):
-            ParameterField.raise_bad_input('Value does not meet requirements.\nCheck the help button [?] for more info.')
+            self.raise_bad_input('Value does not meet requirements.\nCheck the help button [?] for more info.')
             return False
 
         self.entry.delete(0, "end")
@@ -122,6 +123,7 @@ class ParameterField(CTkFrame):
 
     @handle_crash
     def set_entry_block(self, i: int, val: str) -> bool:
+        """Sets the value of the parameter, if the input device is an EntryBlock."""
         assert isinstance(self.entry, EntryWithInstructionsBlock)
         values = list(map(str, self.value))
         values[i] = val
@@ -129,11 +131,11 @@ class ParameterField(CTkFrame):
         try:
             self.value = tuple(map(float, values))
         except ValueError:
-            ParameterField.raise_bad_input('Values must be numeric.')
+            self.raise_bad_input('Values must be numeric.')
             return False
 
         if not self.assert_test(self.value):
-            ParameterField.raise_bad_input('Value does not meet requirements.\nCheck the help button [?] for more info.')
+            self.raise_bad_input('Value does not meet requirements.\nCheck the help button [?] for more info.')
             return False
 
         self.entry.clear()
@@ -145,13 +147,15 @@ class ParameterField(CTkFrame):
 
     @handle_crash
     def set_checkbox(self) -> bool:
+        """Sets the value of the parameter, if the input device is a Checkbox."""
         assert isinstance(self.entry, CTkCheckBox)
         self.value = self.entry.get()
         self.on_set(self.value)
         return True
 
-    @classmethod
-    def raise_bad_input(cls, message: str) -> None:
+    def raise_bad_input(self, message: str) -> None:
+        if isinstance(self.entry, AdvancedEntry):
+            self.entry.flash()
         HelpTopLevel(None, message)
 
     def disable(self) -> None:

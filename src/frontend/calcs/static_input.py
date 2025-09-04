@@ -57,9 +57,11 @@ class StaticInputPanel(CTkFrame):
         try:
             value = int(raw)
         except ValueError:
+            self.height_entry.flash()
             HelpTopLevel(None, 'Values must be numeric.')
             return
         if not 0 <= value <= 8e4:
+            self.height_entry.flash()
             HelpTopLevel(None, 'Altitude must be between 0 and 80,000 m.')
             return
         self.height_entry.clear()
