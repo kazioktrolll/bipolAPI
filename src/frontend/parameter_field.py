@@ -40,7 +40,8 @@ class ParameterField(CTkFrame):
                  help_message: str,
                  on_set: Callable[[value_types], None] = lambda _: None,
                  assert_test: Callable[[value_types], bool] = lambda _: True,
-                 mode: Literal['bool', 'float', 'Vector2', 'Vector3'] = 'float'
+                 mode: Literal['bool', 'float', 'Vector2', 'Vector3'] = 'float',
+                 unit: str = 'm'
                  ) -> None:
         """
         Parameters:
@@ -84,6 +85,7 @@ class ParameterField(CTkFrame):
                 raise ValueError
 
         self.value_label = CTkLabel(self, text=str(self.value))
+        self.unit_label = CTkLabel(self, text=unit)
         self.build()
 
     def build(self):
@@ -93,6 +95,7 @@ class ParameterField(CTkFrame):
         self.columnconfigure(2, weight=1)
         self.value_label.grid(column=3, row=0, sticky="w", padx=10)
         self.entry.grid(column=4, row=0, sticky="ew")
+        self.unit_label.grid(column=5, row=0, sticky="w", padx=5)
         self.columnconfigure(5, minsize=40)
 
     @handle_crash

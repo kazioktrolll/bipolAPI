@@ -63,55 +63,55 @@ class LeftMenuItem(CTkFrame, ABC):
         surf = self.surface
         data = [
             ('pos', 'Position XZ', 'The X and Z positions of the tip of the root section.',
-             lambda tup: True, (surf.origin_position.x, surf.origin_position.z), 'Vector2'),
+             lambda tup: True, (surf.origin_position.x, surf.origin_position.z), 'Vector2', 'm, m'),
 
             ('span', 'Span', "The span of the horizontal tail.\nHas to be positive.",
-             lambda w: w > 0, surf.span, 'float'),
+             lambda w: w > 0, surf.span, 'float', 'm'),
 
             ('chord', 'MAC', "The mean aerodynamic chord of the surface.\nHas to be positive.",
-             lambda c: c > 0, surf.mac(), 'float'),
+             lambda c: c > 0, surf.mac(), 'float', 'm'),
 
             ('taper', 'Taper Ratio', "The taper ratio of the surface - c_tip / c_root.\nHas to be between 0 and 1.",
-             lambda tr: 0 <= tr <= 1, (surf.taper_ratio() if surf.taper_ratio() is not None else 1), 'float'),
+             lambda tr: 0 <= tr <= 1, (surf.taper_ratio() if surf.taper_ratio() is not None else 1), 'float', ''),
 
             ('sweep', 'Sweep Angle', "Sweep angle of the wing, in degrees.\n"
                                      "The angle between Y-axis and the 25%MAC line. Positive means wing deflected backwards.\n"
                                      "Has to be between -90 and 90.",
-             lambda sa: -90 < sa < 90, (surf.sweep_angle() if surf.sweep_angle() is not None else 0), 'float'),
+             lambda sa: -90 < sa < 90, (surf.sweep_angle() if surf.sweep_angle() is not None else 0), 'float', 'deg'),
 
             ('inclination', 'Inclination', "The inclination of the surface, in degrees\n.",
-             lambda i: True, surf.sections[0].inclination, 'float'),
+             lambda i: True, surf.sections[0].inclination, 'float', 'deg'),
 
             ('dihedral', 'Dihedral', "The dihedral of the surface, in degrees\n.",
-             lambda d: -90 < d < 90, surf.sections[0].inclination, 'float'),
+             lambda d: -90 < d < 90, surf.sections[0].inclination, 'float', 'deg'),
 
             ('surface_area', 'Surface Area', "The area of the surface.\nHas to be positive.",
-             lambda s: s > 0, surf.area(), 'float'),
+             lambda s: s > 0, surf.area(), 'float', 'msq'),
 
             ('root_chord', 'Root Chord', "The chord of the surface at its root section.",
-             lambda c: c > 0, surf.sections[0].chord, 'float'),
+             lambda c: c > 0, surf.sections[0].chord, 'float', 'm'),
 
             ('mid_chord', 'Mid Chord', "The chord of the surface at the section where it changes the geometry.",
-             lambda c: c > 0, surf.mac(), 'float'),#TODO fill
+             lambda c: c > 0, surf.mac(), 'float', 'm'),#TODO fill
 
             ('tip_chord', 'Tip Chord', "The chord of the surface at its tip section.",
-             lambda c: c > 0, surf.sections[-1].chord, 'float'),
+             lambda c: c > 0, surf.sections[-1].chord, 'float', 'm'),
 
             ('ss', 'Seam Spanwise Position', "The spanwise position of the seam as percent of the wing span.\nHas to be between 0 and 1.",
-             lambda ss: 0 < ss < 1, 0.2, 'float'),
+             lambda ss: 0 < ss < 1, 0.2, 'float', 'm'),
 
             ('height', 'Height', "The height of the vertical tail.\nHas to be positive.",
-             lambda h: h > 0, surf.span, 'float'),
+             lambda h: h > 0, surf.span, 'float', 'm'),
 
             ('gap', 'Gap', "The gap between the two parts of the surface in meters.\n Has to be positive.",
-             lambda g: g > 0, 1, 'float'),
+             lambda g: g > 0, 1, 'float', 'm'),
 
         ]
 
         for d in data:
-            kw, n, msg, at, iv, m = d
+            kw, n, msg, at, iv, m, u = d
             self.pfs[kw] = ParameterField(self.pf_frame, name=n, help_message=msg, on_set=self.update_surface,
-                                          assert_test=at, mode=m)
+                                          assert_test=at, mode=m, unit=u)
             match m:
                 case 'float':
                     self.pfs[kw].set_entry(iv)
