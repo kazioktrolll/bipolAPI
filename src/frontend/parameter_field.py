@@ -154,7 +154,7 @@ class ParameterField(CTkFrame):
         return True
 
     def raise_bad_input(self, message: str) -> None:
-        if isinstance(self.entry, AdvancedEntry):
+        if isinstance(self.entry, (AdvancedEntry, EntryWithInstructionsBlock)):
             self.entry.flash()
         HelpTopLevel(None, message)
 

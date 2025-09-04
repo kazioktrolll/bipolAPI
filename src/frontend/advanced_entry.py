@@ -83,3 +83,9 @@ class EntryWithInstructionsBlock(CTkFrame):
 
     def clear(self):
         for e in self.entries: e.clear()
+
+    def flash(self, index: int = None, color: str = 'red2'):
+        if index is None:
+            for e in self.entries: e.flash(color)
+        else:
+            self.entries[index].flash(color)

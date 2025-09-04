@@ -93,6 +93,7 @@ class RangeConfig(ConfigItem):
         try:
             f, s, t = map(float, self.entries.get())
         except ValueError:
+            self.entries.flash()
             HelpTopLevel(None, 'Values must be numeric.')
             return
         self.entries.clear()

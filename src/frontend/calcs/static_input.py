@@ -46,6 +46,7 @@ class StaticInputPanel(CTkFrame):
         try:
             vals[i] = float(val)
         except ValueError:
+            self.mass_entry.flash()
             HelpTopLevel(None, 'Values must be numeric.')
             return
         x, y, z = vals
