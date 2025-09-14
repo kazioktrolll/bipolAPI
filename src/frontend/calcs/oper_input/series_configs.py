@@ -80,13 +80,14 @@ class RangeConfig(ConfigItem):
         super().__init__(parent)
         self.values = []
         self.entries = EntryWithInstructionsBlock(self, (lambda _, __: None), ('from', 'step', 'to'),
-                                                  40,1, fg_color='transparent')
+                                                  width=120, padx=1, fg_color='transparent')
         self.build()
 
     def build(self):
         self.value_label.grid(column=0, row=0, padx=3)
         self.nof_values_label.grid(column=1, row=0, padx=3)
-        self.entries.grid(column=2, row=0)
+        self.columnconfigure(2, minsize=126)
+        self.entries.grid(column=2, row=0, sticky='ew')
         self.set_button.grid(column=3, row=0, padx=3)
 
     def set_value(self) -> None:
@@ -110,14 +111,14 @@ class FileConfig(ConfigItem):
     def __init__(self, parent, files_manager: FilesManager):
         super().__init__(parent)
         self.files_manager = files_manager
-        self.choose_file_button = CTkButton(self, text='Choose File', width=160, command=self.choose_file)
+        self.choose_file_button = CTkButton(self, text='Choose File', width=166, command=self.choose_file)
         self.values: list[float] = []
         self.build()
 
     def build(self):
         self.value_label.grid(column=0, row=0, padx=3)
         self.nof_values_label.grid(column=1, row=0, padx=3)
-        self.choose_file_button.grid(column=2, row=0, columnspan=2, sticky='ew', padx=6)
+        self.choose_file_button.grid(column=2, row=0, columnspan=2, sticky='ew', padx=3)
 
     def choose_file(self) -> None:
         popup = Popup(None)

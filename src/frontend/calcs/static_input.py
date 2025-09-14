@@ -20,7 +20,7 @@ class StaticInputPanel(CTkFrame):
         self.center_of_mass = center_of_mass
         self.mass_label = CTkLabel(self, width=120, anchor='e')
         self.mass_entry = EntryWithInstructionsBlock(self, on_enter=self.set_mass, instructions=('x', 'y', 'z'),
-                                                     width=38, padx=1, fg_color='transparent')
+                                                     width=120, padx=1, fg_color='transparent')
         self.height = 0
         self.height_label = CTkLabel(self, width=120, anchor='e')
         self.height_entry = EntryWithInstructions(self, self.set_height, 'altitude', width=120)
@@ -33,8 +33,8 @@ class StaticInputPanel(CTkFrame):
     def build(self):
         CTkLabel(self, text='Center of Mass', width=120, anchor='e').grid(column=0, row=0, padx=3)
         self.columnconfigure(1, weight=1)
-        self.mass_label.grid(column=2, row=0, padx=3, pady=3)
-        self.mass_entry.grid(column=3, row=0, padx=3, pady=3)
+        self.mass_label.grid(column=2, row=0, padx=3, pady=3, sticky='ew')
+        self.mass_entry.grid(column=3, row=0, padx=3, pady=3, sticky='ew')
 
         CTkLabel(self, text='Altitude', width=120, anchor='e').grid(column=0, row=1, padx=3, pady=3)
         self.height_label.grid(column=2, row=1, padx=3, pady=3)
