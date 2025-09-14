@@ -100,8 +100,8 @@ class Section:
 
 
 class Control:
-    class_name: str
     """Class representing a control surface attached to a section."""
+    class_name: str
 
     def __init__(self, x_hinge: float, SgnDup: str = '',
                  gain: float = 1, color: str = 'green', instance_name: str = None) -> None:
@@ -152,6 +152,7 @@ class Control:
 
     @classmethod
     def is_alias(cls, name: str) -> bool:
+        """Returns True if the name is a defined alias for this control surface."""
         name = name.lower()
         return name == cls.class_name or name + 's' == cls.class_name
 

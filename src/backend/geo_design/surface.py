@@ -19,6 +19,7 @@ from ..vector3 import Vector3, AnyVector3
 
 
 class SurfaceTemplates:
+    """A factory class for ``Surface`` templates."""
     types = Literal['Rectangular', 'Delta', 'Simple Tapered', 'Double Trapez', 'Vertical Rectangular', 'Vertical Tapered']
     @staticmethod
     def simple_tapered(name: str,
@@ -130,7 +131,7 @@ class SurfaceTemplates:
     def is_simple_tapered(surface: 'Surface', accuracy=.05) -> bool:
         try:
             surface.assert_straight()
-        except Exception:
+        except AssertionError:
             return False
         safe_tip_y = surface.tip.y if surface.tip.y != 0 else 1e-10
         x_eq = lambda _y: surface.root.x + _y / safe_tip_y * (surface.tip.x - surface.root.x)
@@ -210,7 +211,7 @@ class Surface:
         self.name = name
         self.origin_position = Vector3(*origin_position)
         self.airfoil = airfoil if airfoil else Airfoil.empty()
-        if not len(sections) >= 2: raise ValueError("Cannot create a surface with less than two sections.")
+        if len(sections) < 2: raise ValueError("Cannot create a surface with less than two sections.")
         self.sections = sections
         self.sort_sections()
         self.chord_points = 1
@@ -400,17 +401,11 @@ class Surface:
         reflected_sections = [sec.mirror() for sec in self.sections]
         surf.sections = reflected_sections
         surf._lock_y_duplicate = False
-        # surf.clear_controls()
-        # surf.mechanization = {}
-        # sym_controls = {}
-        # for k, list_of_ranges in self.mechanization.items():
-        #     sym_controls[k] = [(-e, -s, xc) for s, e, xc in list_of_ranges]
-        # surf.set_mechanization(**sym_controls)
         return surf
 
     def assert_straight(self):
         if not self.is_straight:
-            raise Exception('Surface is not straight!')
+            raise AssertionError('Surface is not straight!')
 
     def has_section_at(self, spanwise: float) -> bool:
         """Returns ``True`` if the surface has a section at a given spanwise coordinate."""
@@ -449,8 +444,8 @@ class Surface:
         z = ma * sin(radians(self.dihedral))
         return Vector3(x, y, z)
 
-    # Nowe
     def clear_mechanization(self) -> None:
+        """Removes all mechanization from the surface."""
         self.mechanization = {}
         for sec in self.sections:
             sec.control = None
@@ -469,7 +464,7 @@ class Surface:
         """
         try:
             self.assert_straight()
-        except Exception:
+        except AssertionError:
             return
         if self.mechanization:
             raise ValueError(f"The surface {self.name} already has mechanization!")

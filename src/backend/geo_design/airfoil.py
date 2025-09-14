@@ -92,7 +92,7 @@ class Airfoil:
 
         if len(sorted_data) < 3: raise ValueError("Incorrect input file!")
 
-        af = Airfoil(name, points=sorted_data, naca=None, active_range=active_range)
+        af = cls(name, points=sorted_data, naca=None, active_range=active_range)
         return af
 
     @classmethod
@@ -103,20 +103,20 @@ class Airfoil:
         positive.sort(key=lambda p: -p[0])
         negative.sort(key=lambda p: p[0])
         points = positive + negative
-        return Airfoil(name, points=points, naca=None, active_range=active_range)
+        return cls(name, points=points, naca=None, active_range=active_range)
 
     @classmethod
     def from_naca(cls, naca: str, active_range=(0.0, 1.0)) -> 'Airfoil':
         """Creates an Airfoil object from NACA code."""
         if not valid_naca(naca): raise ValueError("Wrong NACA code")
         if naca == '0000': return cls.empty()
-        af = Airfoil(name=naca, points=None, naca=naca, active_range=active_range)
+        af = cls(name=naca, points=None, naca=naca, active_range=active_range)
         return af
 
     @classmethod
     def empty(cls) -> 'Airfoil':
         """Creates a flat-plate Airfoil."""
-        af = Airfoil(name="Empty", points=None, naca=None, active_range=(0.0, 1.0))
+        af = cls(name="Empty", points=None, naca=None, active_range=(0.0, 1.0))
         return af
 
     def string(self) -> str:

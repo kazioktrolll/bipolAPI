@@ -18,15 +18,16 @@ from ..vector3 import Vector3
 
 
 class GeometryGenerator:
-    @classmethod
-    def empty(cls) -> 'Geometry':
+    """A factory class for ``Geometry`` objects."""
+    @staticmethod
+    def empty() -> 'Geometry':
         g = Geometry(
             name='Empty',
         )
         return g
 
-    @classmethod
-    def default(cls) -> Geometry:
+    @staticmethod
+    def default() -> Geometry:
         wing = Surface.template.simple_tapered(name='Wing', length=4, chord=1, airfoil=Airfoil.from_naca('0006'), taper_ratio=1, sweep_angle=0, origin_position=(0, 0, 0),
                                                dihedral_angle=0, inclination_angle=0, mid_gap=0)
         wing.set_mechanization(ailerons=[(3, 4, .8)], flaps=[(2.3, 2.8, .6)])
@@ -49,23 +50,41 @@ class GeometryGenerator:
         )
         return g
 
-    @classmethod
-    def from_avl(cls, path: Path | str) -> Geometry:
+    @staticmethod
+    def from_avl(path: Path | str) -> Geometry:
         """Creates a Geometry object based on .avl file."""
         return FromAvl.load(path)
 
 
 class FromAvl:
+    """A subclass of ``GeometryGenerator``, for handling AVL-style files."""
     @classmethod
     def load(cls, path: Path | str) -> Geometry:
         """Creates a Geometry object based on .avl file."""
         path = Path(path)
         with open(path) as f: raw_lines = f.readlines()
-        lines = cls.format_lines(raw_lines)
-        return cls.handle_top_level(lines, path)
+        lines = cls._format_lines(raw_lines)
+        return cls._handle_top_level(lines, path)
 
-    @classmethod
-    def format_lines(cls, raw_lines: list[str]) -> list[str]:
+    ### ABANDON ALL HOPE YE WHO ENTER HERE
+
+    ### The following part of the code is basically a giant string parser for turning .avl files into Geometry objects.
+    ### It is recommended to understand .avl files format: https://web.mit.edu/drela/Public/web/avl/
+    ### Basically, the data is sorted into 'blocks', each block describing a structure.
+    ### Each of those blocks contains some general info about the structure, and then the blocks of its substructures.
+    ### So the top-level block, describing the Aircraft, contains some data about the plane, like wingspan and wing area etc.,
+    ### and then block representing the particular surfaces.
+    ### Each block representing a surface contains some data about the surface, and then blocks describing the sections
+    ### of the structure and so on.
+
+    ### Parsing this properly is probably above my qualifications, and definitely above my non-existent pay.
+    ### As this functionality in not really that useful, the code is just good enough to work for the majority of cases,
+    ### if you are thinking of improving/fixing/rewriting this, then stop.
+
+    ### If you didn't - good luck.
+
+    @staticmethod
+    def _format_lines(raw_lines: list[str]) -> list[str]:
         """Returns a list of lines after formatting."""
         lines = []
         for line in raw_lines:
@@ -80,8 +99,8 @@ class FromAvl:
             lines.append(line)
         return lines
 
-    @classmethod
-    def split_into_blocks(cls, lines: list[str], keywords: tuple[str, ...]) -> list[tuple[str, list[str]]]:
+    @staticmethod
+    def _split_into_blocks(lines: list[str], keywords: tuple[str, ...]) -> list[tuple[str, list[str]]]:
         """Splits lines into blocks, each block starting with one of the given keywords."""
         current_block = None
         blocks = []
@@ -103,7 +122,7 @@ class FromAvl:
         return blocks
 
     @classmethod
-    def handle_top_level(cls, lines: list[str], path: Path) -> Geometry:
+    def _handle_top_level(cls, lines: list[str], path: Path) -> Geometry:
         """Returns a Geometry object based on .avl file."""
         # Reading
         readable = '\n'.join(lines)
@@ -125,18 +144,18 @@ class FromAvl:
             'surfaces': []
         }
 
-        blocks = cls.split_into_blocks(lines, ('SURFACE', 'BODY'))
+        blocks = cls._split_into_blocks(lines, ('SURFACE', 'BODY'))
         for keyword, lines in blocks:
             if keyword == 'SURFACE':
                 geometry_data['surfaces'].append(
-                    cls.handle_surface_level(lines[1:], path)
+                    cls._handle_surface_level(lines[1:], path)
                 )
-            if keyword == 'BODY': cls.error('GAVL does not support BODY. The block is being skipped.')
+            if keyword == 'BODY': cls._error('GAVL does not support BODY. The block is being skipped.')
 
         return Geometry(**geometry_data)
 
     @classmethod
-    def handle_surface_level(cls, block: list[str], path: Path) -> Surface:
+    def _handle_surface_level(cls, block: list[str], path: Path) -> Surface:
         """Returns a Surface based on .avl description lines."""
         surface_data: dict[str, Any] = {
             'name': None,
@@ -147,7 +166,7 @@ class FromAvl:
         }
         name = block.pop(0)
         surface_data['name'] = name
-        Nchord_etc = block.pop(0)  # TODO: implement?
+        Nchord_etc = block.pop(0)
 
         keywords = (
             'COMPONENT',
@@ -163,18 +182,18 @@ class FromAvl:
             'SECTION'
         )
 
-        blocks = cls.split_into_blocks(block, keywords)
+        blocks = cls._split_into_blocks(block, keywords)
         scale = (1, 1, 1)
         angle = 0
         for keyword, lines in blocks:
             match keyword:
                 case kw if kw in ('COMPONENT', 'INDEX'):
-                    cls.error(f"{kw}")
+                    cls._error(f"{kw}")
                 case 'YDUPLICATE':
                     if float(lines[1].split()[0]) == 0.0:
                         surface_data['y_duplicate'] = True
                     else:
-                        cls.error(f"YDUPLICATE cannot be non-zero!")  # TODO: fix?
+                        cls._error(f"YDUPLICATE cannot be non-zero!")  # TODO: fix?
                 case 'SCALE':
                     scale = tuple(map(float, lines[1].split()[:3]))
                 case 'TRANSLATE':
@@ -183,19 +202,19 @@ class FromAvl:
                 case 'ANGLE':
                     angle = float(lines[1].split()[0])
                 case kw if kw in ('NOWA', 'NOAL', 'NOLO'):
-                    cls.error(f"{kw}")
+                    cls._error(f"{kw}")
                 case 'CDCL':
-                    cls.error("CDCL")
+                    cls._error("CDCL")
                 case 'SECTION':
                     surface_data['sections'].append(
-                        cls.handle_section_level(lines[1:], path, scale, angle)
+                        cls._handle_section_level(lines[1:], path, scale, angle)
                     )
 
         surface_data['airfoil'] = surface_data['sections'][0].airfoil
         return Surface(**surface_data)
 
     @classmethod
-    def handle_section_level(cls, block: list[str], path: Path, scale=(1, 1, 1), angle=0) -> Section:
+    def _handle_section_level(cls, block: list[str], path: Path, scale=(1, 1, 1), angle=0) -> Section:
         """Returns a Section based on .avl description lines."""
         vals = list(map(float, block.pop(0).split()))
         section_data: dict[str, Any] = {
@@ -206,7 +225,7 @@ class FromAvl:
             'control': None
         }
 
-        blocks = cls.split_into_blocks(block, ('NACA', 'AIRFOIL', 'AFILE', 'CONTROL', 'DESIGN'))
+        blocks = cls._split_into_blocks(block, ('NACA', 'AIRFOIL', 'AFILE', 'CONTROL', 'DESIGN'))
         for keyword, lines in blocks:
             match keyword:
                 case 'NACA':
@@ -233,13 +252,13 @@ class FromAvl:
                         afile_path = path.parent / afile_path
                     section_data['airfoil'] = Airfoil.from_file(afile_path)
                 case 'CONTROL':
-                    section_data['control'] = cls.handle_control_level(lines[1:])
+                    section_data['control'] = cls._handle_control_level(lines[1:])
                 case 'DESIGN':
-                    cls.error("DESIGN")
+                    cls._error("DESIGN")
         return Section(**section_data)
 
-    @classmethod
-    def handle_control_level(cls, block: list[str]) -> Control:
+    @staticmethod
+    def _handle_control_level(block: list[str]) -> Control:
         """Returns a Control based on .avl description lines."""
         vals = block.pop(0).split()
         name = vals.pop(0)
@@ -253,7 +272,7 @@ class FromAvl:
             control_data['SgnDup'] = str(vals[5])
         return Control(**control_data)
 
-    @classmethod
-    def error(cls, message: str) -> None:
+    @staticmethod
+    def _error(message: str) -> None:
         """Handles a Syntax Error in the .avl file."""
         print(f'Keyword ignored: {message}')  # Temporary
