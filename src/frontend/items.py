@@ -12,7 +12,7 @@ from typing import Callable, TypeVar, Generic
 from customtkinter import CTkFrame, CTkLabel, DoubleVar, StringVar, CTkButton, CTkFont, CTkOptionMenu
 from abc import ABC, abstractmethod
 from .advanced_entry import AdvancedEntry
-from .parameter_field import HelpTopLevel
+from .help_top_level import HelpTopLevel
 from .popup import Popup
 from ..backend import Vector3, handle_crash
 from ..backend.geo_design import Control, Section
@@ -29,6 +29,10 @@ class Item(ABC, Generic[T]):
 
     @abstractmethod
     def display(self, parentL: CTkFrame) -> CTkFrame: pass
+
+    @staticmethod
+    def raise_error(e: str):
+        HelpTopLevel(None, message=e)
 
 
 class FlapItem(Item[tuple[float, float, float]]):
@@ -67,7 +71,7 @@ class FlapItem(Item[tuple[float, float, float]]):
         AdvancedEntry(window.frame, textvariable=endvar, on_enter=(lambda _: None)
                  ).grid(column=2, row=2, sticky='nsew')
 
-        CTkLabel(window.frame, text="xc: "
+        CTkLabel(window.frame, text="hinge: "
                  ).grid(column=0, row=3, sticky="e")
         AdvancedEntry(window.frame, textvariable=xcvar, on_enter=(lambda _: None)
                  ).grid(column=2, row=3, sticky='nsew')
@@ -78,7 +82,7 @@ class FlapItem(Item[tuple[float, float, float]]):
                                                              "start and the end of the device. "
                                                              "Start must be closer to the main axis of the aircraft, "
                                                              "while stop must be closer to the wing tip.\n"
-                                                             "xc: chord-wise position of the hinge as a percentage "
+                                                             "hinge: chord-wise position of the hinge as a percentage "
                                                              "of the chord. Must be between 0 and 1.",
                                                max_width=40)
                   ).grid(column=0, row=4, columnspan=2, sticky='nsew')
@@ -91,23 +95,31 @@ class FlapItem(Item[tuple[float, float, float]]):
 
     @handle_crash
     def on_edit_set(self, start: StringVar, end: StringVar, xc: StringVar, window: Popup, do_on_update: Callable[[], None]) -> None:
-        self.set_values(start, end, xc)
+        if not self.set_values(start, end, xc):
+            return
         window.destroy()
         do_on_update()
 
     @handle_crash
-    def set_values(self, start_var: StringVar, end_var: StringVar, xc_var: StringVar) -> None:
+    def set_values(self, start_var: StringVar, end_var: StringVar, xc_var: StringVar) -> bool:
         try:
             start = float(start_var.get())
             end = float(end_var.get())
             xc = float(xc_var.get())
         except ValueError:
-            return
-        if not abs(start) <= abs(end): return
-        if not 0 < xc < 1: return
+            self.raise_error("Values must be numeric.")
+            return False
+        if not abs(start) <= abs(end):
+            t = start
+            start = end
+            end = t
+        if not 0 <= xc <= 1:
+            self.raise_error("Hinge must be between 0 and 1.")
+            return False
         self.start.set(start)
         self.end.set(end)
         self.xc.set(xc)
+        return True
 
     def get_values(self) -> tuple[float, float, float]:
         return self.start.get(), self.end.get(), self.xc.get()

@@ -54,12 +54,17 @@ class EntryWithInstructions(AdvancedEntry):
 
 
 class EntryWithInstructionsBlock(CTkFrame):
-    def __init__(self, parent, on_enter: Callable[[int, str], Any], instructions: tuple[str, ...],
-                 width: int, padx: int, **kwargs):
+    def __init__(self, parent, on_enter: Callable[[int, str], Any], instructions: tuple[str, ...], **kwargs):
+        padx = kwargs.get('padx', 0)
+        del kwargs['padx']
         super().__init__(parent, **kwargs)
         self._on_enter = on_enter
-        self.entries = [EntryWithInstructions(self, self.on_enter, t, width=width) for t in instructions]
-        for i, e in enumerate(self.entries): e.grid(column=i, row=0, padx=padx)
+        self.entries = [EntryWithInstructions(self, self.on_enter, t, width=1) for t in instructions]
+        for i, e in enumerate(self.entries):
+            self.columnconfigure(i*2, weight=1)
+            e.grid(column=i*2, row=0, sticky='news')
+            if not i == len(self.entries) - 1:
+                self.columnconfigure(i*2+1, weight=0, minsize=padx)
 
     def __iter__(self):
         return iter(self.entries)

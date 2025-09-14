@@ -71,15 +71,15 @@ class ParameterField(CTkFrame):
                 self.value = False
                 self.entry.select()
             case 'float':
-                self.entry = AdvancedEntry(self, on_enter=self.set_entry)
+                self.entry = AdvancedEntry(self, on_enter=self.set_entry, width=120)
                 self.value = 0.0
             case 'Vector2':
                 self.entry = EntryWithInstructionsBlock(self, self.set_entry_block, ('', ''),
-                                                        130//2, 2, fg_color='transparent')
+                                                        width=120, padx=2, fg_color='transparent')
                 self.value = (0.0, 0.0)
             case 'Vector3':
                 self.entry = EntryWithInstructionsBlock(self, self.set_entry_block, ('', '', ''),
-                                                        130//3, 2, fg_color='transparent')
+                                                        width=120, padx=2, fg_color='transparent')
                 self.value = (0.0, 0.0, 0.0)
             case _:
                 raise ValueError
@@ -94,6 +94,7 @@ class ParameterField(CTkFrame):
         self.name_label.grid(column=1, row=0, sticky="w", padx=5)
         self.columnconfigure(2, weight=1)
         self.value_label.grid(column=3, row=0, sticky="w", padx=10)
+        self.columnconfigure(4, minsize=120)
         self.entry.grid(column=4, row=0, sticky="ew")
         self.unit_label.grid(column=5, row=0, sticky="w", padx=5)
         self.columnconfigure(5, minsize=40)
@@ -116,7 +117,7 @@ class ParameterField(CTkFrame):
             return False
 
         self.entry.delete(0, "end")
-        self.value_label.configure(text=str(round(self.value, 2)))
+        self.value_label.configure(text=str(round(self.value, 3)))
         self.focus()
         self.on_set(self.value)
         return True
@@ -139,7 +140,7 @@ class ParameterField(CTkFrame):
             return False
 
         self.entry.clear()
-        val_str = ', '.join(map(str, values))
+        val_str = ', '.join(map(lambda v: str(round(v, 3)), self.value))
         self.value_label.configure(text=val_str)
         self.focus()
         self.on_set(self.value)

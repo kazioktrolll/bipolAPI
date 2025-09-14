@@ -28,6 +28,9 @@ class GeoDesignScene(Scene):
     @cached_property
     def left_menu(self) -> LeftMenu:
         recently_saved: list[Path] = [Path(p) for p in self.app.settings.data.recently_saved]
+        for p in recently_saved:
+            if not p.exists():
+                recently_saved.remove(p)
         return LeftMenu(parent=self,
                         do_on_update=self.geometry_display.update,
                         recently_saved=recently_saved)
