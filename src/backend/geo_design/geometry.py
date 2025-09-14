@@ -22,7 +22,7 @@ class Geometry:
     Attributes:
         name (str): The name of the aircraft.
         mach (float): The cruise speed of the aircraft as Mach number.
-        ref_pos (Vector3): The reference position of the aircraft, ideally the position of the center of mass.
+        ref_pos (Vector3): The reference position of the aircraft, ideally the position of the centre of mass.
         surfaces (Dict[str, Surface]): The ``Surface`` objects associated with the aircraft.
         wing (Surface|None): The wing of the aircraft. Returns 'None' if the aircraft has no defined wing.
     """
@@ -36,7 +36,7 @@ class Geometry:
         Parameters:
             name (str): The name of the aircraft.
             mach (float): The cruise speed of the aircraft as Mach number.
-            ref_pos (AnyVector3): The reference position of the aircraft, ideally the position of the center of mass.
+            ref_pos (AnyVector3): The reference position of the aircraft, ideally the position of the centre of mass.
             surfaces (list[Surface]): The ``Surface`` objects associated with the aircraft.
         """
         self.name = name
@@ -55,7 +55,7 @@ class Geometry:
         self.surfaces[surface.name] = surface
 
     def string(self) -> str:
-        """Returns the current geometry as a .avl type string."""
+        """Returns the current geometry as an .avl type string."""
         _r = (f"{self.name}\n"
               f"0.0 | Mach\n"
               f"0 0 0 | iYsym iZsym Zsym\n"

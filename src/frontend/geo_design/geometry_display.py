@@ -156,7 +156,7 @@ class GeometryDisplay(CTkFrame):
         X, Y = self.project(*(section.get_position_at_xc(section.control.x_hinge) + surface.origin_position))
         self.canvas.create_oval(X - 3, Y - 3, X + 3, Y + 3,
                                 outline='black', tags="control",
-                                fill=section.control.color)
+                                fill=section.control.colour)
 
     def display_wing(self, wing: Surface | list[Surface]) -> None:
         """Displays a ``Surface``. If given a list of Surfaces, displays all."""
@@ -201,7 +201,7 @@ class GeometryDisplay(CTkFrame):
             if prev_sec.control is None or curr_sec.control is None: continue
             if not prev_sec.control.is_equal_to(curr_sec.control): continue
 
-            color = prev_sec.control.color
+            color = prev_sec.control.colour
             x_hinge = prev_sec.control.x_hinge
 
             prev_te = globalize(prev_sec.trailing_edge_position)

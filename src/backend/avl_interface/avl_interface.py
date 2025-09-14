@@ -22,6 +22,7 @@ avl_exe_path = Path(__file__).parent.parent.parent / 'avl' / 'avl.exe'
 class AVLInterface:
     """A toolbox class to act as the AVL interface.
     Also contains all methods required to format data into AVL's formats, etc."""
+
     @staticmethod
     def create_run_file_contents(run_file_data: dict[str, list[float]], height: float) -> str:
         """Returns a string containing the input data transformed into a .run format."""
@@ -38,7 +39,7 @@ class AVLInterface:
 
     @staticmethod
     def create_st_command(paths: list[Path]) -> str:
-        """Creates a command string for running a given number of cases, each run 'ST' and saved to file."""
+        """Creates a command string for running a given number of cases, each runs 'ST' and saved to file."""
         _r = 'OPER\n'
         for i, path in enumerate(paths):
             _r += (f'{i + 1}\n'
@@ -70,7 +71,7 @@ class AVLInterface:
         """
         avl = Popen([avl_exe_path, str(avl_file_path)], stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=True, cwd=app_wd)
         if command[-2:] != '\n': command += '\n'
-        dump, err = avl.communicate(bytes(command, encoding='utf-8'), timeout=None)
+        dump, err = avl.communicate(bytes(command, encoding='utf-8'))
         dump = dump.decode()
         err = err.decode()
         if err:
@@ -107,15 +108,15 @@ class AVLInterface:
 
         Parameters:
             geometry (Geometry): The geometry to turn into .avl file.
-            data (dict[str, list[float]): The data to turn into .run file.
+            data (dict[str, list[float]): The data to turn into a .run file.
             height (float): The flight altitude, in meters.
-            flag (AbortFlag): The flag object to abort mid-execution, in case user cancels the calculation.
+            flag (AbortFlag): The Flag object to abort mid-execution, in case the user cancels the calculation.
             app_work_dir (Path): The application working directory, where the AVL should be run from.
 
         Return:
             ([[{name-value} for intro, forces, ST] for each case], errors)
         """
-        if flag: return [], 'Aborted' # If user cancelled the calculation mid-execution. Will be checked multiple times.
+        if flag: return [], 'Aborted'  # If the user cancelled the calculation mid-execution. Will be checked multiple times.
         nof_cases = len(list(data.values())[0])
         contents = cls.create_run_file_contents(data, height)
         # Create a new directory for this run, at the first not-used name.
@@ -136,13 +137,13 @@ class AVLInterface:
             avl_file.write(geometry.string())
         with open(run_file_path, 'w') as run_file:
             run_file.write(contents)
-        # Create the command to execute the series of measurements, and run it
+        # Create the command to execute the series of measurements and run it
         if not flag:
             command = cls.create_st_command(files)
             dump = cls.execute(command, avl_file_path, app_work_dir)
         # Parse data and potential errors
         if not flag:
-            errors = ResultsParser.loading_issues_from_dump(dump)
+            errors = ResultsParser.loading_issues_from_dump(dump)  # noqa The dump is not referenced before assignment, as flag is irreversible.
             vals = ResultsParser.all_sts_to_data(files)
         else:
             errors = 'Aborted'

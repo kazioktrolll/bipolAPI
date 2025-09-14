@@ -23,7 +23,7 @@ def is_number(s: str):
 
 
 def are_numbers(ls: list[str]):
-    """Checks if a list of strings are all valid numbers."""
+    """Checks if all elements in a list of strings are all valid numbers."""
     for s in ls:
         if not is_number(s):
             return False
@@ -40,11 +40,11 @@ class Airfoil:
     A class representing an airfoil geometry.
 
     Attributes:
-            name (str): The name of the airfoil.
-            points (Optional list[tuple[float, float]]): A list of points defining the airfoil geometry.
-                ``None`` if the airfoil is not point-defined.
-            naca (str): The NACA code of the airfoil. ``None`` if the airfoil is not defined using NACA code.
-            active_range (tuple[float, float]): The active range of the airfoil.
+        name (str): The name of the airfoil.
+        points (Optional list[tuple[float, float]]): A list of points defining the airfoil geometry.
+            ``None`` if the airfoil is not point-defined.
+        naca (str): The NACA code of the airfoil. ``None`` if the airfoil is not defined using NACA code.
+        active_range (tuple[float, float]): The active range of the airfoil.
     """
 
     def __init__(self, name: str, points: list[tuple[float, float]] | None, naca: str | None, active_range: tuple[float, float]):
@@ -120,7 +120,7 @@ class Airfoil:
         return af
 
     def string(self) -> str:
-        """Returns the current geometry as a .avl type string."""
+        """Returns the current geometry as an .avl type string."""
         if self.points is None and self.naca is None:
             return ""
 

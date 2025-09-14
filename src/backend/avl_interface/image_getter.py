@@ -30,6 +30,7 @@ def get_gs_path() -> Path:
 
 class ImageGetter:
     """A toolbox class to simplify image generation from AVL."""
+
     @classmethod
     def get_image(cls, avl_file_path: str | Path, command: str, app_wd: str | Path) -> Path:
         """
@@ -41,7 +42,7 @@ class ImageGetter:
         :return: Path to the .png image.
         """
         # Execute the given command
-        dump = AVLInterface.execute(command, avl_file_path, app_wd)
+        _ = AVLInterface.execute(command, avl_file_path, app_wd)
         # Open or create a directory for images
         img_dir = Path(app_wd) / 'images'
         if not img_dir.exists(): img_dir.mkdir()
@@ -105,7 +106,7 @@ class ImageGetter:
 
         :param geometry: The geometry of the aircraft.
         :param run_file_data: Run-file type data.
-        :param case_number: The number of the case considered.
+        :param case_number: The number of the cases considered.
         :param height: The altitude of the aircraft.
         :param app_wd: App working directory.
         :return: The Trefftz plot as a PIL Image.
@@ -166,7 +167,7 @@ class ImageGetter:
 
         :param geometry: The geometry of the aircraft.
         :param run_file_data: Run-file type data.
-        :param case_number: The number of the case considered.
+        :param case_number: The number of the cases considered.
         :param height: The altitude of the aircraft.
         :param app_wd: App working directory.
         :return: The Trefftz plot as a PIL Image.

@@ -7,9 +7,8 @@ the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 """
 
-
-from math import atan2, degrees, sqrt, radians, sin, cos, tan
 from copy import copy
+from math import atan2, degrees, sqrt, radians, sin, cos, tan
 from typing import Literal, Optional
 
 from .airfoil import Airfoil
@@ -21,6 +20,7 @@ from ..vector3 import Vector3, AnyVector3
 class SurfaceTemplates:
     """A factory class for ``Surface`` templates."""
     types = Literal['Rectangular', 'Delta', 'Simple Tapered', 'Double Trapez', 'Vertical Rectangular', 'Vertical Tapered']
+
     @staticmethod
     def simple_tapered(name: str,
                        length: float,
@@ -88,7 +88,7 @@ class SurfaceTemplates:
         chord = surface_area / span
         sweep = degrees(atan2(3 * chord, span))
         surf = SurfaceTemplates.simple_tapered(
-            name=name, length=span/2, origin_position=origin_position,
+            name=name, length=span / 2, origin_position=origin_position,
             airfoil=airfoil, inclination_angle=inclination_angle,
             taper_ratio=0, chord=chord, sweep_angle=sweep, dihedral_angle=0,
             mid_gap=0
@@ -120,7 +120,7 @@ class SurfaceTemplates:
         mac_0 = (root_chord + tip_chord) / 2
         surf = SurfaceTemplates.simple_tapered(
             name=name, length=length, origin_position=origin_position, sweep_angle=sweep_angle, dihedral_angle=dihedral_angle, airfoil=airfoil,
-            inclination_angle=inclination_angle, taper_ratio=tip_chord/root_chord, chord=mac_0, mid_gap=mid_gap)
+            inclination_angle=inclination_angle, taper_ratio=tip_chord / root_chord, chord=mac_0, mid_gap=mid_gap)
 
         mid_section = surf.add_section_gentle(seam_spanwise)
         mid_section.chord = mid_chord
@@ -139,7 +139,7 @@ class SurfaceTemplates:
         c_eq = lambda _y: surface.root.chord + _y / safe_tip_y * (surface.tip.chord - surface.root.chord)
         inc = surface.root.inclination
 
-        # Check if the surface is of correct shape
+        # Check if the surface is of the correct shape
         for section in surface.sections:
             if section is surface.root or section is surface.tip: continue
             y = section.y
@@ -150,7 +150,6 @@ class SurfaceTemplates:
             if abs((c - c_eq(y)) / c) > accuracy: return False
             if section.inclination != inc: return False
         return True
-
 
     @staticmethod
     def is_delta(surface: 'Surface', accuracy=.05) -> bool:
@@ -202,7 +201,7 @@ class Surface:
         """
                 Parameters:
                     name (str): The name of the lifting surface.
-                        If named 'Wing', 'H_tail', 'V_tail' - will be recognized as such by the ``Geometry`` instance.
+                        If named 'Wing', 'H_tail', 'V_tail' - will be recognised as such by the ``Geometry`` instance.
                         It is not used for geometry generation, just for calculations.
                     sections (list[Section]): Sections of the surface.
                     origin_position (AnyVector3): Position of the leading edge of the root chord.
@@ -246,7 +245,7 @@ class Surface:
         return True
 
     @property
-    def is_straight(self, tol = 0.05) -> bool:
+    def is_straight(self, tol=0.05) -> bool:
         """Returns ``True`` if the surface is a straight line, as seen from the front."""
         if len(self.sections) < 2:
             return False
@@ -374,7 +373,7 @@ class Surface:
         else:
             raise Exception('Incorrect spanwise coordinate!')
 
-        # Calculate leading edge position as prev.x + d_spanwise * dx
+        # Calculate the leading-edge position as prev.x + d_spanwise * dx
         d_spanwise = (spanwise - self.spanwise(prev_sec)) / (self.spanwise(next_sec) - self.spanwise(prev_sec))
         xle = (prev_sec.x + d_spanwise * (next_sec.x - prev_sec.x))
         chord = prev_sec.chord + d_spanwise * (next_sec.chord - prev_sec.chord)
@@ -387,8 +386,10 @@ class Surface:
         """Sorts the sections along the major axis of the surface."""
         if len(self.sections) < 2: return
         ref_sec = self.sections[0]
+
         def pos(section):
             return sqrt((section.y - ref_sec.y) ** 2 + (section.z - ref_sec.z) ** 2)
+
         self.sections.sort(key=lambda section: pos(section))
 
     def copy(self) -> 'Surface':
@@ -445,13 +446,13 @@ class Surface:
         return Vector3(x, y, z)
 
     def clear_mechanization(self) -> None:
-        """Removes all mechanization from the surface."""
+        """Removes all mechanisations from the surface."""
         self.mechanization = {}
         for sec in self.sections:
             sec.control = None
 
     def set_mechanization(self, **kwargs: list[tuple[float, float, float]]) -> None:
-        """Sets the mechanization of the surface.
+        """Sets the mechanisation of the surface.
 
         Parameters:
             **kwargs (list[tuple[float, float, float]]): For each type of control a tuple (y_start, y_stop, x_hinge).
@@ -459,8 +460,8 @@ class Surface:
         Usage:
             surface_instance.set_mechanization(ailerons=[(1, 2, .7), (3, 3.5, .6)], flaps=[(2.1, 2.9, .6)])
 
-            This will create **ailerons** for ``y`` = <1 : 2> ``hinge`` 0.7 x/c and ``y`` = <3 : 3.5> ``hinge`` 0.6 x/c,
-            and **flaps** for ``y`` = <2.1 : 2.9> ``hinge`` 0.6 x/c.
+            This will create **ailerons** for ``y`` = <1:2> ``hinge`` 0.7 x/c and ``y`` = <3:3.5> ``hinge`` 0.6 x/c,
+            and **flaps** for ``y`` = <2.1:2.9> ``hinge`` 0.6 x/c.
         """
         try:
             self.assert_straight()

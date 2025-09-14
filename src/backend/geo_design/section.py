@@ -70,7 +70,7 @@ class Section:
 
     @property
     def trailing_edge_position(self) -> Vector3:
-        """Returns the trailing edge position of the section."""
+        """Returns the trailing-edge position of the section."""
         return self.get_position_at_xc(1)
 
     @property
@@ -89,7 +89,7 @@ class Section:
         return self.leading_edge_position.z
 
     def string(self) -> str:
-        """Returns the current geometry as a .avl type string."""
+        """Returns the current geometry as an .avl type string."""
         _r = (f"\n"
               f"SECTION\n"
               f"{self.leading_edge_position.avl_string} {self.chord} {self.inclination} {self.spanwise_points} {1.0}\n")
@@ -104,14 +104,14 @@ class Control:
     class_name: str
 
     def __init__(self, x_hinge: float, SgnDup: str = '',
-                 gain: float = 1, color: str = 'green', instance_name: str = None) -> None:
+                 gain: float = 1, colour: str = 'green', instance_name: str = None) -> None:
         """
         Parameters:
             x_hinge (float): The x/c position of the hinge. If negative, the surface is on the leading edge.
             SgnDup (bool): The sign of the sign of the hinge.
                 ``+1`` for symmetric deflection, ``-1`` for antisymmetric defection.
             gain (float): The gain of the control surface. Defaults to 1.
-            color (str): The color of the control surface. Defaults to 'green'.
+            colour (str): The colour of the control surface. Defaults to 'green'.
             instance_name (str): The name of the control surface.
         """
         assert -1 < x_hinge < 1
@@ -119,7 +119,7 @@ class Control:
         self.x_hinge = x_hinge
         self.SgnDup = SgnDup
         self.gain = gain
-        self.color = color
+        self.colour = colour
         self.instance_name = instance_name
 
     def __repr__(self) -> str:
@@ -130,7 +130,7 @@ class Control:
         return self.__class__(**self.__dict__)
 
     def string(self) -> str:
-        """Returns the current geometry as a .avl type string."""
+        """Returns the current geometry as an .avl type string."""
         return ("CONTROL\n"
                 f"{self.name} {self.gain} {self.x_hinge} 0. 0. 0. {self.SgnDup}\n")
 
@@ -141,7 +141,7 @@ class Control:
                 and self.gain == other.gain
                 and self.x_hinge == other.x_hinge
                 and self.SgnDup == other.SgnDup
-                and self.color == other.color)
+                and self.colour == other.colour)
 
     @property
     def name(self):
@@ -161,8 +161,8 @@ class PreDefControl(Control):
     """An interface for pre-defined types of control surfaces."""
 
     def __init__(self, x_hinge: float, SgnDup: str,
-                 gain: float = 1, color: str = 'green') -> None:
-        super().__init__(x_hinge, SgnDup, gain, color)
+                 gain: float = 1, colour: str = 'green') -> None:
+        super().__init__(x_hinge, SgnDup, gain, colour)
         assert self.class_name is not None
 
     def copy(self: T) -> T:
@@ -178,7 +178,7 @@ class Flaps(PreDefControl):
             x_hinge (float): The x/c position of the hinge.
         """
         assert 0 < x_hinge < 1
-        super().__init__(x_hinge=x_hinge, SgnDup='+1', color='yellow')
+        super().__init__(x_hinge=x_hinge, SgnDup='+1', colour='yellow')
 
 
 class Ailerons(PreDefControl):
@@ -202,7 +202,7 @@ class Elevators(PreDefControl):
             x_hinge (float): The x/c position of the hinge.
         """
         assert 0 <= x_hinge <= 1
-        super().__init__(x_hinge=x_hinge, SgnDup='+1', color='green3')
+        super().__init__(x_hinge=x_hinge, SgnDup='+1', colour='green3')
 
 
 class Rudder(PreDefControl):
@@ -214,7 +214,7 @@ class Rudder(PreDefControl):
             x_hinge (float): The x/c position of the hinge.
         """
         assert 0 <= x_hinge <= 1
-        super().__init__(x_hinge=x_hinge, SgnDup='-1', color='purple4')
+        super().__init__(x_hinge=x_hinge, SgnDup='-1', colour='purple4')
 
 
 control_types = [Flaps, Ailerons, Elevators, Rudder]

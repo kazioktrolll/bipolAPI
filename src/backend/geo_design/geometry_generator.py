@@ -19,6 +19,7 @@ from ..vector3 import Vector3
 
 class GeometryGenerator:
     """A factory class for ``Geometry`` objects."""
+
     @staticmethod
     def empty() -> 'Geometry':
         g = Geometry(
@@ -58,6 +59,7 @@ class GeometryGenerator:
 
 class FromAvl:
     """A subclass of ``GeometryGenerator``, for handling AVL-style files."""
+
     @classmethod
     def load(cls, path: Path | str) -> Geometry:
         """Creates a Geometry object based on .avl file."""
@@ -78,7 +80,7 @@ class FromAvl:
     ### of the structure and so on.
 
     ### Parsing this properly is probably above my qualifications, and definitely above my non-existent pay.
-    ### As this functionality in not really that useful, the code is just good enough to work for the majority of cases,
+    ### As this functionality is not really that useful, the code is just good enough to work for the majority of cases,
     ### if you are thinking of improving/fixing/rewriting this, then stop.
 
     ### If you didn't - good luck.
@@ -125,11 +127,10 @@ class FromAvl:
     def _handle_top_level(cls, lines: list[str], path: Path) -> Geometry:
         """Returns a Geometry object based on .avl file."""
         # Reading
-        readable = '\n'.join(lines)
         name = lines.pop(0)
         mach = float(lines.pop(0).split()[0])
-        syms = tuple(map(float, lines.pop(0).split()[:3]))
-        refs = tuple(map(float, lines.pop(0).split()[:3]))
+        _ = tuple(map(float, lines.pop(0).split()[:3]))  # symmetries
+        _ = tuple(map(float, lines.pop(0).split()[:3]))  # reference values
         ref_pos = tuple(map(float, lines.pop(0).split()[:3]))
         next_line = lines.pop(0)
         try:
@@ -166,7 +167,7 @@ class FromAvl:
         }
         name = block.pop(0)
         surface_data['name'] = name
-        Nchord_etc = block.pop(0)
+        _ = block.pop(0)  # Nchord etc
 
         keywords = (
             'COMPONENT',
@@ -193,7 +194,7 @@ class FromAvl:
                     if float(lines[1].split()[0]) == 0.0:
                         surface_data['y_duplicate'] = True
                     else:
-                        cls._error(f"YDUPLICATE cannot be non-zero!")  # TODO: fix?
+                        cls._error(f"YDUPLICATE cannot be non-zero!")
                 case 'SCALE':
                     scale = tuple(map(float, lines[1].split()[:3]))
                 case 'TRANSLATE':

@@ -15,6 +15,7 @@ val_dict = dict[str, float]
 
 class ResultsParser:
     """A toolbox class to parse the AVL return string."""
+
     @staticmethod
     def _split_dump(dump: str) -> list[str]:
         """Splits the dump string on === lines."""
