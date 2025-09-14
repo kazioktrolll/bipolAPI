@@ -20,6 +20,7 @@ from ..geo_design import Geometry
 
 
 def get_gs_path() -> Path:
+    """Returns Path to GhostScript."""
     base_path = Path(__file__).resolve().parent.parent.parent
     gs_exe = base_path / "ghostscript" / "bin" / "gswin64.exe"
     if not gs_exe.exists():
@@ -28,6 +29,7 @@ def get_gs_path() -> Path:
 
 
 class ImageGetter:
+    """A toolbox class to simplify image generation from AVL."""
     @classmethod
     def get_image(cls, avl_file_path: str | Path, command: str, app_wd: str | Path) -> Path:
         """
@@ -38,11 +40,14 @@ class ImageGetter:
         :param app_wd: App working directory.
         :return: Path to the .png image.
         """
+        # Execute the given command
         dump = AVLInterface.execute(command, avl_file_path, app_wd)
-
+        # Open or create a directory for images
         img_dir = Path(app_wd) / 'images'
         if not img_dir.exists(): img_dir.mkdir()
 
+        # The images are saved as 'img_{num}.png', so we need to find the next free number to use,
+        # in case any files already exist.
         pattern = re.compile(r"img_(?P<index>\d+)\.png")
         # Extract numbers from matching filenames
         numbers = [
@@ -51,23 +56,26 @@ class ImageGetter:
             if (match := pattern.match(file.name))
         ]
         next_number = max(numbers, default=0) + 1
-
+        # Create the path to save the .png under.
         png_path = img_dir / f'img_{next_number}.png'
+        # AVL saves the created graphics as '{WorkDir}/plot.ps' by default
         ps_path = app_wd / 'plot.ps'
         if not ps_path.exists():
             raise FileNotFoundError('Cannot find plot.ps file')
-
-        cls.ps2png(ps_path, png_path)
-        Thread(target=cls.cleanup, args=(ps_path,), daemon=True).start()
+        # Turn the .ps file into a .png file
+        cls._ps2png(ps_path, png_path)
+        # Create a Thread to clean-up, not to block the app
+        Thread(target=cls._cleanup, args=(ps_path,), daemon=True).start()
         return png_path
 
     @staticmethod
-    def cleanup(ps_path: Path, wait_time: float = 3):
+    def _cleanup(ps_path: Path, wait_time: float = 3):
+        """Deletes the given .ps file after a delay, as the GhostScript needs some time to process the file."""
         sleep(wait_time)
         ps_path.unlink()
 
-    @classmethod
-    def ps2png(cls, ps_path: str | Path, png_path: str | Path, add_background: bool = True):
+    @staticmethod
+    def _ps2png(ps_path: str | Path, png_path: str | Path, add_background: bool = True):
         """Converts the given PostScript file to a PNG file."""
         try:
             run([
@@ -81,8 +89,9 @@ class ImageGetter:
         except CalledProcessError as e:
             raise RuntimeError(e)
 
-    @classmethod
-    def image_from_path(cls, path: Path) -> Image.Image:
+    @staticmethod
+    def _image_from_path(path: Path) -> Image.Image:
+        """Returns a PIL Image from the given path."""
         return Image.open(path).rotate(-90, expand=True)
 
     @classmethod
@@ -120,7 +129,7 @@ class ImageGetter:
                    '\n'
                    'Q\n')
         png_path = cls.get_image(avl_file_path, command, app_wd)
-        return cls.image_from_path(png_path)
+        return cls._image_from_path(png_path)
 
     @classmethod
     def get_geometry(cls,
@@ -144,7 +153,7 @@ class ImageGetter:
                    '\n'
                    'Q\n')
         png_path = cls.get_image(avl_file_path, command, app_wd)
-        return cls.image_from_path(png_path)
+        return cls._image_from_path(png_path)
 
     @classmethod
     def get_loading(cls,
@@ -185,4 +194,4 @@ class ImageGetter:
                    '\n'
                    'Q\n')
         png_path = cls.get_image(avl_file_path, command, app_wd)
-        return cls.image_from_path(png_path)
+        return cls._image_from_path(png_path)

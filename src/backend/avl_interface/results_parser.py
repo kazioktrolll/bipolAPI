@@ -14,8 +14,9 @@ val_dict = dict[str, float]
 
 
 class ResultsParser:
-    @classmethod
-    def _split_dump(cls, dump: str) -> list[str]:
+    """A toolbox class to parse the AVL return string."""
+    @staticmethod
+    def _split_dump(dump: str) -> list[str]:
         """Splits the dump string on === lines."""
         dump = re.split(r'=+\r\n', dump)
         return dump
@@ -31,14 +32,14 @@ class ResultsParser:
         if '*' in geom: return '\n'.join([line for line in geom.splitlines() if '*' in line])
         return None
 
-    @classmethod
-    def chop_results(cls, dump: str) -> list[str]:
+    @staticmethod
+    def chop_results(dump: str) -> list[str]:
         """Returns the relevant part from the input 'forces' string."""
         dump = re.split(r'-{61,}', dump)
         return [block for block in dump if 'Vortex Lattice Output' in block]
 
-    @classmethod
-    def forces_to_dict(cls, forces_str: str) -> val_dict:
+    @staticmethod
+    def forces_to_dict(forces_str: str) -> val_dict:
         """Takes the chopped 'forces' string and converts it to a name-value dict."""
         vals = re.sub(r'\s+=\s+', '=', forces_str)
         vals = re.sub(r'\r\n', '', vals)
@@ -50,8 +51,8 @@ class ResultsParser:
             _r[key] = float(value)
         return _r
 
-    @classmethod
-    def st_file_to_dict(cls, st_str: str) -> val_dict:
+    @staticmethod
+    def st_file_to_dict(st_str: str) -> val_dict:
         """Takes the raw contents of the 'ST' file and converts it to a name-value dict."""
         st_str = re.sub(r'\s*=\s*', '=', st_str)
         st_str = re.sub(r'\n', '', st_str)
@@ -64,8 +65,8 @@ class ResultsParser:
             _r[k] = float(v)
         return _r
 
-    @classmethod
-    def split_st_dict(cls, st_dict: val_dict) -> list[val_dict]:
+    @staticmethod
+    def split_st_dict(st_dict: val_dict) -> list[val_dict]:
         """Splits the 'ST_file' dict into 'forces' and 'ST' """
         breakpoints = ['Alpha', 'CLa']
         result = []
@@ -98,8 +99,9 @@ class ResultsParser:
         except FileNotFoundError:
             return []
 
-    @classmethod
-    def sort_forces_dict(cls, forces_dict: val_dict, join=True) -> val_dict | list[val_dict]:
+    @staticmethod
+    def sort_forces_dict(forces_dict: val_dict, join=True) -> val_dict | list[val_dict]:
+        """Sorts the dict so that relevant values are next to each other."""
         sorted_keys = (
             ('Alpha', 'Beta', 'Mach'),
             ('pb/2V', 'qc/2V', 'rb/2V'),
@@ -120,8 +122,8 @@ class ResultsParser:
         if join: return {k: v for d in sorted_dicts for k, v in d.items()}
         return sorted_dicts
 
-    @classmethod
-    def sort_st_dict(cls, st_dict: val_dict, join=True) -> dict[str, val_dict] | val_dict:
+    @staticmethod
+    def sort_st_dict(st_dict: val_dict, join=True) -> dict[str, val_dict] | val_dict:
         """Sorts the dict so that relevant values are next to each other."""
         Xnp = st_dict.pop('Xnp')
         try:

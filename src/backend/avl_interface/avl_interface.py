@@ -20,8 +20,10 @@ avl_exe_path = Path(__file__).parent.parent.parent / 'avl' / 'avl.exe'
 
 
 class AVLInterface:
-    @classmethod
-    def create_run_file_contents(cls, run_file_data: dict[str, list[float]], height: float) -> str:
+    """A toolbox class to act as the AVL interface.
+    Also contains all methods required to format data into AVL's formats, etc."""
+    @staticmethod
+    def create_run_file_contents(run_file_data: dict[str, list[float]], height: float) -> str:
         """Returns a string containing the input data transformed into a .run format."""
         no_of_runs = len(list(run_file_data.values())[0])
         _r = ''
@@ -34,8 +36,8 @@ class AVLInterface:
                f'density = {physics.get_density(height)} kg/m^3\n')
         return _r
 
-    @classmethod
-    def create_st_command(cls, paths: list[Path]) -> str:
+    @staticmethod
+    def create_st_command(paths: list[Path]) -> str:
         """Creates a command string for running a given number of cases, each run 'ST' and saved to file."""
         _r = 'OPER\n'
         for i, path in enumerate(paths):
@@ -47,14 +49,32 @@ class AVLInterface:
                'Q\n')
         return _r
 
-    @classmethod
-    def execute(cls, command: str, avl_file_path, app_wd: Path) -> str:
+    @staticmethod
+    def execute(command: str, avl_file_path: Path | str, app_wd: Path) -> str:
+        """
+        Executes the given AVL command or chain of commands, returns the full AVL output as string.
+
+        Creates a new ``Popen`` instance of AVL, using stdin ``PIPE`` feeds the instance the given command,
+        and returns the full stdout ``PIPE`` output as a string.
+        If any errors are encountered, a respective exception will be raised, except for ``SINVRT``.
+
+        Parameters:
+            command (str): The command to be executed. For a chain of commands, join them using \\n.
+            avl_file_path (Path, str): Path to the .avl file to run the AVL on.
+            app_wd (Path): Path to the application working directory, where the AVL should be run from.
+              Any files created directly by AVL will be saved there.
+        Returns:
+            str: The full AVL output as string.
+        Raises:
+            Exception: If an error occurs while executing the command.
+        """
         avl = Popen([avl_exe_path, str(avl_file_path)], stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=True, cwd=app_wd)
+        if command[-2:] != '\n': command += '\n'
         dump, err = avl.communicate(bytes(command, encoding='utf-8'), timeout=None)
         dump = dump.decode()
         err = err.decode()
         if err:
-            # Ignore 'Notes' - non critical notifications
+            # Ignore 'Notes' - non-critical notifications
             err = '\n'.join([line for line in err.split('\n') if 'Note' not in line])
             if err: raise RuntimeError(err)
         if '***' in dump:
@@ -67,8 +87,9 @@ class AVLInterface:
             raise RuntimeError('SDUPL - geometry resolution too high, decrease mesh density.')
         return dump
 
-    @classmethod
-    def create_temp_files(cls, temp_dir: Path, nof_cases: int) -> list[Path]:
+    @staticmethod
+    def create_temp_files(temp_dir: Path, nof_cases: int) -> list[Path]:
+        """Returns a list of empty temporary files."""
         path = temp_dir.joinpath('st_files')
         path.mkdir()
         files = [path.joinpath(f'{i + 1}') for i in range(nof_cases)]
@@ -84,12 +105,20 @@ class AVLInterface:
         """
         Runs all cases using 'ST' and returns the results.
 
+        Parameters:
+            geometry (Geometry): The geometry to turn into .avl file.
+            data (dict[str, list[float]): The data to turn into .run file.
+            height (float): The flight altitude, in meters.
+            flag (AbortFlag): The flag object to abort mid-execution, in case user cancels the calculation.
+            app_work_dir (Path): The application working directory, where the AVL should be run from.
+
         Return:
-            [[{name-value} for intro, forces, ST] for each case]
+            ([[{name-value} for intro, forces, ST] for each case], errors)
         """
-        if flag: return [], 'Aborted'
+        if flag: return [], 'Aborted' # If user cancelled the calculation mid-execution. Will be checked multiple times.
         nof_cases = len(list(data.values())[0])
         contents = cls.create_run_file_contents(data, height)
+        # Create a new directory for this run, at the first not-used name.
         i = 0
         while True:
             try:
@@ -98,26 +127,29 @@ class AVLInterface:
                 break
             except FileExistsError:
                 i += 1
-
+        # Create the required empty files
         files = cls.create_temp_files(work_dir, nof_cases)
-
         avl_file_path = work_dir / 'plane.avl'
         run_file_path = work_dir / 'plane.run'
+        # Fill the files with data
         with open(avl_file_path, 'w') as avl_file:
             avl_file.write(geometry.string())
         with open(run_file_path, 'w') as run_file:
             run_file.write(contents)
+        # Create the command to execute the series of measurements, and run it
         if not flag:
             command = cls.create_st_command(files)
             dump = cls.execute(command, avl_file_path, app_work_dir)
+        # Parse data and potential errors
         if not flag:
             errors = ResultsParser.loading_issues_from_dump(dump)
             vals = ResultsParser.all_sts_to_data(files)
         else:
             errors = 'Aborted'
             vals = []
-
+        # Delete the working directory of this series
         shutil.rmtree(work_dir)
+        # Return data, errors
         return vals, errors
 
 
