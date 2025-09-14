@@ -29,7 +29,7 @@ layers = [
 ]
 
 
-def get_temperature(h: float) -> float:
+def _get_temperature(h: float) -> float:
     """Calculate temperature at a given altitude, up to 80 km.
 
     :param h: Altitude in meters.
@@ -42,10 +42,10 @@ def get_temperature(h: float) -> float:
         h1 = layers[i + 1][0]
         if h0 <= h_km < h1:
             return T0 + L * (h_km - h0)
-    return layers[-1][1]  # Altitude exactly at top layer
+    return layers[-1][1]  # Altitude exactly at the top layer
 
 
-def get_pressure(h: float) -> float:
+def _get_pressure(h: float) -> float:
     """Calculate pressure at a given altitude, up to 80 km.
 
     :param h: Altitude in meters.
@@ -66,7 +66,7 @@ def get_pressure(h: float) -> float:
                 base = T0 / T
                 exponent = (g0 * M) / (R_star * L * 1e-3)
                 return P0 * base ** exponent
-    return layers[-1][2]  # Altitude exactly at top layer
+    return layers[-1][2]  # Altitude exactly at the top layer
 
 
 def get_density(h: float) -> float:
@@ -76,8 +76,8 @@ def get_density(h: float) -> float:
     :return: Air density in kg/m^3.
     """
     assert 0 <= h <= 8e4
-    T = get_temperature(h)
-    P = get_pressure(h)
+    T = _get_temperature(h)
+    P = _get_pressure(h)
     return P / (R * T)
 
 
@@ -91,6 +91,6 @@ def get_mach(velocity: float, altitude: float = 0.0) -> float:
         Mach number.
     """
     assert 0 <= altitude <= 8e4
-    T = get_temperature(altitude)
+    T = _get_temperature(altitude)
     a = (SHR_air * R * T) ** 0.5
     return velocity / a

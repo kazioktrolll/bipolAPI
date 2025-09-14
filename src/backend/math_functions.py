@@ -32,7 +32,7 @@ def best_factor_pair(n: int) -> tuple[int, int]:
 
 
 def distribute_units(total_units: int, weights: list[float]) -> list[int]:
-    """Returns a distribution of given number of units, according to given weights."""
+    """Returns a distribution of a given number of units, according to given weights."""
     total_weight = sum(weights)
     if total_weight == 0:
         raise ValueError("Cannot distribute units with zero total weight.")
@@ -44,7 +44,7 @@ def distribute_units(total_units: int, weights: list[float]) -> list[int]:
     # Calculate how many units remain to be distributed
     remaining = total_units - sum(allocations)
 
-    # Distribute remaining units to entries with largest remainders
+    # Distribute remaining units to entries with the largest remainders
     remainders.sort(key=lambda x: -x[1])  # sort descending by remainder
     for i in range(remaining):
         allocations[remainders[i][0]] += 1
@@ -53,6 +53,7 @@ def distribute_units(total_units: int, weights: list[float]) -> list[int]:
 
 
 def sort_loop(points):
+    """Sorts points counterclockwise around their centre of mass, starting from the point with max x."""
     cx = sum(x for x, y in points) / len(points)
     cy = sum(y for x, y in points) / len(points)
 
@@ -63,6 +64,6 @@ def sort_loop(points):
     # Sort counterclockwise by angle
     sorted_points = sorted(points, key=angle)
 
-    # Rotate so it starts from point with max x
+    # Rotate so it starts from the point with max x
     max_x_index = max(range(len(sorted_points)), key=lambda i: sorted_points[i][0])
     return sorted_points[max_x_index:] + sorted_points[:max_x_index]
