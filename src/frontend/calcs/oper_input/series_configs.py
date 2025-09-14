@@ -7,30 +7,28 @@ the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 """
 
-
-
-
 from abc import ABC, abstractmethod
 from typing import final, Literal
 
 from customtkinter import CTkFrame, CTkLabel, CTkButton, CTkOptionMenu
+
 from .files_manager import FilesManager
 from ...advanced_entry import AdvancedEntry
-from ...popup import Popup
-from ...help_top_level import HelpTopLevel
 from ...advanced_entry import EntryWithInstructionsBlock
+from ...help_top_level import HelpTopLevel
+from ...popup import Popup
 
 
 class ConfigItem(CTkFrame, ABC):
     def __init__(self, parent):
         super().__init__(parent, fg_color='transparent')
         self.values: list[float] | float = []
-        self.value_label = CTkLabel(self, text='0.0', width=100, anchor='e')
-        self.set_button = CTkButton(self, text='Set', width=40, command=self.set_value)
-        self.nof_values_label = CTkLabel(self, text='(0)', width=30, anchor='e')
+        self._value_label = CTkLabel(self, text='0.0', width=100, anchor='e')
+        self._set_button = CTkButton(self, text='Set', width=40, command=self.set_value)
+        self._nof_values_label = CTkLabel(self, text='(0)', width=30, anchor='e')
 
     @abstractmethod
-    def build(self) -> None: ...
+    def _build(self) -> None: ...
 
     @abstractmethod
     def set_value(self) -> None: ...
@@ -49,15 +47,15 @@ class ConstantConfig(ConfigItem):
     def __init__(self, parent):
         super().__init__(parent)
         self.values = 0.0
-        self.nof_values_label.configure(text='')
+        self._nof_values_label.configure(text='')
         self.entry = AdvancedEntry(self, (lambda _: None), width=120)
-        self.build()
+        self._build()
 
-    def build(self) -> None:
-        self.value_label.grid(column=0, row=0, padx=3)
-        self.nof_values_label.grid(column=1, row=0, padx=3)
+    def _build(self) -> None:
+        self._value_label.grid(column=0, row=0, padx=3)
+        self._nof_values_label.grid(column=1, row=0, padx=3)
         self.entry.grid(column=2, row=0, padx=3)
-        self.set_button.grid(column=3, row=0, padx=3)
+        self._set_button.grid(column=3, row=0, padx=3)
 
     def set_value(self) -> None:
         val = self.entry.get()
@@ -70,9 +68,9 @@ class ConstantConfig(ConfigItem):
             return
         self.values = val
         if len(str(val)) > 12:
-            self.value_label.configure(text=f'{val:.3e}')
+            self._value_label.configure(text=f'{val:.3e}')
         else:
-            self.value_label.configure(text=f'{val}')
+            self._value_label.configure(text=f'{val}')
 
 
 class RangeConfig(ConfigItem):
@@ -81,14 +79,14 @@ class RangeConfig(ConfigItem):
         self.values = []
         self.entries = EntryWithInstructionsBlock(self, (lambda _, __: None), ('from', 'step', 'to'),
                                                   width=120, padx=1, fg_color='transparent')
-        self.build()
+        self._build()
 
-    def build(self):
-        self.value_label.grid(column=0, row=0, padx=3)
-        self.nof_values_label.grid(column=1, row=0, padx=3)
+    def _build(self):
+        self._value_label.grid(column=0, row=0, padx=3)
+        self._nof_values_label.grid(column=1, row=0, padx=3)
         self.columnconfigure(2, minsize=126)
         self.entries.grid(column=2, row=0, sticky='ew')
-        self.set_button.grid(column=3, row=0, padx=3)
+        self._set_button.grid(column=3, row=0, padx=3)
 
     def set_value(self) -> None:
         try:
@@ -99,12 +97,12 @@ class RangeConfig(ConfigItem):
             return
         self.entries.clear()
         self.focus_set()
-        self.value_label.configure(text=f'{round(f, 3)} : {round(s, 3)} : {round(t, 3)}')
+        self._value_label.configure(text=f'{round(f, 3)} : {round(s, 3)} : {round(t, 3)}')
         self.values.clear()
         while f <= t:
             self.values.append(f)
             f += s
-        self.nof_values_label.configure(text=f'({self.nof_values})')
+        self._nof_values_label.configure(text=f'({self.nof_values})')
 
 
 class FileConfig(ConfigItem):
@@ -113,11 +111,11 @@ class FileConfig(ConfigItem):
         self.files_manager = files_manager
         self.choose_file_button = CTkButton(self, text='Choose File', width=166, command=self.choose_file)
         self.values: list[float] = []
-        self.build()
+        self._build()
 
-    def build(self):
-        self.value_label.grid(column=0, row=0, padx=3)
-        self.nof_values_label.grid(column=1, row=0, padx=3)
+    def _build(self):
+        self._value_label.grid(column=0, row=0, padx=3)
+        self._nof_values_label.grid(column=1, row=0, padx=3)
         self.choose_file_button.grid(column=2, row=0, columnspan=2, sticky='ew', padx=3)
 
     def choose_file(self) -> None:
@@ -140,8 +138,8 @@ class FileConfig(ConfigItem):
                 series_name = series_menu.get()
                 if series_name:
                     self.values = self.files_manager.files_dicts[file_name][series_name]
-                    self.value_label.configure(text=f'{file_name} \\ {series_name}')
-                    self.nof_values_label.configure(text=f'({self.nof_values})')
+                    self._value_label.configure(text=f'{file_name} \\ {series_name}')
+                    self._nof_values_label.configure(text=f'({self.nof_values})')
             popup.destroy()
 
         CTkButton(popup.frame, text='Set', command=set_and_close
@@ -155,48 +153,48 @@ class FileConfig(ConfigItem):
 class SeriesConfig(CTkFrame):
     def __init__(self, parent, files_manager: FilesManager):
         super().__init__(parent)
-        self.mode_menu = CTkOptionMenu(self, values=['Constant', 'Range', 'From File'], command=self.switch_mode, width=100)
-        self.constant_entry = ConstantConfig(self)
-        self.range_entry = RangeConfig(self)
-        self.from_file_entry = FileConfig(self, files_manager)
-        self.active_entry = None
-        self.series_enabled = False
-        self.build()
+        self._mode_menu = CTkOptionMenu(self, values=['Constant', 'Range', 'From File'], command=self._switch_mode, width=100)
+        self._constant_entry = ConstantConfig(self)
+        self._range_entry = RangeConfig(self)
+        self._from_file_entry = FileConfig(self, files_manager)
+        self._active_entry = None
+        self._series_enabled = False
+        self._build()
 
     @property
     def mode(self) -> Literal['Constant', 'Range', 'From File']:
-        return self.mode_menu.get() # noqa sklej pizde
+        return self._mode_menu.get()  # noqa sklej pizde
 
-    def build(self):
+    def _build(self):
         self.columnconfigure(0, minsize=100)
         self.update()
 
     def update(self):
-        if self.series_enabled:
-            self.mode_menu.grid(column=0, row=0)
+        if self._series_enabled:
+            self._mode_menu.grid(column=0, row=0)
         else:
-            self.mode_menu.grid_forget()
-        self.switch_mode()
+            self._mode_menu.grid_forget()
+        self._switch_mode()
 
-    def switch_mode(self, mode: Literal['Constant', 'Range', 'From File'] | None = None):
+    def _switch_mode(self, mode: Literal['Constant', 'Range', 'From File'] | None = None):
         if mode is None: mode = self.mode
         curr_active = {
-            'Constant': self.constant_entry,
-            'Range': self.range_entry,
-            'From File': self.from_file_entry
+            'Constant': self._constant_entry,
+            'Range': self._range_entry,
+            'From File': self._from_file_entry
         }[mode]
-        if curr_active is self.active_entry: return
-        if self.active_entry is not None:
-            self.active_entry.grid_forget()
-        self.active_entry = curr_active
-        self.active_entry.grid(column=1, row=0)
+        if curr_active is self._active_entry: return
+        if self._active_entry is not None:
+            self._active_entry.grid_forget()
+        self._active_entry = curr_active
+        self._active_entry.grid(column=1, row=0)
 
     def set_mode(self, mode: Literal['Constant', 'Range', 'From File']):
-        self.mode_menu.set(mode)
+        self._mode_menu.set(mode)
         self.update()
 
     def get_value(self) -> float | list[float]:
-        return self.active_entry.get_values()
+        return self._active_entry.get_values()
 
     @property
     def vals_size(self) -> int:
