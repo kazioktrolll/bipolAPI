@@ -19,7 +19,7 @@ class ResultsDisplay(CTkFrame):
         self.controls_names = controls_names
         self.results: list[list[dict[str, float]]] = [[{}, {}]]
         self.page = 0
-        self.page_button = PagesNumberStrip(self, command=self.switch_page)
+        self.page_button = PagesNumberStrip(self, command=self.switch_page, dynamic_resizing=False)
         self.mode_button = CTkSegmentedButton(self, values=['Forces', 'Stability'], command=self.switch_mode)
         self.csv_button = CTkButton(self, text='Save to .csv', command=self.save_to_csv)
         self.forces_display = ForcesDisplay(self, controls_names)
@@ -39,18 +39,18 @@ class ResultsDisplay(CTkFrame):
 
         self.rowconfigure(0, weight=0)
         self.rowconfigure(1, weight=0)
+        self.rowconfigure(2, weight=1)
         self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=0)
 
         self.rowconfigure(0, minsize=30)
-        self.page_button.grid(row=0, column=0, columnspan=2, sticky='nsew')
+        self.page_button.grid(row=0, column=0, columnspan=2, sticky='nsew', padx=3)
         self.page_button.hide()
         self.mode_button.grid(row=1, column=0, sticky='nsew', padx=3, pady=6)
         self.csv_button.grid(row=1, column=1, sticky='nsew', padx=3, pady=6)
         self.current_display.grid(row=2, column=0, columnspan=2, sticky='nsew')
-        self.rowconfigure(2, weight=1)
-        self.trefftz_button.grid(row=4, column=0, columnspan=2, sticky='nsew', pady=10, padx=5)
-        self.loading_button.grid(row=5, column=0, columnspan=2, sticky='nsew', pady=10, padx=5)
+        self.trefftz_button.grid(row=4, column=0, columnspan=2, sticky='nsew', pady=6, padx=3)
+        self.loading_button.grid(row=5, column=0, columnspan=2, sticky='nsew', pady=6, padx=3)
         self.update()
 
     def update(self):
@@ -271,9 +271,10 @@ class PagesNumberStrip(CTkSegmentedButton):
             end = self._size
             do_next = False
 
-        values = ['<'] if do_previous else []
+        values = ['<'] if do_previous else [' ']
         values += list(map(str, range(start, end + 1)))
         if do_next: values += ['>']
+        else: values += ['‎ ']
 
         self.configure(values=values)
 
@@ -282,11 +283,13 @@ class PagesNumberStrip(CTkSegmentedButton):
         self.change_chapter(start_previous)
 
     def next(self):
-        start_previous = (self._current_chapter + 1) * self._chapter_size
-        self.change_chapter(start_previous)
+        start_next = (self._current_chapter + 1) * self._chapter_size
+        self.change_chapter(start_next)
 
     def set(self, value: str, from_variable_callback: bool = False, from_button_callback: bool = False):
-        if value == '<':
+        if value == ' ' or value == '‎ ':
+            return
+        elif value == '<':
             self.previous()
         elif value == '>':
             self.next()
