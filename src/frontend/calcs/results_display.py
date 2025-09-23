@@ -114,9 +114,9 @@ class TextBox(CTkFrame):
         self.columnconfigure(0, weight=0, minsize=5)
         if self.is_named: self.name_label.grid(row=0, column=1, sticky='nsew', padx=5, pady=5)
         for i, (key, value) in enumerate(self.dict.items()):
-            CTkLabel(self, text=key, anchor="e", width=80).grid(row=i + 1, column=1, padx=5, pady=2, sticky="e")
+            CTkLabel(self, text=key, anchor="e", width=80, height=1).grid(row=i + 1, column=1, padx=5, pady=2, sticky="e")
 
-            entry = CTkEntry(self, width=80, border_width=0, fg_color='transparent')
+            entry = CTkEntry(self, width=80, height=14, border_width=0, fg_color='transparent')
             entry.insert(0, self._format(value))
             entry.configure(state="readonly")  # Make text selectable but not editable
             entry.grid(row=i + 1, column=2, padx=5, pady=2, sticky="w")

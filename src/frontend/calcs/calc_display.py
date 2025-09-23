@@ -9,6 +9,7 @@ the Free Software Foundation, either version 3 of the License, or
 from pathlib import Path
 from customtkinter import CTkFrame, CTkButton, CTkLabel
 from threading import Thread
+import logging
 from .results_display import ResultsDisplay
 from .oper_input import OperSeriesInputPanel
 from .static_input import StaticInputPanel
@@ -73,29 +74,35 @@ class CalcDisplay(CTkFrame):
             self.error(e.args[0])
             return None
         except ResourceWarning:
-            force = AskPopup.ask('It is highly discouraged to run more than a thousand cases at once.\nContinue anyway?',
+            logging.info('Asked to confirm >1000 cases run')
+            force = AskPopup.ask('It is highly discouraged to run more than 1000 cases at once.\nContinue anyway?',
                                  ['Cancel', 'Continue'], 'Cancel')
-            print(force)
+            logging.info(f'User chose {force}')
             if force == 'Cancel': return None
-            return self.oip.get_run_file_data(forced=True)
+            oip_data, size = self.oip.get_run_file_data(ignore_resource_warning=True)
+            return self.static_input.get_data(size) | oip_data
 
     def run_case(self):
         if len(self.geometry.surfaces) == 0: return
         self.exec_button.configure(state='disabled')
-        popup = Popup(self)
-        CTkLabel(popup, text='Running...').grid(row=0, column=0, padx=5, pady=5, sticky='nsew')
-        abort_button = CTkButton(popup, text='Cancel')
-        abort_button.grid(row=1, column=0, padx=5, pady=5, sticky='news')
-        popup.run()
         data = self.get_data()
         abort_flag = AbortFlag()
 
+        popup = Popup(self)
+        CTkLabel(popup.frame, text='Running...').grid(row=0, column=0, padx=5, pady=5, sticky='nsew')
+        abort_button = CTkButton(popup.frame, text='Cancel')
+        abort_button.grid(row=1, column=0, padx=5, pady=5, sticky='news')
+        popup.run()
+
         def task():
+            logging.info('Running calculation')
             vals, errors = AVLInterface.run_series(self.geometry, data, self.static_input.height, abort_flag, self.app_wd)
             self.after(0, on_task_done, *(vals, errors))
 
         def abort():
+            logging.info('Aborting calculation')
             abort_flag.abort()
+            self.error('Calculation aborted')
             on_task_done()
 
         def on_task_done(vals=None, errors=''):

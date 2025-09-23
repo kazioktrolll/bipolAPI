@@ -10,6 +10,7 @@ the Free Software Foundation, either version 3 of the License, or
 
 from customtkinter import CTkFrame
 from typing import final
+import logging
 from ..app import App
 
 
@@ -29,6 +30,7 @@ class Scene(CTkFrame):
 
     def __init__(self, app: App):
         super().__init__(app.root)
+        logging.info(f'Switching to {type(self).__name__}')
         self.app = app
         self.to_update = []
         self.build()

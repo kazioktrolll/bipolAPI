@@ -10,6 +10,7 @@ the Free Software Foundation, either version 3 of the License, or
 import shutil
 from pathlib import Path
 from subprocess import Popen, PIPE
+import logging
 
 from .results_parser import ResultsParser
 from .. import physics
@@ -69,6 +70,7 @@ class AVLInterface:
         Raises:
             Exception: If an error occurs while executing the command.
         """
+        logging.debug(f'Executing AVL command: {command.replace('\n', ' // ')}')
         avl = Popen([avl_exe_path, str(avl_file_path)], stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=True, cwd=app_wd)
         if command[-2:] != '\n': command += '\n'
         dump, err = avl.communicate(bytes(command, encoding='utf-8'))
@@ -91,6 +93,7 @@ class AVLInterface:
     @staticmethod
     def create_temp_files(temp_dir: Path, nof_cases: int) -> list[Path]:
         """Returns a list of empty temporary files."""
+        logging.debug(f'Creating {nof_cases} temporary files at {temp_dir.name}.')
         path = temp_dir.joinpath('st_files')
         path.mkdir()
         files = [path.joinpath(f'{i + 1}') for i in range(nof_cases)]
@@ -118,6 +121,7 @@ class AVLInterface:
         """
         if flag: return [], 'Aborted'  # If the user cancelled the calculation mid-execution. Will be checked multiple times.
         nof_cases = len(list(data.values())[0])
+        logging.info(f'Running {nof_cases} cases.')
         contents = cls.create_run_file_contents(data, height)
         # Create a new directory for this run, at the first not-used name.
         i = 0
@@ -128,6 +132,7 @@ class AVLInterface:
                 break
             except FileExistsError:
                 i += 1
+        logging.debug(f'Created temporary directory for series: {work_dir.name}')
         # Create the required empty files
         files = cls.create_temp_files(work_dir, nof_cases)
         avl_file_path = work_dir / 'plane.avl'
@@ -141,9 +146,12 @@ class AVLInterface:
         if not flag:
             command = cls.create_st_command(files)
             dump = cls.execute(command, avl_file_path, app_work_dir)
+            logging.info('Finished running series.')
         # Parse data and potential errors
         if not flag:
             errors = ResultsParser.loading_issues_from_dump(dump)  # noqa The dump is not referenced before assignment, as flag is irreversible.
+            if errors: logging.warning(f'Running series resulted in errors: {errors}')
+            else: logging.info('No errors found.')
             vals = ResultsParser.all_sts_to_data(files)
         else:
             errors = 'Aborted'
@@ -161,6 +169,7 @@ class AbortFlag:
         self._aborted = False
 
     def abort(self):
+        logging.warning('Abort flag raised.')
         self._aborted = True
 
     def __bool__(self):

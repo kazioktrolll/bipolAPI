@@ -9,9 +9,13 @@ the Free Software Foundation, either version 3 of the License, or
 
 
 from src.app import App
-from src.scenes import GeoDesignScene
+from src.scenes import GeoDesignScene, CalcScene
+from src.backend.geo_design import GeometryGenerator
+import logging
 
 
+logging.basicConfig(level=logging.DEBUG)
 app = App()
-app.set_scene(GeoDesignScene(app))
+app.set_geometry(GeometryGenerator.default())
+app.set_scene(CalcScene(app))
 app.run()

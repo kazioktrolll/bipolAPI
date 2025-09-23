@@ -13,6 +13,7 @@ from typing import Callable
 from tempfile import TemporaryDirectory
 import pickle
 import os
+import logging
 from src.backend.geo_design import Geometry, GeometryGenerator
 from src.backend import handle_crash, Settings
 
@@ -31,6 +32,7 @@ class App:
     def __init__(self):
         from customtkinter import CTk, set_appearance_mode, set_default_color_theme
         from .scenes import Scene
+        logging.info('Initializing app')
         set_appearance_mode("Dark")
         set_default_color_theme("blue")
         self.root = CTk()
@@ -78,6 +80,7 @@ class App:
         from src.frontend import AskPopup
 
         def kill():
+            logging.info('Exiting the app.')
             App.destroy_all_children(self.root)
             self.work_dir.cleanup()
             self.root.destroy()
@@ -126,6 +129,7 @@ class App:
         if path == Path('.'):
             return
         import pickle
+        logging.info(f'Saving as {path}')
         with open(path, 'wb') as f:
             pickle.dump(self.geometry, f)  # noqa
         self.current_save_path = path
@@ -151,6 +155,7 @@ class App:
         ))
         if path == Path('.'):
             return
+        logging.info(f'Loading {path}')
         with open(path, 'rb') as f:
             self.set_geometry(pickle.load(f))
         self.current_save_path = path

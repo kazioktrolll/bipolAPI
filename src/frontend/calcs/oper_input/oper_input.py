@@ -46,15 +46,15 @@ class OperSeriesInput(RowManager):
         """
         super().__init__(grid, master_row)
 
-        # Load all the required names
-        if name not in base_names.keys(): raise ValueError("Invalid name")
-        self.display_name = name  # The name to be displayed in the UI
-        self._command_name = base_names[name][0]  # The callsign to be used in AVL commands
-        self._run_file_name = base_names[name][1]  # The name used in .run files
-
         # Names of all the other parameters this one can be bound to
-        controls_names = {ctrl: (f'd{i}', ctrl) for i, ctrl in enumerate(control_surfaces_names)} if control_surfaces_names else {}
+        controls_names = OperSeriesInput.get_controls_names(control_surfaces_names) if control_surfaces_names else {}
         self.bindable_names = base_names | controls_names | bindable_names
+
+        # Load all the required names
+        if name not in self.bindable_names.keys(): raise ValueError("Invalid name")
+        self.display_name = name  # The name to be displayed in the UI
+        self._command_name = self.bindable_names[name][0]  # The callsign to be used in AVL commands
+        self._run_file_name = self.bindable_names[name][1]  # The name used in .run files
         del self.bindable_names[name]
 
         self.name_label = CTkLabel(self.grid, text=self.display_name.capitalize(), anchor='e')
@@ -64,6 +64,10 @@ class OperSeriesInput(RowManager):
 
         self.bound = False
         self._build()
+
+    @staticmethod
+    def get_controls_names(controls_names: list[str] = None) -> dict[str, tuple[str, str]]:
+        return {ctrl: (f'd{i}', ctrl) for i, ctrl in enumerate(controls_names)}
 
     def get_value(self):
         return self.series_config.get_value()
@@ -118,11 +122,9 @@ class OperSeriesInputPanel(CTkFrame):
         series_toggle_button.set('Single')
         series_toggle_button.grid(row=0, column=3, sticky='w', pady=10)
         self._load_from_file_button = CTkButton(self, text='Add File', width=169, command=self._add_file)
-        self._ois: list[OperSeriesInput] = [
-            OperSeriesInput(grid=self, files_manager=self._files_manager, name='Alpha', master_row=1, control_surfaces_names=control_surfaces)
-        ]
-        for i, name in enumerate(base_names.keys()):
-            if i == 0: continue
+        self._ois: list[OperSeriesInput] = []
+        names = base_names | OperSeriesInput.get_controls_names(control_surfaces)
+        for i, name in enumerate(names.keys()):
             self._ois.append(
                 OperSeriesInput(grid=self, files_manager=self._files_manager, name=name, master_row=i + 1, control_surfaces_names=control_surfaces)
             )
