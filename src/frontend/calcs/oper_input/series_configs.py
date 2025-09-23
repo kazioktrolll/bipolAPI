@@ -41,6 +41,9 @@ class ConfigItem(CTkFrame, ABC):
     @abstractmethod
     def set_value(self) -> None: ...
 
+    @abstractmethod
+    def set_default(self) -> None: ...
+
     @final
     def get_values(self) -> list[float]: return self.values
 
@@ -50,13 +53,17 @@ class ConfigItem(CTkFrame, ABC):
         if isinstance(self.values, int): return 1
         return len(self.values)
 
+    @final
+    def error(self, error: str) -> None:
+        HelpTopLevel(master=None, message=error)
+
 
 class ConstantConfig(ConfigItem):
     def __init__(self, parent):
         super().__init__(parent)
         self.values = 0.0
         self._nof_values_label.configure(text='')
-        self.entry = AdvancedEntry(self, (lambda _: None), width=120)
+        self.entry = AdvancedEntry(self, self.set_value, width=120)
         self._build()
 
     def _build(self) -> None:
@@ -65,20 +72,23 @@ class ConstantConfig(ConfigItem):
         self.entry.grid(column=2, row=0, padx=3)
         self._set_button.grid(column=3, row=0, padx=3)
 
-    def set_value(self) -> None:
-        val = self.entry.get()
+    def set_value(self, value: str = None) -> None:
+        val = value if value is not None else self.entry.get()
         self.entry.delete(0, 'end')
         try:
             val = float(val)
         except ValueError:
             self.entry.flash()
-            HelpTopLevel(None, 'Value must be numeric.')
+            self.error('Value must be numeric.')
             return
         self.values = val
         if len(str(val)) > 12:
             self._value_label.configure(text=f'{val:.3e}')
         else:
             self._value_label.configure(text=f'{val}')
+
+    def set_default(self) -> None:
+        self.set_value('0')
 
 
 class RangeConfig(ConfigItem):
@@ -97,9 +107,9 @@ class RangeConfig(ConfigItem):
         self.entry_block.grid(column=2, row=0, sticky='ew')
         self._set_button.grid(column=3, row=0, padx=3)
 
-    def set_value(self) -> None:
+    def set_value(self, values: tuple[str, str, str] = None) -> None:
         old_vals: tuple[str, str, str] = self._old_input
-        str_vals: list[str] = self.entry_block.get()
+        str_vals: list[str] = values if values is not None else self.entry_block.get()
         bad_input = False
         for i, v in enumerate(str_vals):
             if v == '':
@@ -109,10 +119,16 @@ class RangeConfig(ConfigItem):
                 bad_input = True
 
         if bad_input:
-            HelpTopLevel(None, 'Values must be numeric.')
+            self.error('Values must be numeric.')
             return
 
         f, s, t = map(float, str_vals)
+        if s == 0:
+            self.error('Step must not be 0.')
+            return
+        if f >= t:
+            self.error("Start value must be smaller than end value.")
+            return
         self._old_input = f, s, t
 
         self.entry_block.clear()
@@ -123,6 +139,9 @@ class RangeConfig(ConfigItem):
             self.values.append(f)
             f += s
         self._nof_values_label.configure(text=f'({self.nof_values})')
+
+    def set_default(self) -> None:
+        self.set_value(('0', '1', '1'))
 
 
 class FileConfig(ConfigItem):
@@ -169,6 +188,11 @@ class FileConfig(ConfigItem):
     def set_value(self) -> None:
         pass
 
+    def set_default(self) -> None:
+        self.values.clear()
+        self._value_label.configure(text='')
+        self._nof_values_label.configure(text='(0)')
+
 
 class SeriesConfig(CTkFrame):
     def __init__(self, parent, files_manager: FilesManager):
@@ -208,6 +232,7 @@ class SeriesConfig(CTkFrame):
             self._active_entry.grid_forget()
         self._active_entry = curr_active
         self._active_entry.grid(column=1, row=0)
+        self._active_entry.set_default()
 
     def set_mode(self, mode: Literal['Constant', 'Range', 'From File']):
         self._mode_menu.set(mode)

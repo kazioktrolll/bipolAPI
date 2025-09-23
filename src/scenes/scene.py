@@ -12,6 +12,7 @@ from customtkinter import CTkFrame
 from typing import final
 import logging
 from ..app import App
+from ..backend import handle_crash
 
 
 class Scene(CTkFrame):
@@ -42,7 +43,7 @@ class Scene(CTkFrame):
         """
         if type(self) is not Scene: raise NotImplementedError
 
-    @final
+    @handle_crash
     def update(self) -> None:
         if not self.winfo_exists():
             return

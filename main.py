@@ -15,6 +15,19 @@ import logging
 import argparse
 import sys
 from platformdirs import user_config_dir
+from pathlib import Path
+
+
+def setup_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--log-console", default="WARNING",
+                        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+                        help="Logging level for console output")
+    parser.add_argument("--log-file", default="DEBUG",
+                        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+                        help="Logging level for file output")
+    args = parser.parse_args()
+    return args
 
 
 def setup_logging(console_level: str, file_level: str):
@@ -29,7 +42,8 @@ def setup_logging(console_level: str, file_level: str):
     logger.addHandler(ch)
 
     # --- File handler ---
-    logfile_path = user_config_dir("GAVL") + "/logs.txt"
+    logfile_path = Path(user_config_dir("GAVL")) / "logs.txt"
+    logfile_path.parent.mkdir(parents=True, exist_ok=True)
     fh = logging.FileHandler(logfile_path, mode="w", encoding="utf-8")
     fh.setLevel(getattr(logging, file_level))
     fh.setFormatter(logging.Formatter(
@@ -41,15 +55,8 @@ def setup_logging(console_level: str, file_level: str):
 
 def main():
     # --- parse arguments ---
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--log-console", default="WARNING",
-                        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
-                        help="Logging level for console output")
-    parser.add_argument("--log-file", default="DEBUG",
-                        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
-                        help="Logging level for file output")
-    args = parser.parse_args()
-
+    args = setup_args()
+    # --- setup logging ---
     setup_logging(args.log_console, args.log_file)
 
     # --- run app ---
