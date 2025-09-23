@@ -15,10 +15,11 @@ from typing import Literal
 class Popup(CTkToplevel):
     def __init__(self, master: CTkFrame | None, position: Literal['center', 'cursor'] = 'center'):
         super().__init__(master)
-        self.position = position
+        self.positioning = position
         self.overrideredirect(True)
         self.bind("<Escape>", lambda _: self.destroy())
         self.frame = CTkFrame(self, width=0, height=0, fg_color='transparent')
+        self.frame.grid_propagate(True)
         self.frame.grid(row=1, column=1, sticky="nsew")
         CTkButton(
             self, text='x', command=self.destroy, fg_color='red3', hover_color='red4', width=1, height=1
@@ -31,16 +32,18 @@ class Popup(CTkToplevel):
         self.rowconfigure(2, weight=0, minsize=20)
 
     def run(self):
-        self.wm_geometry("")
+        self.wait_visibility()
+        self.update_idletasks()
         self.resizable(False, False)  # Disable resizing
         self.transient()
         self.grab_set()
         self.focus_force()
 
         def position():
+            self.wm_geometry("")
             w = self.winfo_width()
             h = self.winfo_height()
-            match self.position:
+            match self.positioning:
                 case 'cursor':
                     x = self.winfo_pointerx()
                     y = self.winfo_pointery()
@@ -51,4 +54,4 @@ class Popup(CTkToplevel):
                     raise NotImplementedError
             self.geometry(f"{w}x{h}+{x}+{y}")
 
-        self.after(80, position)  # noqa
+        self.after_idle(position)  # noqa
