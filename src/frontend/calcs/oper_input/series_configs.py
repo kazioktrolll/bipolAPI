@@ -19,6 +19,14 @@ from ...help_top_level import HelpTopLevel
 from ...popup import Popup
 
 
+def is_number(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
+
+
 class ConfigItem(CTkFrame, ABC):
     def __init__(self, parent):
         super().__init__(parent, fg_color='transparent')
@@ -76,26 +84,38 @@ class ConstantConfig(ConfigItem):
 class RangeConfig(ConfigItem):
     def __init__(self, parent):
         super().__init__(parent)
-        self.values = []
-        self.entries = EntryWithInstructionsBlock(self, (lambda _, __: None), ('from', 'step', 'to'),
-                                                  width=120, padx=1, fg_color='transparent')
+        self.values: list[float] = []
+        self._old_input: tuple[str, str, str] = ('0', '0', '0')
+        self.entry_block = EntryWithInstructionsBlock(self, (lambda _, __: None), ('from', 'step', 'to'),
+                                                      width=120, padx=1, fg_color='transparent')
         self._build()
 
     def _build(self):
         self._value_label.grid(column=0, row=0, padx=3)
         self._nof_values_label.grid(column=1, row=0, padx=3)
         self.columnconfigure(2, minsize=126)
-        self.entries.grid(column=2, row=0, sticky='ew')
+        self.entry_block.grid(column=2, row=0, sticky='ew')
         self._set_button.grid(column=3, row=0, padx=3)
 
     def set_value(self) -> None:
-        try:
-            f, s, t = map(float, self.entries.get())
-        except ValueError:
-            self.entries.flash()
+        old_vals: tuple[str, str, str] = self._old_input
+        str_vals: list[str] = self.entry_block.get()
+        bad_input = False
+        for i, v in enumerate(str_vals):
+            if v == '':
+                str_vals[i] = old_vals[i]
+            if not is_number(str_vals[i]): # 'str_vals[i]' instead of 'v' to take the previous step into account
+                self.entry_block.flash(i)
+                bad_input = True
+
+        if bad_input:
             HelpTopLevel(None, 'Values must be numeric.')
             return
-        self.entries.clear()
+
+        f, s, t = map(float, str_vals)
+        self._old_input = f, s, t
+
+        self.entry_block.clear()
         self.focus_set()
         self._value_label.configure(text=f'{round(f, 3)} : {round(s, 3)} : {round(t, 3)}')
         self.values.clear()
