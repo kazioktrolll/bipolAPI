@@ -9,35 +9,57 @@ the Free Software Foundation, either version 3 of the License, or
 
 import sys
 import traceback
+import logging
+from platformdirs import user_config_dir
+from pathlib import Path
 
-from customtkinter import CTk, CTkTextbox, CTkLabel
+from customtkinter import CTk, CTkTextbox, CTkLabel, CTkButton
+from tkinter.filedialog import asksaveasfilename
+import shutil
+import subprocess
+import os
+from time import sleep
 
 
 class CrashWindow:
     def __init__(self, error: str):
         root = CTk()
+        root.title('Critical Error')
         self._root = root
         super().__init__()
         CTkLabel(root,
                  text='A critical error has occurred.\n'
-                      'Please send the error message along with your .gavl file\n'
-                      'to Support at issues.gavl@gmail.com\n'
-                 ).pack(padx=10, pady=10)
+                      'Please send the log file along with your .gavl file\n'
+                      'to the Author at issues.gavl@gmail.com\n'
+                 ).grid(row=0, column=0, padx=10, pady=10)
+        CTkButton(root, text='Get Log File', command=self._get_log_file).grid(row=0, column=1, padx=10, pady=10, sticky='nsew')
+        root.columnconfigure(0, weight=1)
+        root.columnconfigure(1, weight=0)
         # Create a read-only textbox that looks like a label
         scrollable_label = CTkTextbox(root, width=1000, height=400, wrap="word")
-        scrollable_label.pack(padx=10, pady=10, fill="both", expand=True)
+        scrollable_label.grid(row=1, column=0, columnspan=2, padx=10, pady=10, sticky='nsew')
 
         scrollable_label.insert("0.0", error)
         scrollable_label.configure(state="disabled")  # Make it read-only
 
         root.protocol("WM_DELETE_WINDOW", self._exit)
         root.update()
-        root.after(100, root.geometry, "")
+        root.update_idletasks()
+        root.after_idle(root.geometry, "")
         root.mainloop()
 
     def _exit(self):
         self._root.destroy()
-        sys.exit(1)
+        sys.exit(0)
+
+    @staticmethod
+    def _get_log_file():
+        log_file_path = Path(user_config_dir("GAVL")) / "logs.txt"
+        new_path = Path(asksaveasfilename(defaultextension='.txt',
+                                          filetypes=[('Text File', ['.txt'])],
+                                          title='Save Log File',
+                                          initialfile='logs.txt'))
+        shutil.copy(log_file_path, new_path)
 
 
 def handle_crash(func):
@@ -48,6 +70,18 @@ def handle_crash(func):
             return func(*args, **kwargs)
         except Exception:  # noqa
             error_msg = traceback.format_exc()
-            CrashWindow(error_msg)
-
+            logging.critical(error_msg)
+            logging.shutdown()
+            subprocess.Popen(
+                [sys.executable, os.path.abspath(__file__), error_msg],
+                start_new_session=True
+            )
+            sleep(1)
+            sys.exit(1)
     return wrapper
+
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        sys.exit("Usage: crash_ui.py <logfile>")
+    CrashWindow(sys.argv[1])

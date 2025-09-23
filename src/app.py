@@ -28,7 +28,7 @@ class App:
         scene (Scene): The scene currently displayed.
         geometry (Geometry): The geometry of the currently loaded plane.
     """
-
+    @handle_crash
     def __init__(self):
         from customtkinter import CTk, set_appearance_mode, set_default_color_theme
         from .scenes import Scene
@@ -81,6 +81,7 @@ class App:
 
         def kill():
             logging.info('Exiting the app.')
+            logging.shutdown()
             App.destroy_all_children(self.root)
             self.work_dir.cleanup()
             self.root.destroy()
